@@ -32,7 +32,7 @@ Command above creates the config file
    yad mkdir sample_folder
    yad meta set KEY VALUE
    yad meta get KEY
-   yad upload __<paste fule URL here>__
+   yad upload <paste full URL here>
    yad publish sample_folder
    yad unpublish sample_folder
    yad delete sample_folder
