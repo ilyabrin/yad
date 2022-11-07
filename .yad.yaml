@@ -1,0 +1,13 @@
+
+# Yandex Disk CLI tool config
+# update with: yad config set [ language RU | token ENV_VAR]
+
+---
+# configuration file version number
+version: 1
+
+# the language for the CLI interface
+language: RU # [ EN ]
+
+# the name of the environment variable where the token is stored
+access_token: YANDEX_DISK_ACCESS_TOKEN
