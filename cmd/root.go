@@ -2,24 +2,30 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	"github.com/ilyabrin/disk"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
-const CLI_VERSION = "v1.0"
+const CLI_VERSION = "v1.0.0"
 
-var cfgFile string
+var configFile string
+
+var yadisk *disk.Client
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "YaD",
+	Use:     "yad",
+	Version: CLI_VERSION,
+	// Aliases: []string{"v"},
 	Short: "Yandex.Disk command line tool",
+	// TODO: update description text
 	Long: `
-	
     Yandex.Disk command line tool ` + CLI_VERSION + `
 
     Work with Yandex.Disk service from terminal:
@@ -28,41 +34,78 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.yad.yaml)")
-
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
+	if configFile != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
+		viper.SetConfigFile(configFile)
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 			os.Exit(1)
 		}
 
 		// Search config in home directory with name ".yad" (without extension).
 		viper.AddConfigPath(home)
+		println("home: ", home)
 		viper.SetConfigName(".yad")
+		viper.SetConfigType("yaml")
+		viper.AddConfigPath(".")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		log.Println("Using config file:", viper.ConfigFileUsed())
 	}
+
+	// TODO: Disk client init
+	token := os.Getenv(viper.GetString("access_token"))
+	if len(token) > 0 {
+		yadisk = disk.New(token)
+	} else {
+		println("access_token should be declared in cofig file")
+	}
+
+	// cobra.OnInitialize(initConfig)
+
+	// rootCmd.Flags().BoolP("meta", "m", false, "Help message for meta")
+}
+
+// initConfig reads in config file and ENV variables if set.
+func initConfig() {
+	fmt.Println("sdfsdff")
+	if configFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(configFile)
+		println("sdfdfsfsdfsdfs")
+	} else {
+		// Find home directory.
+		home, err := homedir.Dir()
+		if err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
+
+		// Search config in home directory with name ".yad" (without extension).
+		viper.AddConfigPath(home)
+		viper.SetConfigName(".yad")
+		viper.SetConfigType("yaml")
+		viper.AddConfigPath(".")
+	}
+
+	viper.AutomaticEnv() // read in environment variables that match
+
+	// If a config file is found, read it in.
+	if err := viper.ReadInConfig(); err == nil {
+		log.Println("Using config file:", viper.ConfigFileUsed())
+	}
+
 }
