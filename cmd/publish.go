@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"context"
+	"fmt"
+	"log"
+
 	"github.com/spf13/cobra"
 )
 
@@ -10,7 +14,11 @@ var publishCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  `A longer description that spans multiple lines`,
 	Run: func(cmd *cobra.Command, args []string) {
-		println("not implemented")
+		resp, err := yadisk.Resources.Publish(context.Background(), args[0], nil)
+		if err != nil {
+			log.Println(err)
+		}
+		fmt.Println(resp.Href)
 	},
 }
 
