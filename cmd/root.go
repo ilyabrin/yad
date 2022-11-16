@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -53,7 +52,6 @@ func init() {
 
 		// Search config in home directory with name ".yad" (without extension).
 		viper.AddConfigPath(home)
-		println("home: ", home)
 		viper.SetConfigName(".yad")
 		viper.SetConfigType("yaml")
 		viper.AddConfigPath(".")
@@ -77,35 +75,4 @@ func init() {
 	// cobra.OnInitialize(initConfig)
 
 	// rootCmd.Flags().BoolP("meta", "m", false, "Help message for meta")
-}
-
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	fmt.Println("sdfsdff")
-	if configFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(configFile)
-		println("sdfdfsfsdfsdfs")
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			log.Println(err)
-			os.Exit(1)
-		}
-
-		// Search config in home directory with name ".yad" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".yad")
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath(".")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		log.Println("Using config file:", viper.ConfigFileUsed())
-	}
-
 }

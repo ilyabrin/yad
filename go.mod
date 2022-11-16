@@ -10,15 +10,15 @@ require (
 )
 
 require (
-	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/rivo/uniseg v0.4.2 // indirect
 )
 
 require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/ilyabrin/disk v0.0.0-20221106115506-aef2f2f7defa
+	github.com/ilyabrin/disk v1.0.1
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.4.2
 	github.com/magiconair/properties v1.8.6 // indirect
@@ -30,7 +30,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
-	golang.org/x/sys v0.0.0-20220908164124-27713097b956 // indirect
+	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
