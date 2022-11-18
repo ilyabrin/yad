@@ -31,6 +31,15 @@ var rootCmd = &cobra.Command{
     quickly create, delete and share files and folders.`,
 }
 
+var versionCmd = &cobra.Command{
+	Use:     "version",
+	Version: CLI_VERSION,
+	Aliases: []string{"v", "ver"},
+	Run: func(cmd *cobra.Command, args []string) {
+		println(CLI_VERSION)
+	},
+}
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Println(err)
@@ -64,15 +73,21 @@ func init() {
 		log.Println("Using config file:", viper.ConfigFileUsed())
 	}
 
-	// TODO: Disk client init
 	token := os.Getenv(viper.GetString("access_token"))
 	if len(token) > 0 {
 		yadisk = disk.New(token)
 	} else {
-		println("access_token should be declared in cofig file")
+		println("access_token should be declared in config file")
 	}
 
+	rootCmd.AddCommand(versionCmd)
 	// cobra.OnInitialize(initConfig)
-
 	// rootCmd.Flags().BoolP("meta", "m", false, "Help message for meta")
+}
+
+// wip: if Output("json") { ... }
+// println("Output:", Output("table"))
+// TODO: yad --output=format // [ json ]
+func Output(value string) bool {
+	return viper.GetString("output") == value
 }
