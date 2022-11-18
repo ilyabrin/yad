@@ -11,3 +11,7 @@ language: RU # [ EN ]
 
 # the name of the environment variable where the token is stored
 access_token: YANDEX_DISK_ACCESS_TOKEN
+
+# TODO: default in nothing - raw ouptut
+# [ json | csv | table ]
+# format: table # default

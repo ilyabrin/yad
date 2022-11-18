@@ -46,7 +46,7 @@ TODO: use .yad.yaml instead
    yad meta [ get RESOURCE_PATH ]
    yad upload <http(s) URL here | ./local/path>
    yad download path_to_disk_resource
-   yad public [ list (default) | meta | save ]
+   yad public [ list (default) | meta | save | download [url] ]
    yad publish sample_folder
    yad unpublish sample_folder
    yad delete sample_folder
