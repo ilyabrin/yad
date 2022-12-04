@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -40,6 +41,14 @@ var versionCmd = &cobra.Command{
 	},
 }
 
+type Account struct {
+	Name        string `mapstructure:"name"`
+	AccessToken string `mapstructure:"access_token"`
+}
+type Config struct {
+	Accounts []Account `mapstructure:"accounts"`
+}
+
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		log.Println(err)
@@ -73,7 +82,16 @@ func init() {
 		log.Println("Using config file:", viper.ConfigFileUsed())
 	}
 
-	token := os.Getenv(viper.GetString("access_token"))
+	var config Config
+	if err := viper.Unmarshal(&config); err != nil {
+		return
+	}
+
+	// TODO: add config.Accounts["home"].AccessToken
+	fmt.Println(config.Accounts[0].Name)
+
+	// TODO: make it better
+	token := os.Getenv(config.Accounts[0].AccessToken)
 	if len(token) > 0 {
 		yadisk = disk.New(token)
 	} else {
