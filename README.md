@@ -1,5 +1,5 @@
 
-# YaD is a Yandex.Disk CLI tool v.1.0.0
+# YaD is a Yandex.Disk CLI tool v1.0.0
 
 ## Install
 
@@ -33,7 +33,11 @@ TODO: use .yad.yaml instead
 
 ### You can switch between different accounts in config with following command
 
+TODO: default account is a first one in `accounts` section
+TODO: add `default` key [ true | false ]
+
 ```sh
+   # TODO: or switch with yad --config=config/path to use with another account
    yad switch <account name in config>
 ```
 

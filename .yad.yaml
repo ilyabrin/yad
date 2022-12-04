@@ -10,7 +10,11 @@ version: 1
 language: RU # [ EN ]
 
 # the name of the environment variable where the token is stored
-access_token: YANDEX_DISK_ACCESS_TOKEN
+accounts:
+    - name: home
+      access_token: HOME_YANDEX_DISK_ACCESS_TOKEN
+    - name: work
+      access_token: WORK_YANDEX_DISK_ACCESS_TOKEN
 
 # TODO: default in nothing - raw ouptut
 # [ json | csv | table ]
