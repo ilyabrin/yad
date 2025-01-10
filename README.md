@@ -1,5 +1,5 @@
 
-# YaD is a Yandex.Disk CLI tool v1 (2025)
+# YaD - Yandex.Disk CLI tool v1 (2025)
 
 ## Install
 
