@@ -180,6 +180,7 @@ func (m Model) View() string {
 		sb.WriteString(fmt.Sprintf("Error: %s\n", m.errMsg))
 	}
 
+	// TODO: testing purpose only
 	switch m.step {
 	case 0:
 		sb.WriteString("Enter your name: ")
