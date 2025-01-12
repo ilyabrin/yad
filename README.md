@@ -13,8 +13,6 @@
    yad init .
 ```
 
-Command above creates the config file
-
 ### Paste your credentials into config
 
 ```sh
