@@ -1,5 +1,6 @@
 
-# YaD is a Yandex.Disk CLI tool v1.0.0
+
+# YaD - Yandex.Disk CLI tool v1 (2025)
 
 ## Install
 
@@ -41,11 +42,17 @@ TODO: add `default` key [ true | false ]
    yad switch <account name in config>
 ```
 
+### Get currenct account
+
+```sh
+   yad current
+```
 ### Start using yad
 
 ```sh
    yad info [ base (default) | all | me | system ]
    yad mkdir sample_folder
+
    yad meta set PATH_TO_RESOURCE KEY VALUE
    yad meta [ get RESOURCE_PATH ]
    yad upload <http(s) URL here | ./local/path>
