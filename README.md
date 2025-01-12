@@ -7,43 +7,51 @@
    go get -u github.com/ilyabrin/yad
 ```
 
-### Generate the initial config file:
+### Generate the initial config file
 
 ```sh
    yad init .
 ```
-Command above creates the config file
 
-### Paste your credentials into config:
+### Paste your credentials into config
 
 ```sh
    yad account add <new_email_here>
 ```
 
-### You can switch between different accounts in config with following command:
+### You can switch between different accounts in config with following command
 
 ```sh
    yad switch <account name in config>
 ```
 
-### Start using yad:
+### Get currenct account
+
+```sh
+   yad current
+```
+
+### Start using yad
 
 ```sh
    yad mkdir sample_folder
    yad meta set KEY VALUE
    yad meta get KEY
-   yad upload <paste full URL here>
+   yad upload /local/path/here
+   yad download /url/from/disk
    yad publish sample_folder
    yad unpublish sample_folder
    yad delete sample_folder
 ```
 
 ## More command
+
 ```sh
    yad help
 ```
 
-## Get CLI tool version by typing:
+## Get CLI tool version by typing
+
 ```sh
    yad version
 ```
