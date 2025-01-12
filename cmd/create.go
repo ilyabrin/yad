@@ -8,20 +8,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// unpublishCmd represents the unpublish command
-var unpublishCmd = &cobra.Command{
-	Use:   "unpublish",
+var createCmd = &cobra.Command{
+	Use:   "create",
 	Short: "A brief description of your command",
 	Long:  `A longer description that spans multiple lines`,
 	Run: func(cmd *cobra.Command, args []string) {
-		resp, err := yadisk.Resources.Unpublish(context.Background(), args[0], nil)
+		resp, err := yadisk.Resources.CreateDir(context.Background(), args[0], nil)
 		if err != nil {
 			log.Println(err)
 		}
-		fmt.Println(resp.Href)
+
+		fmt.Print(resp.Href)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(unpublishCmd)
+	rootCmd.AddCommand(createCmd)
 }

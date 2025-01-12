@@ -1,4 +1,5 @@
 
+
 # YaD - Yandex.Disk CLI tool v1 (2025)
 
 ## Install
@@ -10,18 +11,34 @@
 ### Generate the initial config file
 
 ```sh
+   # Create .yad.yaml in current directory
    yad init .
+
+   # or init at home dir
+   yad init
+
+   # Note: root rights may be required
+   
 ```
+
+Command above creates the config file
 
 ### Paste your credentials into config
 
+TODO: add instruction section
+TODO: use .yad.yaml instead
+
 ```sh
-   yad account add <new_email_here>
+   ~~yad account add <new_email_here>~~
 ```
 
 ### You can switch between different accounts in config with following command
 
+TODO: default account is a first one in `accounts` section
+TODO: add `default` key [ true | false ]
+
 ```sh
+   # TODO: or switch with yad --config=config/path to use with another account
    yad switch <account name in config>
 ```
 
@@ -30,18 +47,22 @@
 ```sh
    yad current
 ```
-
 ### Start using yad
 
 ```sh
+   yad info [ base (default) | all | me | system ]
    yad mkdir sample_folder
-   yad meta set KEY VALUE
-   yad meta get KEY
-   yad upload /local/path/here
-   yad download /url/from/disk
+
+   yad meta set PATH_TO_RESOURCE KEY VALUE
+   yad meta [ get RESOURCE_PATH ]
+   yad upload <http(s) URL here | ./local/path>
+   yad download path_to_disk_resource
+   yad public [ list (default) | meta | save | download [url] ]
    yad publish sample_folder
    yad unpublish sample_folder
    yad delete sample_folder
+   yad trash [ list (default) | clean | delete ~ remove ]
+   yad help
 ```
 
 ## More command

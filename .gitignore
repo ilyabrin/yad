@@ -15,8 +15,10 @@
 # vendor/
 
 .DS_Store
+
 TODO
 yad
+dev
 
 # VS Code
 .vscode
