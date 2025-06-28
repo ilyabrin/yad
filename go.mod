@@ -7,8 +7,8 @@ require (
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.20.1
+	github.com/spf13/cobra v1.9.1
 )
 
 require (
@@ -38,6 +38,8 @@ require (
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/ilyabrin/disk v1.0.1
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.6.7
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/spf13/afero v1.12.0 // indirect
