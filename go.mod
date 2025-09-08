@@ -42,7 +42,7 @@ require (
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/ilyabrin/disk v1.0.1
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/jedib0t/go-pretty/v6 v6.6.7
+	github.com/jedib0t/go-pretty/v6 v6.6.8
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/spf13/afero v1.12.0 // indirect
 	github.com/spf13/cast v1.7.1 // indirect
