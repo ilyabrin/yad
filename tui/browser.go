@@ -92,8 +92,9 @@ type BrowserModel struct {
 	height int
 
 	// Navigation state
-	loading bool
-	err     error // last load error (cleared on keypress)
+	loading         bool
+	cursorAfterLoad int  // -1 = first item, ≥0 = explicit position (set before page load)
+	err             error // last load error (cleared on key press)
 
 	// Overlay state
 	mode           browserMode
@@ -182,9 +183,14 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 		m.path = msg.path
 		m.entries = msg.entries
 		m.total = msg.total
-		if m.offset == 0 {
+		if m.cursorAfterLoad < 0 {
+			m.cursor = max(0, len(m.entries)-1)
+		} else if m.cursorAfterLoad < len(m.entries) {
+			m.cursor = m.cursorAfterLoad
+		} else {
 			m.cursor = 0
 		}
+		m.cursorAfterLoad = 0
 
 	// --- Operation results ---
 	case deleteDoneMsg:
@@ -460,6 +466,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			if m.offset < 0 {
 				m.offset = 0
 			}
+			m.cursorAfterLoad = -1 // land on last item of previous page
 			m.loading = true
 			return m, tea.Batch(m.loadDir(m.path, m.offset), m.spinner.Tick)
 		}
