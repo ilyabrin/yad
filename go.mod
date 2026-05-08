@@ -34,10 +34,8 @@ require (
 
 require (
 	github.com/charmbracelet/bubbletea v1.3.10
-	github.com/ilyabrin/disk v1.0.1 // replaced by local version below
+	github.com/ilyabrin/disk v1.1.1
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/text v0.22.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
 )
-
-replace github.com/ilyabrin/disk => ../disk
