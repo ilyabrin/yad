@@ -4,25 +4,26 @@ import "github.com/charmbracelet/bubbles/key"
 
 // BrowserKeyMap defines all keybindings for the file browser.
 type BrowserKeyMap struct {
-	Up       key.Binding
-	Down     key.Binding
-	Enter    key.Binding // open dir
-	Back     key.Binding // go to parent directory
-	Select   key.Binding // toggle selection
+	Up        key.Binding
+	Down      key.Binding
+	Enter     key.Binding // open dir
+	Back      key.Binding // go to parent directory
+	Select    key.Binding // toggle selection
 	SelectAll key.Binding // select / deselect all
-	Upload   key.Binding
-	Download key.Binding
-	NewDir   key.Binding
-	Delete   key.Binding
-	Rename   key.Binding
-	Meta     key.Binding // show file metadata
-	Sort     key.Binding // cycle sort order
-	Publish  key.Binding // toggle public link
-	CopyURL  key.Binding // copy public URL to clipboard
-	Refresh  key.Binding
-	Info     key.Binding // show disk info
-	Trash    key.Binding // open trash view
-	Quit     key.Binding
+	Upload    key.Binding
+	UploadURL key.Binding
+	Download  key.Binding
+	NewDir    key.Binding
+	Delete    key.Binding
+	Rename    key.Binding
+	Meta      key.Binding // show file metadata
+	Sort      key.Binding // cycle sort order
+	Publish   key.Binding // toggle public link
+	CopyURL   key.Binding // copy public URL to clipboard
+	Refresh   key.Binding
+	Info      key.Binding // show disk info
+	Trash     key.Binding // open trash view
+	Quit      key.Binding
 }
 
 // DefaultBrowserKeyMap returns the default keybindings.
@@ -55,6 +56,10 @@ func DefaultBrowserKeyMap() BrowserKeyMap {
 		Upload: key.NewBinding(
 			key.WithKeys("u"),
 			key.WithHelp("u", "upload"),
+		),
+		UploadURL: key.NewBinding(
+			key.WithKeys("U"),
+			key.WithHelp("U", "upload URL"),
 		),
 		Download: key.NewBinding(
 			key.WithKeys("d"),

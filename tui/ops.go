@@ -199,6 +199,22 @@ func cmdCopyToClipboard(text string) tea.Cmd {
 	}
 }
 
+// --- Upload from URL ---
+
+type uploadFromURLDoneMsg struct{ err error }
+
+func cmdUploadFromURL(client *disk.Client, remoteURL, destDir string) tea.Cmd {
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		_, errResp := client.UploadFile(ctx, destDir, remoteURL)
+		if errResp != nil {
+			return uploadFromURLDoneMsg{err: newAPIError(errResp)}
+		}
+		return uploadFromURLDoneMsg{}
+	}
+}
+
 // --- helpers ---
 
 func newAPIError(e *disk.ErrorResponse) error {

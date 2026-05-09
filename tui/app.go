@@ -96,7 +96,7 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return a, cmd
 
 	case screenBrowser:
-		if km, ok := msg.(tea.KeyMsg); ok {
+		if km, ok := msg.(tea.KeyMsg); ok && !a.browser.IsInputActive() {
 			switch km.String() {
 			case "t":
 				a.screen = screenTrash

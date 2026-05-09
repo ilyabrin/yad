@@ -33,6 +33,9 @@ const (
 	modeMetadata                  // file / directory metadata overlay
 	modeConfirmBulkDelete         // confirm deletion of selected items
 	modeInputDownloadDir          // destination directory for bulk download
+	modeInputUploadURL            // remote URL to upload from
+	modeInputUploadName           // confirm/change filename before local upload
+	modeInputUploadURLName        // confirm/change filename before URL upload
 )
 
 // entry is a single row in the file list.
@@ -108,6 +111,9 @@ type BrowserModel struct {
 	message        string // shown in modeMessage
 	messageIsError bool
 	publicURL      string // shown in modePublicURL
+
+	// Upload staging
+	pendingUploadSrc string // local path or URL held between step 1 and step 2
 
 	// Multi-selection
 	selected         map[string]bool // resource path → selected
@@ -285,6 +291,13 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 		m.mode = modeNormal
 		return m, tea.Batch(m.loadDir(m.path, 0), m.spinner.Tick)
 
+	case uploadFromURLDoneMsg:
+		if msg.err != nil {
+			return m.showMessage("✗ "+msg.err.Error(), true), nil
+		}
+		m.loading = true
+		return m, tea.Batch(m.loadDir(m.path, m.offset), m.spinner.Tick)
+
 	case clipboardDoneMsg:
 		if msg.err != nil {
 			return m.showMessage("✗ Cannot copy to clipboard: "+msg.err.Error(), true), nil
@@ -446,24 +459,42 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		}
 		if submitted {
 			localPath := strings.TrimSpace(m.inputDlg.Value())
-			m.mode = modeNormal
 			if localPath == "" {
+				m.mode = modeNormal
 				return m, nil
 			}
-			// Destination: current directory + filename
-			filename := path.Base(localPath)
-			remotePath := path.Join(m.path, filename)
-			m.progress = ProgressOverlay{
-				Title:    "Uploading",
-				Filename: filename,
+			m.pendingUploadSrc = localPath
+			suggested := path.Base(localPath)
+			m.inputDlg = NewInputDialog("Upload — destination name", "Enter filename on Disk (↵ to keep as is)", suggested)
+			m.inputDlg.SetValue(suggested)
+			m.mode = modeInputUploadName
+		}
+		return m, nil
+
+	case modeInputUploadName:
+		newDlg, submitted, cancelled := m.inputDlg.Update(msg)
+		m.inputDlg = newDlg
+		if cancelled {
+			m.mode = modeNormal
+			m.pendingUploadSrc = ""
+			return m, nil
+		}
+		if submitted {
+			filename := strings.TrimSpace(m.inputDlg.Value())
+			localPath := m.pendingUploadSrc
+			m.pendingUploadSrc = ""
+			m.mode = modeNormal
+			if filename == "" {
+				filename = path.Base(localPath)
 			}
+			remotePath := path.Join(m.path, filename)
+			m.progress = ProgressOverlay{Title: "Uploading", Filename: filename}
 			m.mode = modeUpload
 
 			ch := make(chan disk.UploadProgress, 32)
 			done := make(chan uploadDoneMsg, 1)
 			m.uploadCh = ch
 			m.uploadDone = done
-
 			go func() {
 				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
 				defer cancel()
@@ -474,8 +505,49 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 				close(ch)
 				close(done)
 			}()
-
 			return m, cmdWaitUpload(ch, done)
+		}
+		return m, nil
+
+	case modeInputUploadURL:
+		newDlg, submitted, cancelled := m.inputDlg.Update(msg)
+		m.inputDlg = newDlg
+		if cancelled {
+			m.mode = modeNormal
+			return m, nil
+		}
+		if submitted {
+			remoteURL := strings.TrimSpace(m.inputDlg.Value())
+			if remoteURL == "" {
+				m.mode = modeNormal
+				return m, nil
+			}
+			m.pendingUploadSrc = remoteURL
+			suggested := path.Base(remoteURL)
+			if suggested == "." || suggested == "/" {
+				suggested = ""
+			}
+			m.inputDlg = NewInputDialog("Upload URL — destination name", "Enter filename on Disk (↵ to keep as is)", "filename")
+			m.inputDlg.SetValue(suggested)
+			m.mode = modeInputUploadURLName
+		}
+		return m, nil
+
+	case modeInputUploadURLName:
+		newDlg, submitted, cancelled := m.inputDlg.Update(msg)
+		m.inputDlg = newDlg
+		if cancelled {
+			m.mode = modeNormal
+			m.pendingUploadSrc = ""
+			return m, nil
+		}
+		if submitted {
+			filename := strings.TrimSpace(m.inputDlg.Value())
+			remoteURL := m.pendingUploadSrc
+			m.pendingUploadSrc = ""
+			m.mode = modeNormal
+			destPath := path.Join(m.path, filename)
+			return m, cmdUploadFromURL(m.client, remoteURL, destPath)
 		}
 		return m, nil
 
@@ -725,6 +797,10 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		m.inputDlg = NewInputDialog("Upload file", "Enter the local path of the file to upload", "/path/to/file")
 		m.mode = modeInputUpload
 
+	case key.Matches(msg, m.keys.UploadURL):
+		m.inputDlg = NewInputDialog("Upload from URL", "Enter the URL to upload to current directory", "https://")
+		m.mode = modeInputUploadURL
+
 	case key.Matches(msg, m.keys.Download):
 		if len(m.selected) > 0 {
 			m.inputDlg = NewInputDialog("Download selected", "Enter local destination directory", "./")
@@ -772,6 +848,22 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 	return m, nil
 }
 
+// IsInputActive reports whether the browser is in a mode that captures
+// all keystrokes (text input, confirmation dialog, etc.).
+// app.go uses this to suppress global hotkeys like t/i while typing.
+func (m BrowserModel) IsInputActive() bool {
+	switch m.mode {
+	case modeInputNewDir, modeInputRename,
+		modeInputUpload, modeInputUploadName,
+		modeInputUploadURL, modeInputUploadURLName,
+		modeInputDownload, modeInputDownloadDir,
+		modeConfirmDelete, modeConfirmBulkDelete,
+		modePublicURL, modeMetadata, modeMessage:
+		return true
+	}
+	return false
+}
+
 // showMessage sets the model into modeMessage with the given text.
 func (m BrowserModel) showMessage(msg string, isError bool) BrowserModel {
 	m.mode = modeMessage
@@ -793,7 +885,10 @@ func (m BrowserModel) View() string {
 	switch m.mode {
 	case modeConfirmDelete, modeConfirmBulkDelete:
 		return renderOverlay(base, m.confirm.View(m.width), m.width, m.height)
-	case modeInputNewDir, modeInputRename, modeInputUpload, modeInputDownload, modeInputDownloadDir:
+	case modeInputNewDir, modeInputRename,
+		modeInputUpload, modeInputUploadName,
+		modeInputUploadURL, modeInputUploadURLName,
+		modeInputDownload, modeInputDownloadDir:
 		return renderOverlay(base, m.inputDlg.View(m.width), m.width, m.height)
 	case modeUpload, modeDownload:
 		return renderOverlay(base, m.progress.View(m.width), m.width, m.height)
