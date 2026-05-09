@@ -6,15 +6,17 @@ import "github.com/charmbracelet/bubbles/key"
 type BrowserKeyMap struct {
 	Up       key.Binding
 	Down     key.Binding
-	Enter    key.Binding // open dir / preview file
+	Enter    key.Binding // open dir
 	Back     key.Binding // go to parent directory
+	Select   key.Binding // toggle selection
+	SelectAll key.Binding // select / deselect all
 	Upload   key.Binding
 	Download key.Binding
 	NewDir   key.Binding
 	Delete   key.Binding
 	Rename   key.Binding
-	Publish  key.Binding // toggle public link
 	Meta     key.Binding // show file metadata
+	Publish  key.Binding // toggle public link
 	CopyURL  key.Binding // copy public URL to clipboard
 	Refresh  key.Binding
 	Info     key.Binding // show disk info
@@ -41,6 +43,14 @@ func DefaultBrowserKeyMap() BrowserKeyMap {
 			key.WithKeys("backspace", "left", "h"),
 			key.WithHelp("←/h", "back"),
 		),
+		Select: key.NewBinding(
+			key.WithKeys(" "),
+			key.WithHelp("space", "select"),
+		),
+		SelectAll: key.NewBinding(
+			key.WithKeys("ctrl+a"),
+			key.WithHelp("ctrl+a", "select all"),
+		),
 		Upload: key.NewBinding(
 			key.WithKeys("u"),
 			key.WithHelp("u", "upload"),
@@ -62,8 +72,8 @@ func DefaultBrowserKeyMap() BrowserKeyMap {
 			key.WithHelp("r", "rename"),
 		),
 		Meta: key.NewBinding(
-			key.WithKeys(" "),
-			key.WithHelp("space", "info"),
+			key.WithKeys("m"),
+			key.WithHelp("m", "info"),
 		),
 		Publish: key.NewBinding(
 			key.WithKeys("p"),
@@ -94,15 +104,16 @@ func DefaultBrowserKeyMap() BrowserKeyMap {
 
 // ShortHelp returns keybindings shown in the compact help line.
 func (k BrowserKeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Up, k.Down, k.Enter, k.Back, k.Upload, k.Download, k.Delete, k.Quit}
+	return []key.Binding{k.Up, k.Down, k.Enter, k.Back, k.Select, k.Upload, k.Download, k.Delete, k.Quit}
 }
 
 // FullHelp returns the full two-column keybinding list.
 func (k BrowserKeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{k.Up, k.Down, k.Enter, k.Back},
-		{k.Upload, k.Download, k.NewDir, k.Delete},
-		{k.Rename, k.Publish, k.CopyURL, k.Refresh},
-		{k.Info, k.Trash, k.Quit},
+		{k.Select, k.SelectAll, k.Upload, k.Download},
+		{k.NewDir, k.Delete, k.Rename, k.Meta},
+		{k.Publish, k.CopyURL, k.Refresh, k.Info},
+		{k.Trash, k.Quit},
 	}
 }

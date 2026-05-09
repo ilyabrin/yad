@@ -31,6 +31,8 @@ const (
 	modeMessage                   // transient success / error message
 	modePublicURL                 // showing public URL after publish
 	modeMetadata                  // file / directory metadata overlay
+	modeConfirmBulkDelete         // confirm deletion of selected items
+	modeInputDownloadDir          // destination directory for bulk download
 )
 
 // entry is a single row in the file list.
@@ -105,6 +107,12 @@ type BrowserModel struct {
 	message        string // shown in modeMessage
 	messageIsError bool
 	publicURL      string // shown in modePublicURL
+
+	// Multi-selection
+	selected         map[string]bool // resource path → selected
+	pendingDelete    []string        // paths queued for sequential bulk delete
+	pendingDownloads []string        // remote paths queued for sequential bulk download
+	downloadDir      string          // local destination dir for bulk download
 
 	// Active async channels (nil when idle)
 	uploadCh   <-chan disk.UploadProgress
@@ -196,9 +204,16 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 	// --- Operation results ---
 	case deleteDoneMsg:
 		if msg.err != nil {
+			m.pendingDelete = nil
 			return m.showMessage("✗ "+msg.err.Error(), true), nil
 		}
+		if len(m.pendingDelete) > 0 {
+			next := m.pendingDelete[0]
+			m.pendingDelete = m.pendingDelete[1:]
+			return m, cmdDelete(m.client, next)
+		}
 		m.mode = modeNormal
+		m.selected = nil
 		m.loading = true
 		return m, tea.Batch(m.loadDir(m.path, 0), m.spinner.Tick)
 
@@ -272,7 +287,35 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 	case downloadDoneMsg:
 		m.dlCh = nil
 		m.dlDone = nil
-		m.progress.Err = msg.err
+		if msg.err != nil {
+			m.pendingDownloads = nil
+			m.progress.Err = msg.err
+			m.progress.Done = true
+			return m, nil
+		}
+		if len(m.pendingDownloads) > 0 {
+			next := m.pendingDownloads[0]
+			m.pendingDownloads = m.pendingDownloads[1:]
+			localPath := path.Join(m.downloadDir, path.Base(next))
+			m.progress = ProgressOverlay{Title: "Downloading", Filename: path.Base(next)}
+			ch := make(chan disk.DownloadProgress, 32)
+			done := make(chan downloadDoneMsg, 1)
+			m.dlCh = ch
+			m.dlDone = done
+			go func() {
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+				defer cancel()
+				err := m.client.DownloadFileToPathWithProgress(ctx, next, localPath, true,
+					func(p disk.DownloadProgress) { ch <- p },
+				)
+				done <- downloadDoneMsg{err: err}
+				close(ch)
+				close(done)
+			}()
+			return m, cmdWaitDownload(ch, done)
+		}
+		m.selected = nil
+		m.downloadDir = ""
 		m.progress.Done = true
 
 	// --- Key input ---
@@ -300,6 +343,23 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 				target := m.entries[m.cursor].resource.Path
 				m.mode = modeNormal
 				return m, cmdDelete(m.client, target)
+			}
+			m.mode = modeNormal
+		}
+		return m, nil
+
+	case modeConfirmBulkDelete:
+		newDlg, confirmed, done := m.confirm.Update(msg)
+		m.confirm = newDlg
+		if done {
+			if confirmed {
+				paths := m.selectedPaths()
+				m.mode = modeNormal
+				if len(paths) == 0 {
+					return m, nil
+				}
+				m.pendingDelete = paths[1:]
+				return m, cmdDelete(m.client, paths[0])
 			}
 			m.mode = modeNormal
 		}
@@ -424,6 +484,48 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		}
 		return m, nil
 
+	case modeInputDownloadDir:
+		newDlg, submitted, cancelled := m.inputDlg.Update(msg)
+		m.inputDlg = newDlg
+		if cancelled {
+			m.mode = modeNormal
+			return m, nil
+		}
+		if submitted {
+			dir := strings.TrimSpace(m.inputDlg.Value())
+			m.mode = modeNormal
+			if dir == "" {
+				return m, nil
+			}
+			files := m.selectedFiles()
+			if len(files) == 0 {
+				return m, nil
+			}
+			first := files[0]
+			localPath := path.Join(dir, path.Base(first))
+			m.progress = ProgressOverlay{Title: "Downloading", Filename: path.Base(first)}
+			m.mode = modeDownload
+			m.pendingDownloads = files[1:]
+			m.downloadDir = dir
+
+			ch := make(chan disk.DownloadProgress, 32)
+			done := make(chan downloadDoneMsg, 1)
+			m.dlCh = ch
+			m.dlDone = done
+			go func() {
+				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Minute)
+				defer cancel()
+				err := m.client.DownloadFileToPathWithProgress(ctx, first, localPath, true,
+					func(p disk.DownloadProgress) { ch <- p },
+				)
+				done <- downloadDoneMsg{err: err}
+				close(ch)
+				close(done)
+			}()
+			return m, cmdWaitDownload(ch, done)
+		}
+		return m, nil
+
 	case modeUpload, modeDownload:
 		if m.progress.Done {
 			m.mode = modeNormal
@@ -445,6 +547,12 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 
 	case modeMetadata:
 		m.mode = modeNormal
+		return m, nil
+	}
+
+	// Esc clears selection in normal mode
+	if msg.String() == "esc" {
+		m.selected = nil
 		return m, nil
 	}
 
@@ -516,26 +624,72 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		m.inputDlg.SetValue(m.entries[m.cursor].resource.Name)
 		m.mode = modeInputRename
 
+	case key.Matches(msg, m.keys.Select):
+		if len(m.entries) == 0 {
+			return m, nil
+		}
+		if m.selected == nil {
+			m.selected = make(map[string]bool)
+		}
+		path := m.entries[m.cursor].resource.Path
+		m.selected[path] = !m.selected[path]
+		if !m.selected[path] {
+			delete(m.selected, path)
+		}
+		// advance cursor
+		if m.cursor < len(m.entries)-1 {
+			m.cursor++
+		} else if m.offset+len(m.entries) < m.total {
+			m.offset += pageSize
+			m.cursorAfterLoad = 0
+			m.loading = true
+			return m, tea.Batch(m.loadDir(m.path, m.offset), m.spinner.Tick)
+		}
+
+	case key.Matches(msg, m.keys.SelectAll):
+		if len(m.entries) == 0 {
+			return m, nil
+		}
+		if len(m.selected) == len(m.entries) {
+			m.selected = nil
+		} else {
+			m.selected = make(map[string]bool, len(m.entries))
+			for _, e := range m.entries {
+				m.selected[e.resource.Path] = true
+			}
+		}
+
 	case key.Matches(msg, m.keys.Delete):
 		if len(m.entries) == 0 {
 			return m, nil
 		}
-		target := m.entries[m.cursor].resource.Name
-		m.confirm = NewConfirmDialog("Delete", "Delete \""+target+"\"?")
-		m.mode = modeConfirmDelete
+		if len(m.selected) > 0 {
+			m.confirm = NewConfirmDialog("Delete", fmt.Sprintf("Delete %d selected items?", len(m.selected)))
+			m.mode = modeConfirmBulkDelete
+		} else {
+			target := m.entries[m.cursor].resource.Name
+			m.confirm = NewConfirmDialog("Delete", "Delete \""+target+"\"?")
+			m.mode = modeConfirmDelete
+		}
 
 	case key.Matches(msg, m.keys.Upload):
 		m.inputDlg = NewInputDialog("Upload file", "Enter the local path of the file to upload", "/path/to/file")
 		m.mode = modeInputUpload
 
 	case key.Matches(msg, m.keys.Download):
-		if len(m.entries) == 0 || m.entries[m.cursor].isDir() {
-			return m, nil
+		if len(m.selected) > 0 {
+			m.inputDlg = NewInputDialog("Download selected", "Enter local destination directory", "./")
+			m.inputDlg.SetValue("./")
+			m.mode = modeInputDownloadDir
+		} else {
+			if len(m.entries) == 0 || m.entries[m.cursor].isDir() {
+				return m, nil
+			}
+			defaultPath := "./" + m.entries[m.cursor].resource.Name
+			m.inputDlg = NewInputDialog("Download file", "Enter local destination path", defaultPath)
+			m.inputDlg.SetValue(defaultPath)
+			m.mode = modeInputDownload
 		}
-		defaultPath := "./" + m.entries[m.cursor].resource.Name
-		m.inputDlg = NewInputDialog("Download file", "Enter local destination path", defaultPath)
-		m.inputDlg.SetValue(defaultPath)
-		m.mode = modeInputDownload
 
 	case key.Matches(msg, m.keys.Meta):
 		if len(m.entries) > 0 {
@@ -586,9 +740,9 @@ func (m BrowserModel) View() string {
 
 	// Render overlay on top of the base view
 	switch m.mode {
-	case modeConfirmDelete:
+	case modeConfirmDelete, modeConfirmBulkDelete:
 		return renderOverlay(base, m.confirm.View(m.width), m.width, m.height)
-	case modeInputNewDir, modeInputRename, modeInputUpload, modeInputDownload:
+	case modeInputNewDir, modeInputRename, modeInputUpload, modeInputDownload, modeInputDownloadDir:
 		return renderOverlay(base, m.inputDlg.View(m.width), m.width, m.height)
 	case modeUpload, modeDownload:
 		return renderOverlay(base, m.progress.View(m.width), m.width, m.height)
@@ -695,11 +849,16 @@ func (m BrowserModel) viewList(height int) string {
 			name = name[:nameWidth-1] + "…"
 		}
 
+		mark := "  "
+		if m.selected[e.resource.Path] {
+			mark = StyleSuccess.Render("✓ ")
+		}
+
 		var nameStyled string
 		if e.isDir() {
-			nameStyled = e.icon() + StyleDir.Render(name)
+			nameStyled = mark + e.icon() + StyleDir.Render(name)
 		} else {
-			nameStyled = e.icon() + StyleFile.Render(name)
+			nameStyled = mark + e.icon() + StyleFile.Render(name)
 		}
 
 		row := lipgloss.JoinHorizontal(lipgloss.Top,
@@ -728,6 +887,9 @@ func (m BrowserModel) viewStatusBar() string {
 	if len(m.entries) > 0 {
 		left = fmt.Sprintf("%d/%d", m.cursor+1+m.offset, m.total)
 	}
+	if n := len(m.selected); n > 0 {
+		left += "  " + StyleSuccess.Render(fmt.Sprintf("%d selected", n))
+	}
 
 	hints := []string{
 		StyleStatusKey.Render("↑↓") + " move",
@@ -749,6 +911,28 @@ func (m BrowserModel) viewStatusBar() string {
 	}
 	bar := left + strings.Repeat(" ", gap) + right
 	return StyleStatusBar.Width(m.width).Render(bar)
+}
+
+// selectedPaths returns paths of all selected entries in stable order.
+func (m BrowserModel) selectedPaths() []string {
+	var paths []string
+	for _, e := range m.entries {
+		if m.selected[e.resource.Path] {
+			paths = append(paths, e.resource.Path)
+		}
+	}
+	return paths
+}
+
+// selectedFiles returns paths of selected entries that are files (not dirs).
+func (m BrowserModel) selectedFiles() []string {
+	var paths []string
+	for _, e := range m.entries {
+		if m.selected[e.resource.Path] && !e.isDir() {
+			paths = append(paths, e.resource.Path)
+		}
+	}
+	return paths
 }
 
 func (m BrowserModel) viewMetadata(e entry) string {
