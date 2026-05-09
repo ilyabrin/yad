@@ -574,6 +574,13 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			if m.publicURL != "" {
 				return m, cmdCopyToClipboard(m.publicURL)
 			}
+		case "u":
+			if len(m.entries) > 0 {
+				target := m.entries[m.cursor].resource.Path
+				m.mode = modeNormal
+				m.publicURL = ""
+				return m, cmdUnpublish(m.client, target)
+			}
 		default:
 			m.mode = modeNormal
 			m.publicURL = ""
@@ -744,8 +751,10 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		}
 		e := m.entries[m.cursor]
 		if e.resource.PublicURL != "" {
-			// Already public - unpublish
-			return m, cmdUnpublish(m.client, e.resource.Path)
+			// Already published — show URL overlay with options
+			m.publicURL = e.resource.PublicURL
+			m.mode = modePublicURL
+			return m, nil
 		}
 		return m, cmdPublish(m.client, e.resource.Path)
 
@@ -799,9 +808,10 @@ func (m BrowserModel) View() string {
 
 	case modePublicURL:
 		urlStyle := lipgloss.NewStyle().Foreground(colorAccent)
-		content := StyleSuccess.Render("✓ Published") + "\n\n" +
+		content := StyleSuccess.Render("⇡ Public link") + "\n\n" +
 			urlStyle.Render(m.publicURL) + "\n\n" +
-			StyleStatusKey.Render("c") + " copy to clipboard   " +
+			StyleStatusKey.Render("c") + " copy   " +
+			StyleStatusKey.Render("u") + " unpublish   " +
 			StyleMuted("any other key to close")
 		overlay := StyleDialog.Render(content)
 		return renderOverlay(base, overlay, m.width, m.height)
