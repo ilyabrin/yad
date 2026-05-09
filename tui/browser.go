@@ -880,7 +880,7 @@ func (m BrowserModel) viewList(height int) string {
 	visible := min(height, len(m.entries))
 	start := max(m.cursor-visible+1, 0)
 	start = min(start, m.cursor)
-	nameWidth := max(m.width-9-18-4, 10)
+	nameWidth := max(m.width-9-18-4-2, 10)
 
 	var rows []string
 	for i := start; i < start+visible && i < len(m.entries); i++ {
@@ -904,16 +904,28 @@ func (m BrowserModel) viewList(height int) string {
 			nameStyled = mark + e.icon() + StyleFile.Render(name)
 		}
 
+		pubMark := "  "
+		if e.resource.PublicURL != "" {
+			pubMark = lipgloss.NewStyle().Foreground(colorAccent).Render("⇡ ")
+		}
+
 		row := lipgloss.JoinHorizontal(lipgloss.Top,
 			lipgloss.NewStyle().Width(nameWidth+2).Render(nameStyled),
 			StyleSize.Render(e.sizeStr()),
 			"  ",
 			StyleDate.Render(e.modifiedStr()),
+			pubMark,
 		)
 
-		if selected {
+		published := e.resource.PublicURL != ""
+		switch {
+		case selected && published:
+			row = StyleItemPublishedSelected.Width(m.width).Render(row)
+		case selected:
 			row = StyleItemSelected.Width(m.width).Render(row)
-		} else {
+		case published:
+			row = StyleItemPublished.Width(m.width).Render(row)
+		default:
 			row = StyleItemNormal.Width(m.width).Render(row)
 		}
 		rows = append(rows, row)

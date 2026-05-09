@@ -9,7 +9,8 @@ var (
 	colorMuted    = lipgloss.Color("#6B7280") // gray
 	colorSuccess  = lipgloss.Color("#10B981") // green
 	colorDanger   = lipgloss.Color("#EF4444") // red
-	colorSelected = lipgloss.Color("#1E1B4B") // deep indigo bg for selected row
+	colorSelected  = lipgloss.Color("#1E1B4B") // deep indigo bg for selected row
+	colorPublished = lipgloss.Color("#0D2D1F") // dark green tint for published rows
 
 	// List item
 	StyleItemNormal = lipgloss.NewStyle().
@@ -20,6 +21,16 @@ var (
 				Background(colorSelected).
 				Foreground(colorAccent).
 				Bold(true)
+
+	StyleItemPublished = lipgloss.NewStyle().
+				PaddingLeft(1).
+				Background(colorPublished)
+
+	StyleItemPublishedSelected = lipgloss.NewStyle().
+					PaddingLeft(1).
+					Background(colorSelected).
+					Foreground(colorAccent).
+					Bold(true)
 
 	// Directory entries are displayed in a different color
 	StyleDir = lipgloss.NewStyle().
