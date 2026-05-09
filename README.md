@@ -100,6 +100,7 @@ To register your own application visit [oauth.yandex.ru](https://oauth.yandex.ru
 | `n`                     | Create new directory                     |
 | `r`                     | Rename selected item                     |
 | `D`                     | Delete selected item                     |
+| `Space`                 | Show file metadata                       |
 | `p`                     | Toggle public link (publish / unpublish) |
 | `c`                     | Copy public URL to clipboard             |
 | `R` / `Ctrl+R`          | Refresh listing                          |

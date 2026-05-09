@@ -14,6 +14,7 @@ type BrowserKeyMap struct {
 	Delete   key.Binding
 	Rename   key.Binding
 	Publish  key.Binding // toggle public link
+	Meta     key.Binding // show file metadata
 	CopyURL  key.Binding // copy public URL to clipboard
 	Refresh  key.Binding
 	Info     key.Binding // show disk info
@@ -59,6 +60,10 @@ func DefaultBrowserKeyMap() BrowserKeyMap {
 		Rename: key.NewBinding(
 			key.WithKeys("r"),
 			key.WithHelp("r", "rename"),
+		),
+		Meta: key.NewBinding(
+			key.WithKeys(" "),
+			key.WithHelp("space", "info"),
 		),
 		Publish: key.NewBinding(
 			key.WithKeys("p"),

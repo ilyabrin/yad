@@ -30,6 +30,7 @@ const (
 	modeDownload                  // download in progress
 	modeMessage                   // transient success / error message
 	modePublicURL                 // showing public URL after publish
+	modeMetadata                  // file / directory metadata overlay
 )
 
 // entry is a single row in the file list.
@@ -441,6 +442,10 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			m.publicURL = ""
 		}
 		return m, nil
+
+	case modeMetadata:
+		m.mode = modeNormal
+		return m, nil
 	}
 
 	// --- Normal mode ---
@@ -532,6 +537,11 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		m.inputDlg.SetValue(defaultPath)
 		m.mode = modeInputDownload
 
+	case key.Matches(msg, m.keys.Meta):
+		if len(m.entries) > 0 {
+			m.mode = modeMetadata
+		}
+
 	case key.Matches(msg, m.keys.Publish):
 		if len(m.entries) == 0 {
 			return m, nil
@@ -599,6 +609,12 @@ func (m BrowserModel) View() string {
 			StyleMuted("any other key to close")
 		overlay := StyleDialog.Render(content)
 		return renderOverlay(base, overlay, m.width, m.height)
+
+	case modeMetadata:
+		if len(m.entries) > 0 {
+			overlay := m.viewMetadata(m.entries[m.cursor])
+			return renderOverlay(base, overlay, m.width, m.height)
+		}
 	}
 
 	return base
@@ -626,10 +642,7 @@ func (m BrowserModel) viewBase() string {
 func (m BrowserModel) viewTitleBar() string {
 	title := StyleTitle.Render("  YaD")
 	pathStr := StylePath.Render(m.path)
-	gap := m.width - lipgloss.Width(title) - lipgloss.Width(pathStr)
-	if gap < 0 {
-		gap = 0
-	}
+	gap := max(m.width-lipgloss.Width(title)-lipgloss.Width(pathStr), 0)
 	return title + pathStr + strings.Repeat(" ", gap)
 }
 
@@ -667,23 +680,10 @@ func (m BrowserModel) viewList(height int) string {
 		return strings.Join(lines, "\n")
 	}
 
-	visible := height
-	if visible > len(m.entries) {
-		visible = len(m.entries)
-	}
-
-	start := m.cursor - visible + 1
-	if start < 0 {
-		start = 0
-	}
-	if m.cursor < start {
-		start = m.cursor
-	}
-
-	nameWidth := m.width - 9 - 18 - 4
-	if nameWidth < 10 {
-		nameWidth = 10
-	}
+	visible := min(height, len(m.entries))
+	start := max(m.cursor-visible+1, 0)
+	start = min(start, m.cursor)
+	nameWidth := max(m.width-9-18-4, 10)
 
 	var rows []string
 	for i := start; i < start+visible && i < len(m.entries); i++ {
@@ -751,6 +751,62 @@ func (m BrowserModel) viewStatusBar() string {
 	return StyleStatusBar.Width(m.width).Render(bar)
 }
 
+func (m BrowserModel) viewMetadata(e entry) string {
+	r := e.resource
+
+	label := lipgloss.NewStyle().Foreground(colorMuted).Width(10)
+	value := lipgloss.NewStyle().Foreground(colorAccent)
+
+	row := func(k, v string) string {
+		if v == "" {
+			return ""
+		}
+		return label.Render(k) + value.Render(v) + "\n"
+	}
+
+	parseTime := func(s string) string {
+		if s == "" {
+			return ""
+		}
+		t, err := time.Parse(time.RFC3339, s)
+		if err != nil {
+			return s
+		}
+		return t.Format("2006-01-02  15:04:05")
+	}
+
+	kind := "file"
+	if e.isDir() {
+		kind = "directory"
+	}
+
+	var sb strings.Builder
+	sb.WriteString(StyleTitle.Render(" Info") + "\n\n")
+	sb.WriteString(row("Name", r.Name))
+	sb.WriteString(row("Type", kind))
+	if !e.isDir() {
+		sb.WriteString(row("Size", disk.FormatFileSize(int64(r.Size))))
+		sb.WriteString(row("MIME", r.MimeType))
+		if r.MediaType != "" {
+			sb.WriteString(row("Media", r.MediaType))
+		}
+	}
+	sb.WriteString(row("Created", parseTime(r.Created)))
+	sb.WriteString(row("Modified", parseTime(r.Modified)))
+	if r.Md5 != "" {
+		sb.WriteString(row("MD5", r.Md5))
+	}
+	if r.Sha256 != "" {
+		sb.WriteString(row("SHA256", r.Sha256[:16]+"…"))
+	}
+	if r.PublicURL != "" {
+		sb.WriteString(row("Public", r.PublicURL))
+	}
+	sb.WriteString("\n" + StyleMuted("any key to close"))
+
+	return StyleDialog.Render(sb.String())
+}
+
 // renderOverlay centres a dialog on top of a base view string.
 func renderOverlay(base, overlay string, width, height int) string {
 	overlayLines := strings.Split(overlay, "\n")
@@ -764,14 +820,8 @@ func renderOverlay(base, overlay string, width, height int) string {
 		}
 	}
 
-	startY := (height - oH) / 2
-	if startY < 0 {
-		startY = 0
-	}
-	startX := (width - oW) / 2
-	if startX < 0 {
-		startX = 0
-	}
+	startY := max((height-oH)/2, 0)
+	startX := max((width-oW)/2, 0)
 
 	for y, ol := range overlayLines {
 		row := startY + y
@@ -797,20 +847,19 @@ func truncateToWidth(s string, w int) string {
 	if w <= 0 {
 		return ""
 	}
-	result := ""
+	var buf strings.Builder
 	col := 0
 	for _, r := range s {
-		rw := 1
-		if col+rw > w {
+		if col+1 > w {
 			break
 		}
-		result += string(r)
-		col += rw
+		buf.WriteRune(r)
+		col++
 	}
 	if col < w {
-		result += strings.Repeat(" ", w-col)
+		buf.WriteString(strings.Repeat(" ", w-col))
 	}
-	return result
+	return buf.String()
 }
 
 // parentPath returns the parent of a Yandex Disk path.
