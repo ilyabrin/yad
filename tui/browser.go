@@ -89,6 +89,7 @@ type BrowserModel struct {
 	cursor  int
 	total   int
 	offset  int
+	sort    string // API sort field: "name", "-name", "modified", "-modified", "size", "-size"
 
 	// Terminal size
 	width  int
@@ -121,6 +122,39 @@ type BrowserModel struct {
 	dlDone     <-chan downloadDoneMsg
 }
 
+// sortCycle defines the order in which sort modes cycle on each keypress.
+var sortCycle = []string{"name", "-name", "modified", "-modified", "size", "-size"}
+
+// sortLabel returns a short human-readable label for the current sort.
+func sortLabel(s string) string {
+	switch s {
+	case "name":
+		return "name ↑"
+	case "-name":
+		return "name ↓"
+	case "modified":
+		return "date ↑"
+	case "-modified":
+		return "date ↓"
+	case "size":
+		return "size ↑"
+	case "-size":
+		return "size ↓"
+	default:
+		return s
+	}
+}
+
+// nextSort returns the next sort mode in the cycle.
+func nextSort(current string) string {
+	for i, s := range sortCycle {
+		if s == current {
+			return sortCycle[(i+1)%len(sortCycle)]
+		}
+	}
+	return sortCycle[0]
+}
+
 func NewBrowserModel(client *disk.Client) BrowserModel {
 	sp := spinner.New()
 	sp.Spinner = spinner.Dot
@@ -131,6 +165,7 @@ func NewBrowserModel(client *disk.Client) BrowserModel {
 		keys:    DefaultBrowserKeyMap(),
 		spinner: sp,
 		path:    "/",
+		sort:    "name",
 		loading: true,
 	}
 }
@@ -148,7 +183,7 @@ func (m BrowserModel) loadDir(path string, offset int) tea.Cmd {
 		opts := &disk.ResourceOptions{
 			Limit:  pageSize,
 			Offset: offset,
-			Sort:   "name",
+			Sort:   m.sort,
 		}
 		resource, errResp := m.client.GetMetadataWithOptions(ctx, path, opts)
 		if errResp != nil {
@@ -608,6 +643,13 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			return m, tea.Batch(m.loadDir(parent, 0), m.spinner.Tick)
 		}
 
+	case key.Matches(msg, m.keys.Sort):
+		m.sort = nextSort(m.sort)
+		m.offset = 0
+		m.cursorAfterLoad = 0
+		m.loading = true
+		return m, tea.Batch(m.loadDir(m.path, 0), m.spinner.Tick)
+
 	case key.Matches(msg, m.keys.Refresh):
 		m.loading = true
 		return m, tea.Batch(m.loadDir(m.path, m.offset), m.spinner.Tick)
@@ -796,8 +838,9 @@ func (m BrowserModel) viewBase() string {
 func (m BrowserModel) viewTitleBar() string {
 	title := StyleTitle.Render("  YaD")
 	pathStr := StylePath.Render(m.path)
-	gap := max(m.width-lipgloss.Width(title)-lipgloss.Width(pathStr), 0)
-	return title + pathStr + strings.Repeat(" ", gap)
+	sortStr := StyleMuted("  " + sortLabel(m.sort))
+	gap := max(m.width-lipgloss.Width(title)-lipgloss.Width(pathStr)-lipgloss.Width(sortStr), 0)
+	return title + pathStr + strings.Repeat(" ", gap) + sortStr
 }
 
 func (m BrowserModel) viewLoading(height int) string {
@@ -1056,7 +1099,11 @@ func parentPath(p string) string {
 	if idx <= 0 {
 		return "/"
 	}
-	return p[:idx]
+	parent := p[:idx]
+	if parent == "disk:" {
+		return "disk:/"
+	}
+	return parent
 }
 
 // StyleMuted renders text in the muted color.
