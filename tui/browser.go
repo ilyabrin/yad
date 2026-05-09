@@ -20,22 +20,22 @@ const pageSize = 100
 type browserMode int
 
 const (
-	modeNormal        browserMode = iota
-	modeConfirmDelete             // delete confirmation dialog
-	modeInputNewDir               // new directory name input
-	modeInputRename               // rename input
-	modeInputUpload               // local file path input before upload
-	modeInputDownload             // local destination path input before download
-	modeUpload                    // upload in progress
-	modeDownload                  // download in progress
-	modeMessage                   // transient success / error message
-	modePublicURL                 // showing public URL after publish
-	modeMetadata                  // file / directory metadata overlay
-	modeConfirmBulkDelete         // confirm deletion of selected items
-	modeInputDownloadDir          // destination directory for bulk download
-	modeInputUploadURL            // remote URL to upload from
-	modeInputUploadName           // confirm/change filename before local upload
-	modeInputUploadURLName        // confirm/change filename before URL upload
+	modeNormal             browserMode = iota
+	modeConfirmDelete                  // delete confirmation dialog
+	modeInputNewDir                    // new directory name input
+	modeInputRename                    // rename input
+	modeInputUpload                    // local file path input before upload
+	modeInputDownload                  // local destination path input before download
+	modeUpload                         // upload in progress
+	modeDownload                       // download in progress
+	modeMessage                        // transient success / error message
+	modePublicURL                      // showing public URL after publish
+	modeMetadata                       // file / directory metadata overlay
+	modeConfirmBulkDelete              // confirm deletion of selected items
+	modeInputDownloadDir               // destination directory for bulk download
+	modeInputUploadURL                 // remote URL to upload from
+	modeInputUploadName                // confirm/change filename before local upload
+	modeInputUploadURLName             // confirm/change filename before URL upload
 )
 
 // entry is a single row in the file list.
@@ -100,7 +100,7 @@ type BrowserModel struct {
 
 	// Navigation state
 	loading         bool
-	cursorAfterLoad int  // -1 = first item, ≥0 = explicit position (set before page load)
+	cursorAfterLoad int   // -1 = first item, ≥0 = explicit position (set before page load)
 	err             error // last load error (cleared on key press)
 
 	// Overlay state
@@ -1054,13 +1054,18 @@ func (m BrowserModel) viewStatusBar() string {
 	hints := []string{
 		StyleStatusKey.Render("↑↓") + " move",
 		StyleStatusKey.Render("↵") + " open",
+		StyleStatusKey.Render("spc") + " select",
 		StyleStatusKey.Render("u") + " upload",
+		StyleStatusKey.Render("U") + " URL",
 		StyleStatusKey.Render("d") + " download",
 		StyleStatusKey.Render("n") + " mkdir",
 		StyleStatusKey.Render("r") + " rename",
 		StyleStatusKey.Render("D") + " delete",
+		StyleStatusKey.Render("s") + " sort",
 		StyleStatusKey.Render("p") + " publish",
-		StyleStatusKey.Render("i") + " info",
+		StyleStatusKey.Render("m") + " info",
+		StyleStatusKey.Render("t") + " trash",
+		StyleStatusKey.Render("i") + " disk info",
 		StyleStatusKey.Render("q") + " quit",
 	}
 	right := strings.Join(hints, "  ")

@@ -89,24 +89,32 @@ To register your own application visit [oauth.yandex.ru](https://oauth.yandex.ru
 
 ### File browser
 
-| Key                     | Action                                   |
-| ----------------------- | ---------------------------------------- |
-| `↑` / `k`               | Move up                                  |
-| `↓` / `j`               | Move down                                |
-| `↵` / `→` / `l`         | Open directory                           |
-| `←` / `h` / `Backspace` | Go to parent                             |
-| `u`                     | Upload file                              |
-| `d`                     | Download selected file                   |
-| `n`                     | Create new directory                     |
-| `r`                     | Rename selected item                     |
-| `D`                     | Delete selected item                     |
-| `Space`                 | Show file metadata                       |
-| `p`                     | Toggle public link (publish / unpublish) |
-| `c`                     | Copy public URL to clipboard             |
-| `R` / `Ctrl+R`          | Refresh listing                          |
-| `i`                     | Disk usage info                          |
-| `t`                     | Open trash                               |
-| `q` / `Ctrl+C`          | Quit                                     |
+| Key                     | Action                                         |
+| ----------------------- | ---------------------------------------------- |
+| `↑` / `k`               | Move up                                        |
+| `↓` / `j`               | Move down                                      |
+| `↵` / `→` / `l`         | Open directory                                 |
+| `←` / `h` / `Backspace` | Go to parent                                   |
+| `Space`                 | Toggle selection                               |
+| `Ctrl+A`                | Select all / deselect all                      |
+| `Esc`                   | Clear selection                                |
+| `u`                     | Upload local file (2-step: path then filename) |
+| `U`                     | Upload from URL (2-step: URL then filename)    |
+| `d`                     | Download file (bulk if items selected)         |
+| `n`                     | Create new directory                           |
+| `r`                     | Rename selected item                           |
+| `D`                     | Delete (bulk if items selected)                |
+| `s`                     | Cycle sort: name / date / size, asc and desc   |
+| `p`                     | Publish / show public link                     |
+| `c`                     | Copy public URL to clipboard                   |
+| `m`                     | Show file metadata                             |
+| `R` / `Ctrl+R`          | Refresh listing                                |
+| `i`                     | Disk usage info                                |
+| `t`                     | Open trash                                     |
+| `q` / `Ctrl+C`          | Quit                                           |
+
+Published files are highlighted with a green background and a `⇡` marker.
+Pressing `p` on a published file shows the link with options: `c` copy, `u` unpublish.
 
 ### Trash
 
