@@ -12,7 +12,16 @@ import (
 	"github.com/ilyabrin/yad/tui"
 )
 
+// version is injected at build time via:
+//
+//	go build -ldflags "-X main.version=v0.1.0"
+var version = "dev"
+
 func main() {
+	if len(os.Args) == 2 && (os.Args[1] == "--version" || os.Args[1] == "-v") {
+		fmt.Println("yad", version)
+		return
+	}
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)

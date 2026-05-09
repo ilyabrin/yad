@@ -45,9 +45,10 @@ jobs:
           CGO_ENABLED: 0
         run: |
           BINARY="yad-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
+          VERSION="${GITHUB_REF_NAME}"
           go build \
             -trimpath \
-            -ldflags "-s -w -X github.com/ilyabrin/yad/internal/auth.clientSecret=${{ secrets.YANDEX_CLIENT_SECRET }}" \
+            -ldflags "-s -w -X main.version=${VERSION} -X github.com/ilyabrin/yad/internal/auth.clientSecret=${{ secrets.YANDEX_CLIENT_SECRET }}" \
             -o "$BINARY" .
           echo "BINARY=$BINARY" >> $GITHUB_ENV
 
