@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ilyabrin/disk"
 )
@@ -30,6 +31,7 @@ const (
 	modeInputDownloadDir              // destination directory for bulk download
 	modeInputUploadURL                // remote URL to upload from
 	modeInputUploadName               // confirm/change filename before upload (local or URL)
+	modeFilter                        // live name filter — search bar shown in status bar
 )
 
 // entry is a single row in the file list.
@@ -122,6 +124,10 @@ type BrowserModel struct {
 	pendingDownloads []string        // remote paths queued for sequential bulk download
 	downloadDir      string          // local destination dir for bulk download
 
+	// Filter state
+	filter      string           // current name filter query; empty = no filter
+	filterInput textinput.Model  // text input used while in modeFilter
+
 	// Active async channels (nil when idle)
 	uploadCh   <-chan disk.UploadProgress
 	uploadDone <-chan uploadDoneMsg
@@ -169,6 +175,10 @@ func NewBrowserModel(client *disk.Client, defaultSort, lastPath string) BrowserM
 	sp.Spinner = spinner.Dot
 	sp.Style = lipgloss.NewStyle().Foreground(colorPrimary)
 
+	fi := textinput.New()
+	fi.Placeholder = "filter…"
+	fi.CharLimit = 128
+
 	sort := defaultSort
 	if sort == "" {
 		sort = "name"
@@ -179,12 +189,13 @@ func NewBrowserModel(client *disk.Client, defaultSort, lastPath string) BrowserM
 	}
 
 	return BrowserModel{
-		client:  client,
-		keys:    DefaultBrowserKeyMap(),
-		spinner: sp,
-		path:    path,
-		sort:    sort,
-		loading: true,
+		client:      client,
+		keys:        DefaultBrowserKeyMap(),
+		spinner:     sp,
+		filterInput: fi,
+		path:        path,
+		sort:        sort,
+		loading:     true,
 	}
 }
 
@@ -222,6 +233,22 @@ func (m BrowserModel) selectedFiles() []string {
 		}
 	}
 	return paths
+}
+
+// visibleEntries returns entries after applying the active name filter.
+// When filter is empty the full loaded page is returned as-is.
+func (m BrowserModel) visibleEntries() []entry {
+	if m.filter == "" {
+		return m.entries
+	}
+	q := strings.ToLower(m.filter)
+	out := make([]entry, 0, len(m.entries))
+	for _, e := range m.entries {
+		if strings.Contains(strings.ToLower(e.resource.Name), q) {
+			out = append(out, e)
+		}
+	}
+	return out
 }
 
 func (m *BrowserModel) setClient(c *disk.Client) { m.client = c }

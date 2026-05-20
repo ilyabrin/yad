@@ -119,6 +119,8 @@ To register your own application visit [oauth.yandex.ru](https://oauth.yandex.ru
 | `n`                     | Create new directory                           |
 | `r`                     | Rename selected item                           |
 | `D`                     | Delete (bulk if items selected)                |
+| `/`                     | Filter by name (live, case-insensitive)        |
+| `Esc`                   | Clear filter / clear selection                 |
 | `s`                     | Cycle sort: name / date / size, asc and desc   |
 | `p`                     | Publish / show public link                     |
 | `c`                     | Copy public URL to clipboard                   |

@@ -38,7 +38,8 @@ Keybindings (inside the app):
   ←/h/Backspace      go up           d  download
   Space              select          D  delete
   Ctrl+A             select all      n  new directory
-  s                  cycle sort      r  rename
+  /                  filter by name  s  cycle sort
+  Esc                clear filter    r  rename
   p                  publish         i  disk info
   c                  copy URL        t  trash
   o                  open in browser q  quit

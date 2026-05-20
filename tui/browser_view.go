@@ -104,9 +104,15 @@ func (m BrowserModel) viewError(height int) string {
 }
 
 func (m BrowserModel) viewList(height int) string {
-	if len(m.entries) == 0 {
+	entries := m.visibleEntries()
+
+	if len(entries) == 0 {
 		lines := make([]string, height)
-		lines[height/2] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted("(empty directory)"))
+		msg := "(empty directory)"
+		if m.filter != "" {
+			msg = `no matches for "` + m.filter + `"`
+		}
+		lines[height/2] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted(msg))
 		return strings.Join(lines, "\n")
 	}
 
@@ -122,14 +128,14 @@ func (m BrowserModel) viewList(height int) string {
 		listHeight--
 	}
 
-	visible := min(listHeight, len(m.entries))
+	visible := min(listHeight, len(entries))
 	start := max(m.cursor-visible+1, 0)
 	start = min(start, m.cursor)
 	nameWidth := max(m.width-colSizeWidth-colDateWidth-colPubMarkWidth-colRowPadding, colNameMinWidth)
 
 	rows := make([]string, 0, height)
-	for i := start; i < start+visible && i < len(m.entries); i++ {
-		e := m.entries[i]
+	for i := start; i < start+visible && i < len(entries); i++ {
+		e := entries[i]
 		selected := i == m.cursor
 
 		name := e.resource.Name
@@ -199,29 +205,41 @@ func (m BrowserModel) viewList(height int) string {
 }
 
 func (m BrowserModel) viewStatusBar() string {
+	// Filter mode: show the search input instead of hints.
+	if m.mode == modeFilter {
+		prompt := StyleStatusKey.Render("/") + " " + m.filterInput.View()
+		return StyleStatusBar.Width(m.width).Render(prompt)
+	}
+
 	left := ""
-	if len(m.entries) > 0 {
-		left = fmt.Sprintf("%d/%d", m.cursor+1+m.offset, m.total)
+	entries := m.visibleEntries()
+	if len(entries) > 0 {
+		if m.filter != "" {
+			left = fmt.Sprintf("%d matches", len(entries))
+		} else {
+			left = fmt.Sprintf("%d/%d", m.cursor+1+m.offset, m.total)
+		}
 	}
 	if n := len(m.selected); n > 0 {
 		left += "  " + StyleSuccess.Render(fmt.Sprintf("%d selected", n))
+	}
+	if m.filter != "" {
+		left += "  " + StyleMuted(`filter: "`+m.filter+`"`)
 	}
 
 	hints := []string{
 		StyleStatusKey.Render("↑↓") + " move",
 		StyleStatusKey.Render("↵") + " open",
 		StyleStatusKey.Render("spc") + " select",
+		StyleStatusKey.Render("/") + " filter",
 		StyleStatusKey.Render("u") + " upload",
-		StyleStatusKey.Render("U") + " URL",
 		StyleStatusKey.Render("d") + " download",
 		StyleStatusKey.Render("n") + " mkdir",
 		StyleStatusKey.Render("r") + " rename",
 		StyleStatusKey.Render("D") + " delete",
 		StyleStatusKey.Render("s") + " sort",
 		StyleStatusKey.Render("p") + " publish",
-		StyleStatusKey.Render("m") + " info",
 		StyleStatusKey.Render("t") + " trash",
-		StyleStatusKey.Render("i") + " disk info",
 		StyleStatusKey.Render("q") + " quit",
 	}
 	right := strings.Join(hints, "  ")

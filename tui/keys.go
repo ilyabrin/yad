@@ -23,6 +23,7 @@ type BrowserKeyMap struct {
 	Refresh   key.Binding
 	Info      key.Binding // show disk info
 	Trash     key.Binding // open trash view
+	Filter    key.Binding // enter filter/search mode
 	Quit      key.Binding
 }
 
@@ -104,6 +105,10 @@ func DefaultBrowserKeyMap() BrowserKeyMap {
 		Trash: key.NewBinding(
 			key.WithKeys("t"),
 			key.WithHelp("t", "trash"),
+		),
+		Filter: key.NewBinding(
+			key.WithKeys("/"),
+			key.WithHelp("/", "filter"),
 		),
 		Quit: key.NewBinding(
 			key.WithKeys("q", "ctrl+c"),

@@ -8,6 +8,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/ilyabrin/disk"
 )
@@ -79,6 +80,12 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 			}
 			m.err = msg.err
 			return m, nil
+		}
+		// Clear filter when navigating to a new directory.
+		if msg.path != m.path {
+			m.filter = ""
+			m.filterInput.SetValue("")
+			m.mode = modeNormal
 		}
 		m.path = msg.path
 		m.entries = msg.entries
@@ -448,10 +455,41 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 	case modeMetadata:
 		m.mode = modeNormal
 		return m, nil
+
+	case modeFilter:
+		switch msg.Type {
+		case tea.KeyEsc:
+			// Esc cancels filter entirely
+			m.filter = ""
+			m.filterInput.SetValue("")
+			m.filterInput.Blur()
+			m.mode = modeNormal
+			m.cursor = 0
+			return m, nil
+		case tea.KeyEnter:
+			// Confirm — keep filter active, return to navigable normal mode
+			m.filter = strings.TrimSpace(m.filterInput.Value())
+			m.filterInput.Blur()
+			m.mode = modeNormal
+			m.cursor = 0
+			return m, nil
+		default:
+			var cmd tea.Cmd
+			m.filterInput, cmd = m.filterInput.Update(msg)
+			m.filter = m.filterInput.Value()
+			m.cursor = 0
+			return m, cmd
+		}
 	}
 
-	// Esc clears selection in normal mode
+	// Esc in normal mode: clear filter first, then selection on second press
 	if msg.String() == "esc" {
+		if m.filter != "" {
+			m.filter = ""
+			m.filterInput.SetValue("")
+			m.cursor = 0
+			return m, nil
+		}
 		m.selected = nil
 		return m, nil
 	}
@@ -515,7 +553,16 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		m.loading = true
 		return m, m.reloadCmd()
 
+	case key.Matches(msg, m.keys.Filter):
+		m.filterInput.SetValue(m.filter)
+		m.filterInput.Focus()
+		m.filterInput.CursorEnd()
+		m.mode = modeFilter
+		return m, textinput.Blink
+
 	case key.Matches(msg, m.keys.Refresh):
+		m.filter = ""
+		m.filterInput.SetValue("")
 		m.loading = true
 		return m, m.reloadCmd()
 
