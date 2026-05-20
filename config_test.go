@@ -184,6 +184,9 @@ func TestToAuthConfig_BothFieldsPreserved(t *testing.T) {
 	}
 }
 
+// toAuthConfig is tested above; AuthConfig() method was removed as it was
+// unused — yad.go calls toAuthConfig() directly.
+
 // --- LoadConfig / SaveConfig (filesystem round-trip) ---
 
 func TestLoadConfig_ReturnsEmptyWhenFileAbsent(t *testing.T) {

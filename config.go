@@ -70,18 +70,6 @@ func (c *Config) CanRefresh() bool {
 	return c.RefreshToken != "" && os.Getenv(EnvToken) == ""
 }
 
-// AuthConfig returns the auth.Config derived from any user-supplied
-// OAuth credentials in this config. Returns nil when empty.
-func (c *Config) AuthConfig() *struct{ ClientID, ClientSecret string } {
-	if c.OAuth.ClientID == "" && c.OAuth.ClientSecret == "" {
-		return nil
-	}
-	return &struct{ ClientID, ClientSecret string }{
-		ClientID:     c.OAuth.ClientID,
-		ClientSecret: c.OAuth.ClientSecret,
-	}
-}
-
 // ---- Persistence -----------------------------------------------------------
 
 func configPath() (string, error) {
