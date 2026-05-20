@@ -32,6 +32,7 @@ const (
 	modeInputUploadURL                // remote URL to upload from
 	modeInputUploadName               // confirm/change filename before upload (local or URL)
 	modeFilter                        // live name filter — search bar shown in status bar
+	modeConfirmQuit                    // quit confirmation while transfer is in progress
 )
 
 // entry is a single row in the file list.

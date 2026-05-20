@@ -423,9 +423,35 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		return m, nil
 
 	case modeUpload, modeDownload:
+		switch msg.String() {
+		case "q", "ctrl+c":
+			op := "upload"
+			if m.mode == modeDownload {
+				op = "download"
+			}
+			m.confirm = NewConfirmDialog("Quit", "Abort "+op+" in progress and quit?")
+			m.mode = modeConfirmQuit
+			return m, nil
+		}
 		if m.progress.Done {
 			m.mode = modeNormal
 			m.progress = ProgressOverlay{}
+		}
+		return m, nil
+
+	case modeConfirmQuit:
+		newDlg, confirmed, done := m.confirm.Update(msg)
+		m.confirm = newDlg
+		if done {
+			if confirmed {
+				return m, tea.Quit
+			}
+			// Cancelled — return to the active transfer mode
+			if m.dlCh != nil {
+				m.mode = modeDownload
+			} else {
+				m.mode = modeUpload
+			}
 		}
 		return m, nil
 

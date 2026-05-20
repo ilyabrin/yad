@@ -23,7 +23,10 @@ func (m BrowserModel) View() string {
 		modeInputUpload, modeInputUploadName, modeInputUploadURL,
 		modeInputDownload, modeInputDownloadDir:
 		return renderOverlay(base, m.inputDlg.View(m.width), m.width, m.height)
-	case modeUpload, modeDownload:
+	case modeUpload, modeDownload, modeConfirmQuit:
+		if m.mode == modeConfirmQuit {
+			return renderOverlay(base, m.confirm.View(m.width), m.width, m.height)
+		}
 		return renderOverlay(base, m.progress.View(m.width), m.width, m.height)
 	case modeMessage:
 		var msgView string
