@@ -65,9 +65,10 @@ func TestLoadedMsg_CursorAfterLoad(t *testing.T) {
 	}
 }
 
-func TestLoadedMsg_Error(t *testing.T) {
+func TestLoadedMsg_Error_ShowsInline(t *testing.T) {
 	m := newTestBrowser()
-	msg := loadedMsg{path: "disk:/", err: errTest("load failed")}
+	m.path = "/"
+	msg := loadedMsg{path: "/", err: errTest("load failed")}
 
 	updated, cmd := m.Update(msg)
 	if updated.err == nil {
@@ -77,7 +78,44 @@ func TestLoadedMsg_Error(t *testing.T) {
 		t.Error("loading should be false")
 	}
 	if cmd != nil {
-		t.Error("cmd should be nil on error")
+		t.Error("cmd should be nil on error at root")
+	}
+}
+
+func TestLoadedMsg_Error_NonRootPath_FallsBackToRoot(t *testing.T) {
+	m := newTestBrowser()
+	m.path = "disk:/photos/vacation"
+	m.offset = 0
+	msg := loadedMsg{path: "disk:/photos/vacation", err: errTest("not found")}
+
+	updated, cmd := m.Update(msg)
+	if updated.path != "/" {
+		t.Errorf("path = %q, want / after fallback", updated.path)
+	}
+	if updated.err != nil {
+		t.Error("err should not be set when falling back to root")
+	}
+	if cmd == nil {
+		t.Error("expected reload cmd for root")
+	}
+}
+
+func TestLoadedMsg_Error_NonRootWithOffset_ShowsInline(t *testing.T) {
+	// Error on page 2+ of a real path — show inline, don't reset to root
+	m := newTestBrowser()
+	m.path = "disk:/photos"
+	m.offset = 100
+	msg := loadedMsg{path: "disk:/photos", err: errTest("timeout")}
+
+	updated, cmd := m.Update(msg)
+	if updated.path != "disk:/photos" {
+		t.Errorf("path should not change on paginated error, got %q", updated.path)
+	}
+	if updated.err == nil {
+		t.Error("err should be set")
+	}
+	if cmd != nil {
+		t.Error("cmd should be nil")
 	}
 }
 

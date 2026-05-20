@@ -51,13 +51,14 @@ type App struct {
 //   - client nil      → show OAuth setup screen
 //   - oauthCfg        → optional user-supplied OAuth credentials (may be nil)
 //   - defaultSort     → initial sort order (e.g. "-modified"); empty → "name"
-func New(client *disk.Client, oauthCfg *auth.Config, defaultSort string) *App {
+//   - lastPath        → directory to open on start; empty → "/"
+func New(client *disk.Client, oauthCfg *auth.Config, defaultSort, lastPath string) *App {
 	app := &App{}
 
 	if client != nil {
 		app.client = client
 		app.screen = screenBrowser
-		app.browser = NewBrowserModel(client, defaultSort)
+		app.browser = NewBrowserModel(client, defaultSort, lastPath)
 		return app
 	}
 
@@ -97,7 +98,7 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		a.client = client
 		a.screen = screenBrowser
-		a.browser = NewBrowserModel(client, "")
+		a.browser = NewBrowserModel(client, "", "")
 		return a, tea.Batch(
 			a.browser.Init(),
 			func() tea.Msg { return tea.WindowSizeMsg{Width: a.width, Height: a.height} },
@@ -200,4 +201,13 @@ func (a *App) viewFatalError() string {
 // persist the tokens to config.
 func (a *App) TokenResult() *SetupDoneMsg {
 	return a.tokenResult
+}
+
+// LastPath returns the directory the browser was in when the app exited.
+// Empty when the browser was never shown (e.g. setup screen).
+func (a *App) LastPath() string {
+	if a.screen == screenBrowser || a.screen == screenFatalError {
+		return a.browser.path
+	}
+	return ""
 }

@@ -44,7 +44,7 @@ func run() error {
 		fmt.Fprintf(os.Stderr, "warning: %v\n", err)
 	}
 
-	app := tui.New(client, oauthCfg, cfg.EffectiveSort())
+	app := tui.New(client, oauthCfg, cfg.EffectiveSort(), cfg.LastPath)
 	p := tea.NewProgram(app, tea.WithAltScreen())
 
 	finalModel, err := p.Run()
@@ -52,12 +52,20 @@ func run() error {
 		return fmt.Errorf("program error: %w", err)
 	}
 
-	// Persist any tokens obtained during this session
+	// Persist session state (tokens + last visited path)
 	if a, ok := finalModel.(*tui.App); ok {
+		changed := false
 		if result := a.TokenResult(); result != nil {
 			cfg.AccessToken = result.AccessToken
 			cfg.RefreshToken = result.RefreshToken
 			cfg.TokenExpiry = result.Expiry
+			changed = true
+		}
+		if p := a.LastPath(); p != "" && p != cfg.LastPath {
+			cfg.LastPath = p
+			changed = true
+		}
+		if changed {
 			if saveErr := SaveConfig(cfg); saveErr != nil {
 				fmt.Fprintf(os.Stderr, "warning: could not save config: %v\n", saveErr)
 			}

@@ -104,6 +104,38 @@ func TestApp_TrashFatalError_SwitchesScreen(t *testing.T) {
 	}
 }
 
+// --- LastPath ---
+
+func TestApp_LastPath_ReturnsBrowserPath(t *testing.T) {
+	a := newTestApp()
+	a.screen = screenBrowser
+	a.browser.path = "disk:/photos/vacation"
+
+	if got := a.LastPath(); got != "disk:/photos/vacation" {
+		t.Errorf("LastPath() = %q, want disk:/photos/vacation", got)
+	}
+}
+
+func TestApp_LastPath_EmptyOnSetupScreen(t *testing.T) {
+	a := newTestApp()
+	a.screen = screenSetup
+
+	if got := a.LastPath(); got != "" {
+		t.Errorf("LastPath() = %q, want empty on setup screen", got)
+	}
+}
+
+func TestApp_LastPath_ReturnsBrowserPathOnFatalError(t *testing.T) {
+	a := newTestApp()
+	a.screen = screenFatalError
+	a.browser.path = "disk:/docs"
+	a.fatalErr = &fatalErrorMsg{title: "T", body: "B", hint: "H"}
+
+	if got := a.LastPath(); got != "disk:/docs" {
+		t.Errorf("LastPath() = %q, want disk:/docs", got)
+	}
+}
+
 // --- View returns non-empty for each screen ---
 
 func TestApp_View_Browser(t *testing.T) {

@@ -68,6 +68,12 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 			if fe := asFatalErrorMsg(msg.err); fe != nil {
 				return m, func() tea.Msg { return *fe }
 			}
+			// Saved path no longer exists — silently fall back to root
+			// rather than showing an error on startup.
+			if m.path != "/" && m.path != "disk:/" && m.offset == 0 {
+				m.path = "/"
+				return m, m.reloadCmd()
+			}
 			m.err = msg.err
 			return m, nil
 		}
