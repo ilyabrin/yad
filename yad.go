@@ -17,10 +17,44 @@ import (
 //	go build -ldflags "-X main.version=v0.1.0"
 var version = "dev"
 
+const helpText = `yad — Yandex.Disk terminal UI
+
+Usage:
+  yad [flag]
+
+Flags:
+  -v, --version   print version and exit
+  -h, --help      print this help and exit
+
+Config:
+  ~/.yad/config.yaml   tokens and UI preferences
+
+Environment:
+  YANDEX_DISK_TOKEN   override stored token (useful for CI/scripting)
+
+Keybindings (inside the app):
+  ↑/k  ↓/j          navigate        u  upload file
+  ↵/→/l              open dir        U  upload from URL
+  ←/h/Backspace      go up           d  download
+  Space              select          D  delete
+  Ctrl+A             select all      n  new directory
+  s                  cycle sort      r  rename
+  p                  publish         i  disk info
+  c                  copy URL        t  trash
+  o                  open in browser q  quit
+
+Source: https://github.com/ilyabrin/yad`
+
 func main() {
-	if len(os.Args) == 2 && (os.Args[1] == "--version" || os.Args[1] == "-v") {
-		fmt.Println("yad", version)
-		return
+	if len(os.Args) == 2 {
+		switch os.Args[1] {
+		case "--version", "-v":
+			fmt.Println("yad", version)
+			return
+		case "--help", "-h":
+			fmt.Println(helpText)
+			return
+		}
 	}
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)

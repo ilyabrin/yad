@@ -25,8 +25,8 @@ A terminal UI for [Yandex.Disk](https://disk.yandex.ru) built with [Bubbletea](h
 
 ```sh
 yad              # open the file browser
+yad --help       # print help and exit
 yad --version    # print version and exit
-yad -v           # same
 ```
 
 ## Installation
