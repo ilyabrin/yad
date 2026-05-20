@@ -3,6 +3,8 @@ package tui
 import (
 	"context"
 	"fmt"
+	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/atotto/clipboard"
@@ -246,6 +248,25 @@ func cmdUploadFromURL(client *disk.Client, remoteURL, destDir string) tea.Cmd {
 			return uploadFromURLDoneMsg{err: newAPIError(errResp)}
 		}
 		return uploadFromURLDoneMsg{}
+	}
+}
+
+// --- Open in browser ---
+
+type browserOpenedMsg struct{ err error }
+
+func cmdOpenBrowser(url string) tea.Cmd {
+	return func() tea.Msg {
+		var cmd *exec.Cmd
+		switch runtime.GOOS {
+		case "windows":
+			cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
+		case "darwin":
+			cmd = exec.Command("open", url)
+		default:
+			cmd = exec.Command("xdg-open", url)
+		}
+		return browserOpenedMsg{err: cmd.Start()}
 	}
 }
 

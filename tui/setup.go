@@ -2,8 +2,6 @@ package tui
 
 import (
 	"context"
-	"os/exec"
-	"runtime"
 	"strings"
 	"time"
 
@@ -38,8 +36,6 @@ type exchangeResultMsg struct {
 	resp *auth.TokenResponse
 	err  error
 }
-
-type browserOpenedMsg struct{ err error }
 
 // --- SetupModel -------------------------------------------------------------
 
@@ -295,22 +291,6 @@ func (m SetupModel) viewExchange() string {
 // --- Helpers ----------------------------------------------------------------
 
 // cmdOpenBrowser tries to open url in the system default browser.
-func cmdOpenBrowser(url string) tea.Cmd {
-	return func() tea.Msg {
-		var cmd *exec.Cmd
-		switch runtime.GOOS {
-		case "windows":
-			// cmd /c start truncates URLs at '&'.
-			// rundll32 handles full URLs with query parameters correctly.
-			cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
-		case "darwin":
-			cmd = exec.Command("open", url)
-		default:
-			cmd = exec.Command("xdg-open", url)
-		}
-		return browserOpenedMsg{err: cmd.Start()}
-	}
-}
 
 func wrapWidth(termWidth int) int {
 	w := termWidth - 8

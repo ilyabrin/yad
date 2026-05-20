@@ -38,6 +38,7 @@ func (m BrowserModel) View() string {
 		content := StyleSuccess.Render("⇡ Public link") + "\n\n" +
 			urlStyle.Render(m.publicURL) + "\n\n" +
 			StyleStatusKey.Render("c") + " copy   " +
+			StyleStatusKey.Render("o") + " open   " +
 			StyleStatusKey.Render("u") + " unpublish   " +
 			StyleMuted("any other key to close")
 		return renderOverlay(base, StyleDialog.Render(content), m.width, m.height)

@@ -419,6 +419,10 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			if m.publicURL != "" {
 				return m, cmdCopyToClipboard(m.publicURL)
 			}
+		case "o":
+			if m.publicURL != "" {
+				return m, cmdOpenBrowser(m.publicURL)
+			}
 		case "u":
 			if len(m.entries) > 0 {
 				target := m.entries[m.cursor].resource.Path
