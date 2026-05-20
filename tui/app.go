@@ -27,6 +27,16 @@ type fatalErrorMsg struct {
 	detail error  // raw API error, shown in muted style (may be nil)
 }
 
+// tryRefreshMsg is emitted when a 401/403 API error is detected mid-session.
+// App intercepts it and attempts a silent token refresh via refreshFn.
+type tryRefreshMsg struct{ origErr error }
+
+// refreshDoneMsg is the result of a token refresh attempt.
+type refreshDoneMsg struct {
+	token string
+	err   error
+}
+
 // App is the root Bubbletea model. It owns all screens and routes messages
 // between them.
 type App struct {
@@ -39,7 +49,8 @@ type App struct {
 	// Written when setup completes; read by main() to persist to config.
 	tokenResult *SetupDoneMsg
 
-	fatalErr *fatalErrorMsg // set when a fatal error is received from any screen
+	fatalErr  *fatalErrorMsg     // set when a fatal error is received from any screen
+	refreshFn func() (string, error) // nil when no refresh is possible (env token / no refresh token)
 
 	width  int
 	height int
@@ -52,8 +63,9 @@ type App struct {
 //   - oauthCfg        → optional user-supplied OAuth credentials (may be nil)
 //   - defaultSort     → initial sort order (e.g. "-modified"); empty → "name"
 //   - lastPath        → directory to open on start; empty → "/"
-func New(client *disk.Client, oauthCfg *auth.Config, defaultSort, lastPath string) *App {
-	app := &App{}
+//   - refreshFn       → called when a mid-session 401 is detected; nil disables silent refresh
+func New(client *disk.Client, oauthCfg *auth.Config, defaultSort, lastPath string, refreshFn func() (string, error)) *App {
+	app := &App{refreshFn: refreshFn}
 
 	if client != nil {
 		app.client = client
@@ -86,6 +98,38 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		a.fatalErr = &m
 		a.screen = screenFatalError
 		return a, nil
+
+	case tryRefreshMsg:
+		if a.refreshFn == nil {
+			return a.goFatalAuth(m.origErr)
+		}
+		refreshFn := a.refreshFn
+		return a, func() tea.Msg {
+			token, err := refreshFn()
+			return refreshDoneMsg{token: token, err: err}
+		}
+
+	case refreshDoneMsg:
+		if m.err != nil {
+			return a.goFatalAuth(m.err)
+		}
+		newClient, err := disk.New(m.token)
+		if err != nil {
+			return a.goFatalAuth(err)
+		}
+		a.client = newClient
+		a.browser.setClient(newClient)
+		a.trash.setClient(newClient)
+		a.diskInfo.setClient(newClient)
+		switch a.screen {
+		case screenTrash:
+			return a, a.trash.Init()
+		case screenDiskInfo:
+			return a, a.diskInfo.Init()
+		default:
+			a.browser.loading = true
+			return a, a.browser.reloadCmd()
+		}
 
 	case SetupDoneMsg:
 		a.tokenResult = &m
@@ -194,6 +238,12 @@ func (a *App) viewFatalError() string {
 	inner := lipgloss.PlaceHorizontal(a.width, lipgloss.Center,
 		lipgloss.Place(a.width, a.height-2, lipgloss.Center, lipgloss.Center, content))
 	return title + "\n" + inner
+}
+
+func (a *App) goFatalAuth(err error) (tea.Model, tea.Cmd) {
+	a.fatalErr = authFatalMsg(err)
+	a.screen = screenFatalError
+	return a, nil
 }
 
 // TokenResult returns the OAuth result from a completed setup flow, or nil

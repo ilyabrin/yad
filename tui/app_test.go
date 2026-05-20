@@ -121,9 +121,9 @@ func TestApp_WindowSizeMsg_UpdatesDimensions(t *testing.T) {
 	}
 }
 
-// --- fatalErrorMsg emitted by browser loadedMsg with auth error ---
+// --- tryRefreshMsg emitted by browser loadedMsg with auth error ---
 
-func TestApp_BrowserAuthError_RoutesFatal(t *testing.T) {
+func TestApp_BrowserAuthError_RoutesTryRefresh(t *testing.T) {
 	a := newTestApp()
 
 	// Simulate browser receiving a 401 error via loadedMsg
@@ -134,12 +134,58 @@ func TestApp_BrowserAuthError_RoutesFatal(t *testing.T) {
 		t.Fatal("expected a cmd from browser on auth error")
 	}
 	msg := cmd()
-	fe, ok := msg.(fatalErrorMsg)
+	rm, ok := msg.(tryRefreshMsg)
 	if !ok {
-		t.Fatalf("expected fatalErrorMsg, got %T", msg)
+		t.Fatalf("expected tryRefreshMsg, got %T", msg)
 	}
-	if fe.title != "Authentication Error" {
-		t.Errorf("title = %q, want Authentication Error", fe.title)
+	if rm.origErr == nil {
+		t.Error("origErr should be set")
+	}
+}
+
+// --- tryRefreshMsg with no refreshFn falls back to fatalErrorMsg ---
+
+func TestApp_TryRefreshMsg_NoRefreshFn_ShowsFatal(t *testing.T) {
+	a := newTestApp() // refreshFn is nil
+
+	model, _ := a.Update(tryRefreshMsg{origErr: errors.New("HTTP 401: Unauthorized")})
+	app := model.(*App)
+
+	if app.screen != screenFatalError {
+		t.Errorf("screen = %v, want screenFatalError", app.screen)
+	}
+	if app.fatalErr == nil || app.fatalErr.title != "Authentication Error" {
+		t.Errorf("fatalErr = %v, want Authentication Error", app.fatalErr)
+	}
+}
+
+// --- tryRefreshMsg with refreshFn spawns a goroutine ---
+
+func TestApp_TryRefreshMsg_WithRefreshFn_SpawnsCmd(t *testing.T) {
+	a := newTestApp()
+	called := false
+	a.refreshFn = func() (string, error) {
+		called = true
+		return "new-token", nil
+	}
+
+	_, cmd := a.Update(tryRefreshMsg{origErr: errors.New("HTTP 401")})
+	if cmd == nil {
+		t.Fatal("expected a cmd when refreshFn is set")
+	}
+	msg := cmd()
+	rd, ok := msg.(refreshDoneMsg)
+	if !ok {
+		t.Fatalf("expected refreshDoneMsg, got %T", msg)
+	}
+	if !called {
+		t.Error("refreshFn should have been called")
+	}
+	if rd.token != "new-token" {
+		t.Errorf("token = %q, want new-token", rd.token)
+	}
+	if rd.err != nil {
+		t.Errorf("unexpected err: %v", rd.err)
 	}
 }
 

@@ -57,22 +57,22 @@ func TestTrashUpdate_LoadedMsg_Error_ShowsInline(t *testing.T) {
 	}
 }
 
-func TestTrashUpdate_LoadedMsg_AuthError_RoutesFatal(t *testing.T) {
+func TestTrashUpdate_LoadedMsg_AuthError_RoutesTryRefresh(t *testing.T) {
 	m := newTestTrash()
 	m.loading = true
 
 	_, cmd := m.Update(trashLoadedMsg{err: errors.New("HTTP 401: Unauthorized")})
 
 	if cmd == nil {
-		t.Fatal("expected fatalErrorMsg cmd on auth error")
+		t.Fatal("expected a cmd on auth error")
 	}
 	msg := cmd()
-	fe, ok := msg.(fatalErrorMsg)
+	rm, ok := msg.(tryRefreshMsg)
 	if !ok {
-		t.Fatalf("expected fatalErrorMsg, got %T", msg)
+		t.Fatalf("expected tryRefreshMsg, got %T", msg)
 	}
-	if fe.title != "Authentication Error" {
-		t.Errorf("title = %q, want Authentication Error", fe.title)
+	if rm.origErr == nil {
+		t.Error("origErr should be set")
 	}
 }
 

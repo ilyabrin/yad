@@ -286,26 +286,40 @@ func newAPIError(e *disk.ErrorResponse) error {
 	return fmt.Errorf("%s", msg)
 }
 
+// isAuthError reports whether err is an authentication failure (HTTP 401/403
+// or a token-related error keyword). These errors are handled by attempting a
+// silent token refresh before falling back to the fatal error screen.
+func isAuthError(err error) bool {
+	if err == nil {
+		return false
+	}
+	s := err.Error()
+	return strings.Contains(s, "401") || strings.Contains(s, "403") ||
+		strings.Contains(s, "Unauthorized") || strings.Contains(s, "unauthorized") ||
+		strings.Contains(s, "InvalidToken") || strings.Contains(s, "invalid_token")
+}
+
+// authFatalMsg builds a fatalErrorMsg for an authentication failure.
+// Used when a token refresh has failed or is not available.
+func authFatalMsg(err error) *fatalErrorMsg {
+	return &fatalErrorMsg{
+		title:  "Authentication Error",
+		body:   "Your session has expired or the token is invalid.",
+		hint:   "Re-run `yad` to authenticate again.",
+		detail: err,
+	}
+}
+
 // asFatalErrorMsg checks whether err represents an unrecoverable API error and,
 // if so, returns the appropriate fatalErrorMsg to show the dedicated screen.
+// Auth errors (401/403) are NOT handled here — they are routed through
+// tryRefreshMsg first so a silent token refresh can be attempted.
 // Returns nil when the error is ordinary and should be shown inline.
 func asFatalErrorMsg(err error) *fatalErrorMsg {
 	if err == nil {
 		return nil
 	}
 	s := err.Error()
-
-	// Expired or invalid token (HTTP 401 / 403)
-	if strings.Contains(s, "401") || strings.Contains(s, "403") ||
-		strings.Contains(s, "Unauthorized") || strings.Contains(s, "unauthorized") ||
-		strings.Contains(s, "InvalidToken") || strings.Contains(s, "invalid_token") {
-		return &fatalErrorMsg{
-			title:  "Authentication Error",
-			body:   "Your session has expired or the token is invalid.",
-			hint:   "Re-run `yad` to authenticate again.",
-			detail: err,
-		}
-	}
 
 	// Storage overdraft — API disabled until quota is restored
 	if strings.Contains(s, "DiskAPIDisabledForOverdraftUserError") ||

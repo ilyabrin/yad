@@ -5,6 +5,30 @@ import (
 	"testing"
 )
 
+func TestIsAuthError(t *testing.T) {
+	tests := []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{name: "nil", err: nil, want: false},
+		{name: "ordinary error", err: errors.New("DiskNotFoundError: resource not found"), want: false},
+		{name: "HTTP 401", err: errors.New("HTTP 401: Unauthorized"), want: true},
+		{name: "HTTP 403", err: errors.New("HTTP 403: Forbidden"), want: true},
+		{name: "InvalidToken", err: errors.New("InvalidToken: the token is expired"), want: true},
+		{name: "invalid_token", err: errors.New("invalid_token"), want: true},
+		{name: "unauthorized lowercase", err: errors.New("unauthorized access"), want: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isAuthError(tt.err); got != tt.want {
+				t.Errorf("isAuthError(%v) = %v, want %v", tt.err, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestAsFatalErrorMsg(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -23,29 +47,9 @@ func TestAsFatalErrorMsg(t *testing.T) {
 			wantNil: true,
 		},
 		{
-			name:      "HTTP 401",
-			err:       errors.New("HTTP 401: Unauthorized"),
-			wantTitle: "Authentication Error",
-		},
-		{
-			name:      "HTTP 403",
-			err:       errors.New("HTTP 403: Forbidden"),
-			wantTitle: "Authentication Error",
-		},
-		{
-			name:      "InvalidToken keyword",
-			err:       errors.New("InvalidToken: the token is expired"),
-			wantTitle: "Authentication Error",
-		},
-		{
-			name:      "invalid_token keyword",
-			err:       errors.New("invalid_token"),
-			wantTitle: "Authentication Error",
-		},
-		{
-			name:      "unauthorized lowercase",
-			err:       errors.New("unauthorized access"),
-			wantTitle: "Authentication Error",
+			name:    "auth error is not handled here",
+			err:     errors.New("HTTP 401: Unauthorized"),
+			wantNil: true,
 		},
 		{
 			name:      "DiskAPIDisabledForOverdraftUserError",

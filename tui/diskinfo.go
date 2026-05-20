@@ -35,6 +35,8 @@ type DiskInfoModel struct {
 	height int
 }
 
+func (m *DiskInfoModel) setClient(c *disk.Client) { m.client = c }
+
 func NewDiskInfoModel(client *disk.Client) DiskInfoModel {
 	sp := spinner.New()
 	sp.Spinner = spinner.Dot
@@ -78,6 +80,9 @@ func (m DiskInfoModel) Update(msg tea.Msg) (DiskInfoModel, tea.Cmd) {
 	case diskInfoLoadedMsg:
 		m.loading = false
 		if msg.err != nil {
+			if isAuthError(msg.err) {
+				return m, func() tea.Msg { return tryRefreshMsg{origErr: msg.err} }
+			}
 			if fe := asFatalErrorMsg(msg.err); fe != nil {
 				return m, func() tea.Msg { return *fe }
 			}

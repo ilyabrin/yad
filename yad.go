@@ -44,7 +44,14 @@ func run() error {
 		fmt.Fprintf(os.Stderr, "warning: %v\n", err)
 	}
 
-	app := tui.New(client, oauthCfg, cfg.EffectiveSort(), cfg.LastPath)
+	var refreshFn func() (string, error)
+	if cfg.CanRefresh() {
+		refreshFn = func() (string, error) {
+			return refreshToken(cfg, oauthCfg)
+		}
+	}
+
+	app := tui.New(client, oauthCfg, cfg.EffectiveSort(), cfg.LastPath, refreshFn)
 	p := tea.NewProgram(app, tea.WithAltScreen())
 
 	finalModel, err := p.Run()

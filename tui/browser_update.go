@@ -65,6 +65,9 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 	case loadedMsg:
 		m.loading = false
 		if msg.err != nil {
+			if isAuthError(msg.err) {
+				return m, func() tea.Msg { return tryRefreshMsg{origErr: msg.err} }
+			}
 			if fe := asFatalErrorMsg(msg.err); fe != nil {
 				return m, func() tea.Msg { return *fe }
 			}

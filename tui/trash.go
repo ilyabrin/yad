@@ -107,6 +107,8 @@ type TrashModel struct {
 	height int
 }
 
+func (m *TrashModel) setClient(c *disk.Client) { m.client = c }
+
 func NewTrashModel(client *disk.Client) TrashModel {
 	sp := spinner.New()
 	sp.Spinner = spinner.Dot
@@ -155,6 +157,9 @@ func (m TrashModel) Update(msg tea.Msg) (TrashModel, tea.Cmd) {
 	case trashLoadedMsg:
 		m.loading = false
 		if msg.err != nil {
+			if isAuthError(msg.err) {
+				return m, func() tea.Msg { return tryRefreshMsg{origErr: msg.err} }
+			}
 			if fe := asFatalErrorMsg(msg.err); fe != nil {
 				return m, func() tea.Msg { return *fe }
 			}

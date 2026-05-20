@@ -224,6 +224,8 @@ func (m BrowserModel) selectedFiles() []string {
 	return paths
 }
 
+func (m *BrowserModel) setClient(c *disk.Client) { m.client = c }
+
 // parentPath returns the parent of a Yandex Disk path.
 func parentPath(p string) string {
 	if p == "/" || p == "disk:/" {
