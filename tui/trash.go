@@ -85,6 +85,8 @@ const (
 
 // --- TrashModel -------------------------------------------------------------
 
+// TrashModel is the trash management screen. It lists deleted items and
+// allows restoring or permanently deleting them.
 type TrashModel struct {
 	client  *disk.Client
 	keys    trashKeyMap
@@ -124,7 +126,7 @@ func (m TrashModel) Init() tea.Cmd {
 
 func (m TrashModel) loadTrash() tea.Cmd {
 	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), timeoutOp)
 		defer cancel()
 
 		list, err := m.client.ListTrashResources(ctx, "", 100, 0)
@@ -153,6 +155,9 @@ func (m TrashModel) Update(msg tea.Msg) (TrashModel, tea.Cmd) {
 	case trashLoadedMsg:
 		m.loading = false
 		if msg.err != nil {
+			if fe := asFatalErrorMsg(msg.err); fe != nil {
+				return m, func() tea.Msg { return *fe }
+			}
 			m.err = msg.err
 			return m, nil
 		}
@@ -163,25 +168,25 @@ func (m TrashModel) Update(msg tea.Msg) (TrashModel, tea.Cmd) {
 
 	case trashRestoreDoneMsg:
 		if msg.err != nil {
-			return m.flashMessage("✗ "+msg.err.Error(), true), nil
+			return m.showMessage(iconErr+" "+msg.err.Error(), true), nil
 		}
 		m.loading = true
 		return m, tea.Batch(m.loadTrash(), m.spinner.Tick)
 
 	case trashDeleteDoneMsg:
 		if msg.err != nil {
-			return m.flashMessage("✗ "+msg.err.Error(), true), nil
+			return m.showMessage(iconErr+" "+msg.err.Error(), true), nil
 		}
 		m.loading = true
 		return m, tea.Batch(m.loadTrash(), m.spinner.Tick)
 
 	case trashEmptyDoneMsg:
 		if msg.err != nil {
-			return m.flashMessage("✗ "+msg.err.Error(), true), nil
+			return m.showMessage(iconErr+" "+msg.err.Error(), true), nil
 		}
 		m.items = nil
 		m.cursor = 0
-		return m.flashMessage("✓ Trash emptied", false), nil
+		return m.showMessage(iconOK+" Trash emptied", false), nil
 
 	case tea.KeyMsg:
 		return m.handleKey(msg)
@@ -278,7 +283,7 @@ func (m TrashModel) handleKey(msg tea.KeyMsg) (TrashModel, tea.Cmd) {
 
 func (m TrashModel) cmdRestore(trashPath string) tea.Cmd {
 	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), timeoutOp)
 		defer cancel()
 		_, err := m.client.RestoreFromTrash(ctx, trashPath, false, "")
 		return trashRestoreDoneMsg{err: err}
@@ -287,7 +292,7 @@ func (m TrashModel) cmdRestore(trashPath string) tea.Cmd {
 
 func (m TrashModel) cmdDeleteFromTrash(trashPath string) tea.Cmd {
 	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), timeoutOp)
 		defer cancel()
 		err := m.client.EmptyTrash(ctx, trashPath, false)
 		return trashDeleteDoneMsg{err: err}
@@ -296,14 +301,14 @@ func (m TrashModel) cmdDeleteFromTrash(trashPath string) tea.Cmd {
 
 func (m TrashModel) cmdEmptyTrash() tea.Cmd {
 	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), timeoutDelete)
 		defer cancel()
 		err := m.client.EmptyTrash(ctx, "", false)
 		return trashEmptyDoneMsg{err: err}
 	}
 }
 
-func (m TrashModel) flashMessage(msg string, isError bool) TrashModel {
+func (m TrashModel) showMessage(msg string, isError bool) TrashModel {
 	m.mode = trashModeMessage
 	m.message = msg
 	m.messageIsError = isError
@@ -380,7 +385,7 @@ func (m TrashModel) viewError(height int) string {
 	for i := range lines {
 		switch i {
 		case mid:
-			lines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleError.Render("✗ "+m.err.Error()))
+			lines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleError.Render(iconErr+" "+m.err.Error()))
 		case mid + 1:
 			lines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted("Press any key to continue"))
 		}
@@ -408,11 +413,8 @@ func (m TrashModel) viewList(height int) string {
 		start = m.cursor
 	}
 
-	nameWidth := m.width - 9 - 18 - 20 - 4 // size + date + origin + padding
-	if nameWidth < 10 {
-		nameWidth = 10
-	}
-	originWidth := 20
+	nameWidth := max(m.width-colSizeWidth-colDateWidth-trashOriginWidth-colRowPadding, colNameMinWidth)
+	originWidth := trashOriginWidth
 
 	var rows []string
 	for i := start; i < start+visible && i < len(m.items); i++ {

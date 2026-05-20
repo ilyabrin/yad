@@ -71,11 +71,7 @@ func (d ConfirmDialog) View(width int) string {
 	b.WriteString("\n\n")
 	b.WriteString(StyleMuted("←/→ select   ↵ confirm   Esc cancel"))
 
-	maxW := width - 8
-	if maxW < 40 {
-		maxW = 40
-	}
-	return StyleDialog.Width(maxW).Render(b.String())
+	return StyleDialog.Width(max(width-dialogMargin, dialogMinWidth)).Render(b.String())
 }
 
 // InputDialog is a single-line text input overlay.
@@ -111,9 +107,8 @@ func (d InputDialog) Update(msg tea.KeyMsg) (InputDialog, bool, bool) {
 	case tea.KeyEsc:
 		return d, false, true
 	}
-	var cmd tea.Cmd
-	d.input, cmd = d.input.Update(msg)
-	_ = cmd
+	// textinput.Update never returns a non-nil Cmd for key messages.
+	d.input, _ = d.input.Update(msg)
 	return d, false, false
 }
 
@@ -129,11 +124,7 @@ func (d InputDialog) View(width int) string {
 	b.WriteString("\n\n")
 	b.WriteString(StyleMuted("↵ confirm   Esc cancel"))
 
-	maxW := width - 8
-	if maxW < 40 {
-		maxW = 40
-	}
-	return StyleDialog.Width(maxW).Render(b.String())
+	return StyleDialog.Width(max(width-dialogMargin, dialogMinWidth)).Render(b.String())
 }
 
 // ProgressOverlay renders an upload/download progress bar.
@@ -154,16 +145,13 @@ func (p ProgressOverlay) View(width int) string {
 	b.WriteString(StyleFile.Render(p.Filename))
 	b.WriteString("\n\n")
 
-	barWidth := width - 16
-	if barWidth < 20 {
-		barWidth = 20
-	}
+	barWidth := max(width-dialogMargin-8, 20)
 
 	if p.Done {
 		if p.Err != nil {
-			b.WriteString(StyleError.Render("✗ " + p.Err.Error()))
+			b.WriteString(StyleError.Render(iconErr + " " + p.Err.Error()))
 		} else {
-			b.WriteString(StyleSuccess.Render("✓ Done  " + disk.FormatFileSize(p.Current)))
+			b.WriteString(StyleSuccess.Render(iconOK + " Done  " + disk.FormatFileSize(p.Current)))
 		}
 	} else {
 		filled := int(float64(barWidth) * p.Percentage / 100)
@@ -188,9 +176,5 @@ func (p ProgressOverlay) View(width int) string {
 		b.WriteString(bar)
 	}
 
-	maxW := width - 8
-	if maxW < 40 {
-		maxW = 40
-	}
-	return StyleDialog.Width(maxW).Render(b.String())
+	return StyleDialog.Width(max(width-dialogMargin, dialogMinWidth)).Render(b.String())
 }

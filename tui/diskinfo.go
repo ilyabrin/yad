@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -23,6 +22,7 @@ type switchToBrowserFromInfoMsg struct{}
 
 // --- DiskInfoModel ----------------------------------------------------------
 
+// DiskInfoModel is the disk usage overview screen.
 type DiskInfoModel struct {
 	client  *disk.Client
 	spinner spinner.Model
@@ -53,7 +53,7 @@ func (m DiskInfoModel) Init() tea.Cmd {
 
 func (m DiskInfoModel) loadInfo() tea.Cmd {
 	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), timeoutMeta)
 		defer cancel()
 		info, err := m.client.DiskInfo(ctx)
 		return diskInfoLoadedMsg{info: info, err: err}
@@ -77,6 +77,11 @@ func (m DiskInfoModel) Update(msg tea.Msg) (DiskInfoModel, tea.Cmd) {
 
 	case diskInfoLoadedMsg:
 		m.loading = false
+		if msg.err != nil {
+			if fe := asFatalErrorMsg(msg.err); fe != nil {
+				return m, func() tea.Msg { return *fe }
+			}
+		}
 		m.err = msg.err
 		m.info = msg.info
 
@@ -118,7 +123,7 @@ func (m DiskInfoModel) View() string {
 		for i := 0; i < m.height/2-1; i++ {
 			b.WriteByte('\n')
 		}
-		b.WriteString(lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleError.Render("✗ "+m.err.Error())))
+		b.WriteString(lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleError.Render(iconErr+" "+m.err.Error())))
 	} else {
 		b.WriteString(m.viewContent())
 	}

@@ -2,6 +2,7 @@ package tui
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/ilyabrin/disk"
 	"github.com/ilyabrin/yad/internal/auth"
 )
@@ -13,7 +14,18 @@ const (
 	screenBrowser
 	screenTrash
 	screenDiskInfo
+	screenFatalError
 )
+
+// fatalErrorMsg is emitted by any screen when an unrecoverable API error occurs
+// (expired token, storage overdraft, etc.). App intercepts it, switches to the
+// fatal error screen, and only allows the user to quit.
+type fatalErrorMsg struct {
+	title  string // screen subtitle, e.g. "Authentication Error"
+	body   string // primary message shown in the dialog
+	hint   string // remediation instruction shown below the body
+	detail error  // raw API error, shown in muted style (may be nil)
+}
 
 // App is the root Bubbletea model. It owns all screens and routes messages
 // between them.
@@ -26,6 +38,8 @@ type App struct {
 
 	// Written when setup completes; read by main() to persist to config.
 	tokenResult *SetupDoneMsg
+
+	fatalErr *fatalErrorMsg // set when a fatal error is received from any screen
 
 	width  int
 	height int
@@ -66,6 +80,11 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// App-level routing messages
 	switch m := msg.(type) {
+	case fatalErrorMsg:
+		a.fatalErr = &m
+		a.screen = screenFatalError
+		return a, nil
+
 	case SetupDoneMsg:
 		a.tokenResult = &m
 		client, err := disk.New(m.AccessToken)
@@ -86,6 +105,17 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case switchToBrowserMsg, switchToBrowserFromInfoMsg:
 		a.screen = screenBrowser
 		return a, func() tea.Msg { return tea.WindowSizeMsg{Width: a.width, Height: a.height} }
+	}
+
+	// Fatal error screen: only q/esc/ctrl+c to quit
+	if a.screen == screenFatalError {
+		if km, ok := msg.(tea.KeyMsg); ok {
+			switch km.String() {
+			case "q", "esc", "ctrl+c":
+				return a, tea.Quit
+			}
+		}
+		return a, nil
 	}
 
 	// Delegate to active screen
@@ -142,8 +172,26 @@ func (a *App) View() string {
 		return a.trash.View()
 	case screenDiskInfo:
 		return a.diskInfo.View()
+	case screenFatalError:
+		return a.viewFatalError()
 	}
 	return ""
+}
+
+func (a *App) viewFatalError() string {
+	fe := a.fatalErr
+	title := StyleTitle.Render("  YaD  ·  " + fe.title)
+	body := StyleError.Render(iconErr + " " + fe.body)
+	detail := ""
+	if fe.detail != nil {
+		detail = "\n" + StyleMuted(fe.detail.Error())
+	}
+	hint := "\n\n" + StyleMuted(fe.hint) +
+		"\n\n" + StyleStatusKey.Render("q") + StyleMuted(" quit")
+	content := StyleDialog.Render(body + detail + hint)
+	inner := lipgloss.PlaceHorizontal(a.width, lipgloss.Center,
+		lipgloss.Place(a.width, a.height-2, lipgloss.Center, lipgloss.Center, content))
+	return title + "\n" + inner
 }
 
 // TokenResult returns the OAuth result from a completed setup flow, or nil
