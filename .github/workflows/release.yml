@@ -9,84 +9,22 @@ permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build ${{ matrix.goos }}/${{ matrix.goarch }}
+  release:
+    name: Release
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - goos: linux
-            goarch: amd64
-            suffix: ""
-          - goos: linux
-            goarch: arm64
-            suffix: ""
-          - goos: darwin
-            goarch: amd64
-            suffix: ""
-          - goos: darwin
-            goarch: arm64
-            suffix: ""
-          - goos: windows
-            goarch: amd64
-            suffix: ".exe"
-
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
-      - name: Build
+      - uses: goreleaser/goreleaser-action@v7
+        with:
+          version: "~> v2"
+          args: release --clean
         env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
-        run: |
-          BINARY="yad-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.suffix }}"
-          VERSION="${GITHUB_REF_NAME}"
-          go build \
-            -trimpath \
-            -ldflags "-s -w -X main.version=${VERSION} -X github.com/ilyabrin/yad/internal/auth.clientSecret=${{ secrets.YANDEX_CLIENT_SECRET }}" \
-            -o "$BINARY" .
-          echo "BINARY=$BINARY" >> $GITHUB_ENV
-
-      - name: Compress with UPX (Linux/Windows only)
-        if: matrix.goos != 'darwin'
-        continue-on-error: true
-        run: |
-          sudo apt-get install -y upx-ucl
-          UPX_BINARY="${{ env.BINARY }}-upx"
-          cp "${{ env.BINARY }}" "$UPX_BINARY"
-          upx --best "$UPX_BINARY"
-          echo "UPX_BINARY=$UPX_BINARY" >> $GITHUB_ENV
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ env.BINARY }}
-          path: ${{ env.BINARY }}
-
-      - name: Upload UPX artifact (Linux/Windows only)
-        if: matrix.goos != 'darwin' && env.UPX_BINARY != ''
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ env.UPX_BINARY }}
-          path: ${{ env.UPX_BINARY }}
-
-  release:
-    name: Publish release
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v8
-        with:
-          path: dist
-          merge-multiple: true
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          files: dist/*
-          generate_release_notes: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          YANDEX_CLIENT_SECRET: ${{ secrets.YANDEX_CLIENT_SECRET }}
