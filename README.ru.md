@@ -6,6 +6,7 @@
 
 ![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?style=flat&logo=go)
 ![License](https://img.shields.io/github/license/ilyabrin/yad)
+[![CI](https://github.com/ilyabrin/yad/actions/workflows/ci.yml/badge.svg)](https://github.com/ilyabrin/yad/actions/workflows/ci.yml)
 
 ## Возможности
 
