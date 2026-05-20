@@ -158,17 +158,23 @@ func nextSort(current string) string {
 }
 
 // NewBrowserModel creates a BrowserModel rooted at the Yandex.Disk root ("/").
-func NewBrowserModel(client *disk.Client) BrowserModel {
+// defaultSort sets the initial sort order; empty string falls back to "name".
+func NewBrowserModel(client *disk.Client, defaultSort string) BrowserModel {
 	sp := spinner.New()
 	sp.Spinner = spinner.Dot
 	sp.Style = lipgloss.NewStyle().Foreground(colorPrimary)
+
+	sort := defaultSort
+	if sort == "" {
+		sort = "name"
+	}
 
 	return BrowserModel{
 		client:  client,
 		keys:    DefaultBrowserKeyMap(),
 		spinner: sp,
 		path:    "/",
-		sort:    "name",
+		sort:    sort,
 		loading: true,
 	}
 }

@@ -184,6 +184,32 @@ func TestToAuthConfig_BothFieldsPreserved(t *testing.T) {
 	}
 }
 
+// --- EffectiveSort ---
+
+func TestEffectiveSort_EmptyFallsBackToName(t *testing.T) {
+	cfg := &Config{}
+	if got := cfg.EffectiveSort(); got != "name" {
+		t.Errorf("EffectiveSort() = %q, want name", got)
+	}
+}
+
+func TestEffectiveSort_InvalidFallsBackToName(t *testing.T) {
+	cfg := &Config{DefaultSort: "random"}
+	if got := cfg.EffectiveSort(); got != "name" {
+		t.Errorf("EffectiveSort() = %q, want name", got)
+	}
+}
+
+func TestEffectiveSort_ValidValues(t *testing.T) {
+	valid := []string{"name", "-name", "modified", "-modified", "size", "-size"}
+	for _, s := range valid {
+		cfg := &Config{DefaultSort: s}
+		if got := cfg.EffectiveSort(); got != s {
+			t.Errorf("EffectiveSort() = %q, want %q", got, s)
+		}
+	}
+}
+
 // --- LoadConfig / SaveConfig (filesystem round-trip) ---
 
 func TestLoadConfig_ReturnsEmptyWhenFileAbsent(t *testing.T) {

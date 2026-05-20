@@ -35,6 +35,24 @@ type Config struct {
 	AccessToken  string    `yaml:"access_token,omitempty"`
 	RefreshToken string    `yaml:"refresh_token,omitempty"`
 	TokenExpiry  time.Time `yaml:"token_expiry,omitempty"`
+
+	// UI preferences
+	DefaultSort string `yaml:"default_sort,omitempty"` // name, -name, modified, -modified, size, -size
+}
+
+// validSorts is the set of values accepted by the Yandex Disk API sort parameter.
+var validSorts = map[string]bool{
+	"name": true, "-name": true,
+	"modified": true, "-modified": true,
+	"size": true, "-size": true,
+}
+
+// EffectiveSort returns the sort to use in the browser, falling back to "name".
+func (c *Config) EffectiveSort() string {
+	if validSorts[c.DefaultSort] {
+		return c.DefaultSort
+	}
+	return "name"
 }
 
 // EffectiveToken returns the token to use when creating a disk.Client,

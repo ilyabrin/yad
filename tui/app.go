@@ -50,13 +50,14 @@ type App struct {
 //   - client non-nil  → skip setup, open browser directly
 //   - client nil      → show OAuth setup screen
 //   - oauthCfg        → optional user-supplied OAuth credentials (may be nil)
-func New(client *disk.Client, oauthCfg *auth.Config) *App {
+//   - defaultSort     → initial sort order (e.g. "-modified"); empty → "name"
+func New(client *disk.Client, oauthCfg *auth.Config, defaultSort string) *App {
 	app := &App{}
 
 	if client != nil {
 		app.client = client
 		app.screen = screenBrowser
-		app.browser = NewBrowserModel(client)
+		app.browser = NewBrowserModel(client, defaultSort)
 		return app
 	}
 
@@ -96,7 +97,7 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		a.client = client
 		a.screen = screenBrowser
-		a.browser = NewBrowserModel(client)
+		a.browser = NewBrowserModel(client, "")
 		return a, tea.Batch(
 			a.browser.Init(),
 			func() tea.Msg { return tea.WindowSizeMsg{Width: a.width, Height: a.height} },
