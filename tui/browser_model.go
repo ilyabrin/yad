@@ -54,12 +54,17 @@ func (e entry) sizeStr() string {
 }
 
 func (e entry) modifiedStr() string {
-	if e.resource.Modified == "" {
+	s := e.resource.Modified
+	if s == "" {
 		return ""
 	}
-	t, err := time.Parse(time.RFC3339, e.resource.Modified)
+	t, err := time.Parse(time.RFC3339, s)
 	if err != nil {
-		return e.resource.Modified[:10]
+		// Truncate to date portion only; guard against unexpectedly short strings.
+		if len(s) >= 10 {
+			return s[:10]
+		}
+		return s
 	}
 	return t.Format("2006-01-02 15:04")
 }

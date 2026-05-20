@@ -15,6 +15,11 @@ const (
 
 	dialogMargin   = 8  // horizontal space consumed by dialog border + outer padding
 	dialogMinWidth = 40 // minimum dialog width to remain readable
+
+	// setupWrap* — text wrap bounds used in the OAuth setup screen.
+	setupWrapMargin = 8  // subtracted from terminal width before clamping
+	setupWrapMin    = 40 // minimum wrap width
+	setupWrapMax    = 72 // maximum wrap width
 )
 
 // API timeout constants.

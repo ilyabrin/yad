@@ -293,12 +293,12 @@ func (m SetupModel) viewExchange() string {
 // cmdOpenBrowser tries to open url in the system default browser.
 
 func wrapWidth(termWidth int) int {
-	w := termWidth - 8
-	if w > 72 {
-		return 72
+	w := termWidth - setupWrapMargin
+	if w > setupWrapMax {
+		return setupWrapMax
 	}
-	if w < 40 {
-		return 40
+	if w < setupWrapMin {
+		return setupWrapMin
 	}
 	return w
 }
