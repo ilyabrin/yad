@@ -21,6 +21,14 @@ A terminal UI for [Yandex.Disk](https://disk.yandex.ru) built with [Bubbletea](h
 - Token auto-refresh - silent background refresh when the token expires
 - Configurable default sort order and last-visited path restored on startup
 
+## Usage
+
+```sh
+yad              # open the file browser
+yad --version    # print version and exit
+yad -v           # same
+```
+
 ## Installation
 
 ### go install
