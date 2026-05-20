@@ -75,9 +75,26 @@ func (m BrowserModel) viewBase() string {
 
 func (m BrowserModel) viewTitleBar() string {
 	title := StyleTitle.Render("  YaD")
-	pathStr := StylePath.Render(m.path)
 	sortStr := StyleMuted("  " + sortLabel(m.sort))
-	gap := max(m.width-lipgloss.Width(title)-lipgloss.Width(pathStr)-lipgloss.Width(sortStr), 0)
+
+	titleW := lipgloss.Width(title)
+	sortW := lipgloss.Width(sortStr)
+	// 2 = padding inside StylePath (1 left + 1 right)
+	pathAvail := m.width - titleW - sortW - 2
+
+	// Strip the "disk:/" prefix — redundant in a Yandex Disk context.
+	display := strings.TrimPrefix(m.path, "disk:")
+	if display == "" {
+		display = "/"
+	}
+
+	// Truncate from the left so the deepest path segment is always visible.
+	if len(display) > pathAvail && pathAvail > 1 {
+		display = "…" + display[len(display)-pathAvail+1:]
+	}
+
+	pathStr := StylePath.Render(display)
+	gap := max(m.width-titleW-lipgloss.Width(pathStr)-sortW, 0)
 	return title + pathStr + strings.Repeat(" ", gap) + sortStr
 }
 
