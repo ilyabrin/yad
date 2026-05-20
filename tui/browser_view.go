@@ -109,7 +109,19 @@ func (m BrowserModel) viewList(height int) string {
 		return strings.Join(lines, "\n")
 	}
 
-	visible := min(height, len(m.entries))
+	hasPrev := m.offset > 0
+	hasNext := m.offset+len(m.entries) < m.total
+
+	// Reserve one row each for the prev/next page indicators.
+	listHeight := height
+	if hasPrev {
+		listHeight--
+	}
+	if hasNext {
+		listHeight--
+	}
+
+	visible := min(listHeight, len(m.entries))
 	start := max(m.cursor-visible+1, 0)
 	start = min(start, m.cursor)
 	nameWidth := max(m.width-colSizeWidth-colDateWidth-colPubMarkWidth-colRowPadding, colNameMinWidth)
@@ -161,6 +173,22 @@ func (m BrowserModel) viewList(height int) string {
 			row = StyleItemNormal.Width(m.width).Render(row)
 		}
 		rows = append(rows, row)
+	}
+
+	for len(rows) < listHeight {
+		rows = append(rows, strings.Repeat(" ", m.width))
+	}
+
+	// Wrap list rows with pagination indicators.
+	remaining := m.total - m.offset - len(m.entries)
+	if hasPrev {
+		indicator := lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted("▲ previous page"))
+		rows = append([]string{indicator}, rows...)
+	}
+	if hasNext {
+		label := fmt.Sprintf("▼  %d more  (↓ to load)", remaining)
+		indicator := lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted(label))
+		rows = append(rows, indicator)
 	}
 
 	for len(rows) < height {
