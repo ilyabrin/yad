@@ -9,14 +9,16 @@ A terminal UI for [Yandex.Disk](https://disk.yandex.ru) built with [Bubbletea](h
 
 ## Features
 
-- Full-screen file browser - navigate, open directories
+- Full-screen file browser - navigate, open directories, paginated with `▲`/`▼` indicators
 - Upload and download files with real-time progress bars
-- Create directories, rename and delete files
-- Publish files and copy public URLs to clipboard
+- Upload from remote URL directly to Yandex.Disk
+- Create directories, rename and delete files (bulk operations supported)
+- Publish files, copy public URLs to clipboard, open links in browser
 - Trash management - restore or permanently delete items
 - Disk usage info - storage breakdown with a visual bar
 - OAuth 2.0 authentication - guided first-run setup, tokens stored locally
 - Token auto-refresh - silent background refresh when the token expires
+- Configurable default sort order and last-visited path restored on startup
 
 ## Installation
 
@@ -81,6 +83,10 @@ token_expiry: "2026-06-01T12:00:00Z"
 oauth:
   client_id: "your_client_id"
   client_secret: "your_client_secret"
+
+# Optional: UI preferences
+default_sort: "-modified"   # name | -name | modified | -modified | size | -size
+last_path: "disk:/photos"   # restored automatically on exit; set to "" to always open root
 ```
 
 To register your own application visit [oauth.yandex.ru](https://oauth.yandex.ru) and request the `cloud_api:disk.read` and `cloud_api:disk.write` scopes.
@@ -107,6 +113,7 @@ To register your own application visit [oauth.yandex.ru](https://oauth.yandex.ru
 | `s`                     | Cycle sort: name / date / size, asc and desc   |
 | `p`                     | Publish / show public link                     |
 | `c`                     | Copy public URL to clipboard                   |
+| `o`                     | Open public URL in browser                     |
 | `m`                     | Show file metadata                             |
 | `R` / `Ctrl+R`          | Refresh listing                                |
 | `i`                     | Disk usage info                                |
@@ -114,7 +121,7 @@ To register your own application visit [oauth.yandex.ru](https://oauth.yandex.ru
 | `q` / `Ctrl+C`          | Quit                                           |
 
 Published files are highlighted with a green background and a `⇡` marker.
-Pressing `p` on a published file shows the link with options: `c` copy, `u` unpublish.
+Pressing `p` on a published file shows the link with options: `c` copy, `o` open in browser, `u` unpublish.
 
 ### Trash
 
