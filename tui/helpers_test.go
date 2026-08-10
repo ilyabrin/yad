@@ -11,7 +11,7 @@ func TestBoolStr(t *testing.T) {
 	}
 }
 
-func TestTruncateToWidth(t *testing.T) {
+func TestPadToWidth(t *testing.T) {
 	tests := []struct {
 		name  string
 		input string
@@ -27,9 +27,52 @@ func TestTruncateToWidth(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := truncateToWidth(tt.input, tt.width)
+			got := padToWidth(tt.input, tt.width)
 			if got != tt.want {
-				t.Errorf("truncateToWidth(%q, %d) = %q, want %q", tt.input, tt.width, got, tt.want)
+				t.Errorf("padToWidth(%q, %d) = %q, want %q", tt.input, tt.width, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTruncateRight(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		width int
+		want  string
+	}{
+		{"zero width", "hello", 0, ""},
+		{"fits", "hi", 5, "hi"},
+		{"exact fit", "hello", 5, "hello"},
+		{"ascii truncated", "hello world", 5, "hell…"},
+		{"cyrillic not cut mid-rune", "отчёт-2026.pdf", 6, "отчёт…"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := truncateRight(tt.input, tt.width); got != tt.want {
+				t.Errorf("truncateRight(%q, %d) = %q, want %q", tt.input, tt.width, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestTruncateLeft(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		width int
+		want  string
+	}{
+		{"zero width", "/a/b", 0, ""},
+		{"fits", "/a/b", 10, "/a/b"},
+		{"keeps tail", "/very/deep/path", 5, "…path"},
+		{"cyrillic keeps tail intact", "/архив/документы", 7, "…ументы"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := truncateLeft(tt.input, tt.width); got != tt.want {
+				t.Errorf("truncateLeft(%q, %d) = %q, want %q", tt.input, tt.width, got, tt.want)
 			}
 		})
 	}

@@ -32,8 +32,8 @@ func TestNextSort(t *testing.T) {
 		{"modified", "-modified"},
 		{"-modified", "size"},
 		{"size", "-size"},
-		{"-size", "name"},      // wrap-around
-		{"unknown", "name"},    // unknown value → start of cycle
+		{"-size", "name"},   // wrap-around
+		{"unknown", "name"}, // unknown value → start of cycle
 	}
 	for _, tt := range tests {
 		if got := nextSort(tt.input); got != tt.want {

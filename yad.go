@@ -33,16 +33,17 @@ Environment:
   YANDEX_DISK_TOKEN   override stored token (useful for CI/scripting)
 
 Keybindings (inside the app):
-  ↑/k  ↓/j          navigate        u  upload file
+  ↑/k  ↓/j           navigate        u  upload file
   ↵/→/l              open dir        U  upload from URL
   ←/h/Backspace      go up           d  download
   Space              select          D  delete
   Ctrl+A             select all      n  new directory
-  /                  filter by name  s  cycle sort
-  Esc                clear filter    r  rename
+  /                  filter by name  r  rename
+  Esc                clear filter    s  cycle sort
+  m                  file info       R  refresh
   p                  publish         i  disk info
   c                  copy URL        t  trash
-  o                  open in browser q  quit
+  o                  open link       q  quit
 
 Source: https://github.com/ilyabrin/yad`
 

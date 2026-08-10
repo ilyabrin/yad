@@ -49,7 +49,7 @@ type App struct {
 	// Written when setup completes; read by main() to persist to config.
 	tokenResult *SetupDoneMsg
 
-	fatalErr  *fatalErrorMsg     // set when a fatal error is received from any screen
+	fatalErr  *fatalErrorMsg         // set when a fatal error is received from any screen
 	refreshFn func() (string, error) // nil when no refresh is possible (env token / no refresh token)
 
 	width  int

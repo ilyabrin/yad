@@ -32,7 +32,7 @@ const (
 	modeInputUploadURL                // remote URL to upload from
 	modeInputUploadName               // confirm/change filename before upload (local or URL)
 	modeFilter                        // live name filter — search bar shown in status bar
-	modeConfirmQuit                    // quit confirmation while transfer is in progress
+	modeConfirmQuit                   // quit confirmation while transfer is in progress
 )
 
 // entry is a single row in the file list.
@@ -126,8 +126,8 @@ type BrowserModel struct {
 	downloadDir      string          // local destination dir for bulk download
 
 	// Filter state
-	filter      string           // current name filter query; empty = no filter
-	filterInput textinput.Model  // text input used while in modeFilter
+	filter      string          // current name filter query; empty = no filter
+	filterInput textinput.Model // text input used while in modeFilter
 
 	// Active async channels (nil when idle)
 	uploadCh   <-chan disk.UploadProgress
@@ -250,6 +250,33 @@ func (m BrowserModel) visibleEntries() []entry {
 		}
 	}
 	return out
+}
+
+// currentEntry returns the entry under the cursor, honouring the active
+// filter. Every action that operates on "the highlighted row" MUST go through
+// this — indexing m.entries directly targets the wrong resource whenever a
+// filter is on, because the view renders visibleEntries().
+func (m BrowserModel) currentEntry() (entry, bool) {
+	entries := m.visibleEntries()
+	if m.cursor < 0 || m.cursor >= len(entries) {
+		return entry{}, false
+	}
+	return entries[m.cursor], true
+}
+
+// visibleCount is the number of rows currently rendered in the list.
+func (m BrowserModel) visibleCount() int { return len(m.visibleEntries()) }
+
+// clampCursor keeps the cursor inside the visible list after the filter or the
+// entry set changes.
+func (m *BrowserModel) clampCursor() {
+	n := m.visibleCount()
+	if m.cursor >= n {
+		m.cursor = max(0, n-1)
+	}
+	if m.cursor < 0 {
+		m.cursor = 0
+	}
 }
 
 func (m *BrowserModel) setClient(c *disk.Client) { m.client = c }

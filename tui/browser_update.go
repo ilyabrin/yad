@@ -98,6 +98,7 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 			m.cursor = 0
 		}
 		m.cursorAfterLoad = 0
+		m.clampCursor()
 
 	case deleteDoneMsg:
 		if msg.err != nil {
@@ -235,10 +236,9 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		newDlg, confirmed, done := m.confirm.Update(msg)
 		m.confirm = newDlg
 		if done {
-			if confirmed && len(m.entries) > 0 {
-				target := m.entries[m.cursor].resource.Path
+			if e, ok := m.currentEntry(); confirmed && ok {
 				m.mode = modeNormal
-				return m, cmdDelete(m.client, target)
+				return m, cmdDelete(m.client, e.resource.Path)
 			}
 			m.mode = modeNormal
 		}
@@ -288,10 +288,11 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		if submitted {
 			newName := strings.TrimSpace(m.inputDlg.Value())
 			m.mode = modeNormal
-			if newName == "" || len(m.entries) == 0 {
+			e, ok := m.currentEntry()
+			if newName == "" || !ok {
 				return m, nil
 			}
-			from := m.entries[m.cursor].resource.Path
+			from := e.resource.Path
 			to := path.Join(parentPath(from), newName)
 			return m, cmdRename(m.client, from, to)
 		}
@@ -384,10 +385,10 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		if submitted {
 			localPath := strings.TrimSpace(m.inputDlg.Value())
 			m.mode = modeNormal
-			if localPath == "" || len(m.entries) == 0 {
+			e, ok := m.currentEntry()
+			if localPath == "" || !ok {
 				return m, nil
 			}
-			e := m.entries[m.cursor]
 			m.progress = ProgressOverlay{Title: "Downloading", Filename: e.resource.Name}
 			m.mode = modeDownload
 			return m, cmdStartDownload(m.client, e.resource.Path, localPath, e.resource.Name)
@@ -466,11 +467,10 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 				return m, cmdOpenBrowser(m.publicURL)
 			}
 		case "u":
-			if len(m.entries) > 0 {
-				target := m.entries[m.cursor].resource.Path
+			if e, ok := m.currentEntry(); ok {
 				m.mode = modeNormal
 				m.publicURL = ""
-				return m, cmdUnpublish(m.client, target)
+				return m, cmdUnpublish(m.client, e.resource.Path)
 			}
 		default:
 			m.mode = modeNormal
@@ -536,7 +536,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 	case key.Matches(msg, m.keys.Up):
 		if m.cursor > 0 {
 			m.cursor--
-		} else if m.offset > 0 {
+		} else if m.offset > 0 && m.filter == "" {
 			m.offset -= pageSize
 			if m.offset < 0 {
 				m.offset = 0
@@ -547,9 +547,9 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		}
 
 	case key.Matches(msg, m.keys.Down):
-		if m.cursor < len(m.entries)-1 {
+		if m.cursor < m.visibleCount()-1 {
 			m.cursor++
-		} else if m.offset+len(m.entries) < m.total {
+		} else if m.filter == "" && m.offset+len(m.entries) < m.total {
 			m.offset += pageSize
 			m.cursor = 0
 			m.loading = true
@@ -557,8 +557,8 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		}
 
 	case key.Matches(msg, m.keys.Enter):
-		if len(m.entries) > 0 && m.entries[m.cursor].isDir() {
-			m.path = m.entries[m.cursor].resource.Path
+		if e, ok := m.currentEntry(); ok && e.isDir() {
+			m.path = e.resource.Path
 			m.offset = 0
 			m.loading = true
 			return m, m.reloadCmd()
@@ -597,28 +597,30 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		m.mode = modeInputNewDir
 
 	case key.Matches(msg, m.keys.Rename):
-		if len(m.entries) == 0 {
+		e, ok := m.currentEntry()
+		if !ok {
 			return m, nil
 		}
 		m.inputDlg = NewInputDialog("Rename", "", "new name")
-		m.inputDlg.SetValue(m.entries[m.cursor].resource.Name)
+		m.inputDlg.SetValue(e.resource.Name)
 		m.mode = modeInputRename
 
 	case key.Matches(msg, m.keys.Select):
-		if len(m.entries) == 0 {
+		e, ok := m.currentEntry()
+		if !ok {
 			return m, nil
 		}
 		if m.selected == nil {
 			m.selected = make(map[string]bool)
 		}
-		p := m.entries[m.cursor].resource.Path
+		p := e.resource.Path
 		m.selected[p] = !m.selected[p]
 		if !m.selected[p] {
 			delete(m.selected, p)
 		}
-		if m.cursor < len(m.entries)-1 {
+		if m.cursor < m.visibleCount()-1 {
 			m.cursor++
-		} else if m.offset+len(m.entries) < m.total {
+		} else if m.filter == "" && m.offset+len(m.entries) < m.total {
 			m.offset += pageSize
 			m.cursorAfterLoad = 0
 			m.loading = true
@@ -626,28 +628,31 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		}
 
 	case key.Matches(msg, m.keys.SelectAll):
-		if len(m.entries) == 0 {
+		// Select-all applies to the rows the user can actually see, so it
+		// composes with the filter instead of silently grabbing hidden items.
+		entries := m.visibleEntries()
+		if len(entries) == 0 {
 			return m, nil
 		}
-		if len(m.selected) == len(m.entries) {
+		if len(m.selected) == len(entries) {
 			m.selected = nil
 		} else {
-			m.selected = make(map[string]bool, len(m.entries))
-			for _, e := range m.entries {
+			m.selected = make(map[string]bool, len(entries))
+			for _, e := range entries {
 				m.selected[e.resource.Path] = true
 			}
 		}
 
 	case key.Matches(msg, m.keys.Delete):
-		if len(m.entries) == 0 {
+		e, ok := m.currentEntry()
+		if !ok {
 			return m, nil
 		}
 		if len(m.selected) > 0 {
 			m.confirm = NewConfirmDialog("Delete", fmt.Sprintf("Delete %d selected items?", len(m.selected)))
 			m.mode = modeConfirmBulkDelete
 		} else {
-			target := m.entries[m.cursor].resource.Name
-			m.confirm = NewConfirmDialog("Delete", "Delete \""+target+"\"?")
+			m.confirm = NewConfirmDialog("Delete", "Delete \""+e.resource.Name+"\"?")
 			m.mode = modeConfirmDelete
 		}
 
@@ -665,25 +670,26 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			m.inputDlg.SetValue("./")
 			m.mode = modeInputDownloadDir
 		} else {
-			if len(m.entries) == 0 || m.entries[m.cursor].isDir() {
+			e, ok := m.currentEntry()
+			if !ok || e.isDir() {
 				return m, nil
 			}
-			defaultPath := "./" + m.entries[m.cursor].resource.Name
+			defaultPath := "./" + e.resource.Name
 			m.inputDlg = NewInputDialog("Download file", "Enter local destination path", defaultPath)
 			m.inputDlg.SetValue(defaultPath)
 			m.mode = modeInputDownload
 		}
 
 	case key.Matches(msg, m.keys.Meta):
-		if len(m.entries) > 0 {
+		if _, ok := m.currentEntry(); ok {
 			m.mode = modeMetadata
 		}
 
 	case key.Matches(msg, m.keys.Publish):
-		if len(m.entries) == 0 {
+		e, ok := m.currentEntry()
+		if !ok {
 			return m, nil
 		}
-		e := m.entries[m.cursor]
 		if e.resource.PublicURL != "" {
 			m.publicURL = e.resource.PublicURL
 			m.mode = modePublicURL
@@ -692,10 +698,11 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		return m, cmdPublish(m.client, e.resource.Path)
 
 	case key.Matches(msg, m.keys.CopyURL):
-		if len(m.entries) == 0 {
+		e, ok := m.currentEntry()
+		if !ok {
 			return m, nil
 		}
-		url := m.entries[m.cursor].resource.PublicURL
+		url := e.resource.PublicURL
 		if url == "" {
 			return m.showMessage(iconErr+" No public URL — press p to publish first", true), nil
 		}

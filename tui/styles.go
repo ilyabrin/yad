@@ -4,11 +4,11 @@ import "github.com/charmbracelet/lipgloss"
 
 var (
 	// Base palette
-	colorPrimary  = lipgloss.Color("#7C3AED") // violet
-	colorAccent   = lipgloss.Color("#A78BFA") // light violet
-	colorMuted    = lipgloss.Color("#6B7280") // gray
-	colorSuccess  = lipgloss.Color("#10B981") // green
-	colorDanger   = lipgloss.Color("#EF4444") // red
+	colorPrimary   = lipgloss.Color("#7C3AED") // violet
+	colorAccent    = lipgloss.Color("#A78BFA") // light violet
+	colorMuted     = lipgloss.Color("#6B7280") // gray
+	colorSuccess   = lipgloss.Color("#10B981") // green
+	colorDanger    = lipgloss.Color("#EF4444") // red
 	colorSelected  = lipgloss.Color("#1E1B4B") // deep indigo bg for selected row
 	colorPublished = lipgloss.Color("#0D2D1F") // dark green tint for published rows
 

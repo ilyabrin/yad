@@ -34,7 +34,7 @@ func startUploadAsync(client *disk.Client, localPath, remotePath string) (<-chan
 		ctx, cancel := context.WithTimeout(context.Background(), timeoutTransfer)
 		defer cancel()
 		resource, err := client.UploadFileFromPathWithProgress(ctx, localPath, remotePath, true,
-			func(p disk.UploadProgress) { ch <- p },
+			func(p disk.UploadProgress) { trySend(ch, p) },
 		)
 		done <- uploadDoneMsg{resource: resource, err: err}
 		close(ch)
@@ -93,7 +93,7 @@ func startDownloadAsync(client *disk.Client, remotePath, localPath string) (<-ch
 		ctx, cancel := context.WithTimeout(context.Background(), timeoutTransfer)
 		defer cancel()
 		err := client.DownloadFileToPathWithProgress(ctx, remotePath, localPath, true,
-			func(p disk.DownloadProgress) { ch <- p },
+			func(p disk.DownloadProgress) { trySend(ch, p) },
 		)
 		done <- downloadDoneMsg{err: err}
 		close(ch)
@@ -271,6 +271,18 @@ func cmdOpenBrowser(url string) tea.Cmd {
 }
 
 // --- helpers ---
+
+// trySend delivers a progress frame without ever blocking the transfer.
+// Progress is purely cosmetic: if the UI has not drained the buffer yet the
+// frame is dropped rather than throttling the upload/download — and, more
+// importantly, the producer goroutine can never deadlock when the model stops
+// reading (quit mid-transfer, screen switch).
+func trySend[T any](ch chan<- T, v T) {
+	select {
+	case ch <- v:
+	default:
+	}
+}
 
 func newAPIError(e *disk.ErrorResponse) error {
 	if e == nil {

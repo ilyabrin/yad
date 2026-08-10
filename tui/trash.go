@@ -356,7 +356,7 @@ func (m TrashModel) viewBase() string {
 	if gap < 0 {
 		gap = 0
 	}
-	b.WriteString(title + StylePath.Render(count) + strings.Repeat(" ", gap))
+	b.WriteString(title + StylePath.Render(count) + spaces(gap))
 	b.WriteByte('\n')
 
 	contentHeight := m.height - 2
@@ -426,10 +426,8 @@ func (m TrashModel) viewList(height int) string {
 		item := m.items[i]
 		selected := i == m.cursor
 
-		name := item.Name
-		if len(name) > nameWidth {
-			name = name[:nameWidth-1] + "…"
-		}
+		name := truncateRight(item.Name, nameWidth)
+
 		icon := "  "
 		if item.Type == "dir" {
 			icon = "  "
@@ -437,9 +435,7 @@ func (m TrashModel) viewList(height int) string {
 		nameStyled := icon + StyleFile.Render(name)
 
 		origin := item.OriginPath
-		if len(origin) > originWidth {
-			origin = "…" + origin[len(origin)-originWidth+1:]
-		}
+		origin = truncateLeft(origin, originWidth)
 
 		deleted := ""
 		if item.Deleted != "" {
@@ -467,7 +463,7 @@ func (m TrashModel) viewList(height int) string {
 	}
 
 	for len(rows) < height {
-		rows = append(rows, strings.Repeat(" ", m.width))
+		rows = append(rows, spaces(m.width))
 	}
 	return strings.Join(rows, "\n")
 }
@@ -491,5 +487,5 @@ func (m TrashModel) viewStatusBar() string {
 	if gap < 1 {
 		gap = 1
 	}
-	return StyleStatusBar.Width(m.width).Render(left + strings.Repeat(" ", gap) + right)
+	return StyleStatusBar.Width(m.width).Render(left + spaces(gap) + right)
 }

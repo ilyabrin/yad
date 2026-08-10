@@ -46,8 +46,8 @@ func (m BrowserModel) View() string {
 			StyleMuted("any other key to close")
 		return renderOverlay(base, StyleDialog.Render(content), m.width, m.height)
 	case modeMetadata:
-		if len(m.entries) > 0 {
-			return renderOverlay(base, m.viewMetadata(m.entries[m.cursor]), m.width, m.height)
+		if e, ok := m.currentEntry(); ok {
+			return renderOverlay(base, m.viewMetadata(e), m.width, m.height)
 		}
 	}
 
@@ -89,13 +89,13 @@ func (m BrowserModel) viewTitleBar() string {
 	}
 
 	// Truncate from the left so the deepest path segment is always visible.
-	if len(display) > pathAvail && pathAvail > 1 {
-		display = "…" + display[len(display)-pathAvail+1:]
+	if pathAvail > 1 {
+		display = truncateLeft(display, pathAvail)
 	}
 
 	pathStr := StylePath.Render(display)
 	gap := max(m.width-titleW-lipgloss.Width(pathStr)-sortW, 0)
-	return title + pathStr + strings.Repeat(" ", gap) + sortStr
+	return title + pathStr + spaces(gap) + sortStr
 }
 
 func (m BrowserModel) viewLoading(height int) string {
@@ -158,14 +158,11 @@ func (m BrowserModel) viewList(height int) string {
 		e := entries[i]
 		selected := i == m.cursor
 
-		name := e.resource.Name
-		if len(name) > nameWidth {
-			name = name[:nameWidth-1] + "…"
-		}
+		name := truncateRight(e.resource.Name, nameWidth)
 
 		mark := "  "
 		if m.selected[e.resource.Path] {
-			mark = StyleSuccess.Render(iconOK+" ")
+			mark = StyleSuccess.Render(iconOK + " ")
 		}
 
 		var nameStyled string
@@ -203,7 +200,7 @@ func (m BrowserModel) viewList(height int) string {
 	}
 
 	for len(rows) < listHeight {
-		rows = append(rows, strings.Repeat(" ", m.width))
+		rows = append(rows, spaces(m.width))
 	}
 
 	// Wrap list rows with pagination indicators.
@@ -219,7 +216,7 @@ func (m BrowserModel) viewList(height int) string {
 	}
 
 	for len(rows) < height {
-		rows = append(rows, strings.Repeat(" ", m.width))
+		rows = append(rows, spaces(m.width))
 	}
 	return strings.Join(rows, "\n")
 }
@@ -265,7 +262,7 @@ func (m BrowserModel) viewStatusBar() string {
 	right := strings.Join(hints, "  ")
 
 	gap := max(m.width-lipgloss.Width(left)-lipgloss.Width(right)-2, 1)
-	bar := left + strings.Repeat(" ", gap) + right
+	bar := left + spaces(gap) + right
 	return StyleStatusBar.Width(m.width).Render(bar)
 }
 
@@ -346,36 +343,12 @@ func renderOverlay(base, overlay string, width, height int) string {
 		if row >= len(baseLines) {
 			break
 		}
-		bl := baseLines[row]
-		blW := lipgloss.Width(bl)
-		if blW < width {
-			bl += strings.Repeat(" ", width-blW)
-		}
-		prefix := truncateToWidth(bl, startX)
-		baseLines[row] = prefix + ol
+		// padToWidth is ANSI-aware: it keeps the styled base row intact
+		// instead of slicing through an escape sequence.
+		baseLines[row] = padToWidth(baseLines[row], startX) + ol
 	}
 
 	return strings.Join(baseLines, "\n")
-}
-
-// truncateToWidth returns the leading portion of s that fits within w visible columns.
-func truncateToWidth(s string, w int) string {
-	if w <= 0 {
-		return ""
-	}
-	var buf strings.Builder
-	col := 0
-	for _, r := range s {
-		if col+1 > w {
-			break
-		}
-		buf.WriteRune(r)
-		col++
-	}
-	if col < w {
-		buf.WriteString(strings.Repeat(" ", w-col))
-	}
-	return buf.String()
 }
 
 // StyleMuted renders text in the muted color.

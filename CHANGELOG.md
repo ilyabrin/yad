@@ -14,7 +14,21 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+- **Actions targeted the wrong file while a filter was active.** The list rendered filtered entries but delete, rename, download, publish, copy-URL and metadata all indexed the unfiltered page, so they operated on a resource the user could not see. All cursor-based actions now resolve through a single filter-aware accessor
+- Cursor could move past the end of a filtered list, and `↑`/`↓` triggered page loads while filtering
+- `Ctrl+A` selected hidden entries instead of only the visible (filtered) ones
+- Filenames and paths containing non-ASCII characters (Cyrillic, CJK, emoji) were truncated mid-rune, producing mojibake in the list, title bar and trash view
+- Dialog overlays could slice through ANSI escape sequences of the row behind them, corrupting colours
+- Progress callbacks no longer block the transfer goroutine when the UI stops reading (quit mid-transfer)
+- `--help` now lists the `m` (metadata) and `R` (refresh) keys
 - Inline fallback to `/` when the saved `last_path` no longer exists on Disk (directory deleted remotely)
+
+### Changed
+
+- Dependencies updated to their latest releases (`ilyabrin/disk` v1.2.0, charmbracelet stack, `golang.org/x/*`); Go 1.25
+- CI now runs on Linux, macOS and Windows with `-race`, coverage, `gofmt`/`go vet`/`golangci-lint` checks and a cross-compile matrix
+- Dependabot watches GitHub Actions in addition to Go modules, with grouped weekly PRs
+- README rewritten for both languages with a task-oriented structure, an OAuth flow diagram and a full configuration reference
 
 ## [v1.1.2] — 2026-05-09
 
