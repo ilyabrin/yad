@@ -9,7 +9,7 @@ Browse, upload, download, publish and restore files without ever leaving the she
 [![Release](https://img.shields.io/github/v/release/ilyabrin/yad?sort=semver&color=00ADD8)](https://github.com/ilyabrin/yad/releases/latest)
 [![Go Reference](https://pkg.go.dev/badge/github.com/ilyabrin/yad.svg)](https://pkg.go.dev/github.com/ilyabrin/yad)
 [![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![License](https://img.shields.io/github/license/ilyabrin/yad?color=blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#-licence)
 
 [Quick start](#-quick-start) · [Keybindings](#%EF%B8%8F-keybindings) · [Configuration](#%EF%B8%8F-configuration) · [Authentication](#-authentication) · [Contributing](#-contributing) · [Русская версия](README.ru.md)
 
@@ -322,6 +322,8 @@ The browser follows the Elm architecture: **model** holds state, **update** turn
 
 Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `ci:`…) — the release changelog is generated from them.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide, and [SECURITY.md](SECURITY.md) before reporting anything security-related.
+
 ---
 
 ## 🧩 Built with
@@ -336,8 +338,21 @@ Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`fe
 
 ---
 
+## 📄 Licence
+
+Dual-licensed, at your option, under either of:
+
+- **MIT** — [LICENSE-MIT](LICENSE-MIT) · [spdx.org](https://spdx.org/licenses/MIT.html)
+- **Apache License 2.0** — [LICENSE-APACHE](LICENSE-APACHE) · [spdx.org](https://spdx.org/licenses/Apache-2.0.html)
+
+`SPDX-License-Identifier: MIT OR Apache-2.0`
+
+Pick whichever suits you — MIT if you want the shortest possible terms, Apache 2.0 if you need its explicit patent grant. Unless you state otherwise, any contribution you submit is dual-licensed the same way, with no additional terms.
+
+---
+
 <div align="center">
 
-**[MIT](LICENSE)** · Made with ☕ by [@ilyabrin](https://github.com/ilyabrin) · [Report a bug](https://github.com/ilyabrin/yad/issues/new)
+Made with ☕ by [@ilyabrin](https://github.com/ilyabrin) · [Report a bug](https://github.com/ilyabrin/yad/issues/new/choose) · [Security policy](SECURITY.md)
 
 </div>

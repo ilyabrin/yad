@@ -9,7 +9,7 @@
 [![Release](https://img.shields.io/github/v/release/ilyabrin/yad?sort=semver&color=00ADD8)](https://github.com/ilyabrin/yad/releases/latest)
 [![Go Reference](https://pkg.go.dev/badge/github.com/ilyabrin/yad.svg)](https://pkg.go.dev/github.com/ilyabrin/yad)
 [![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
-[![License](https://img.shields.io/github/license/ilyabrin/yad?color=blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#-лицензия)
 
 [Быстрый старт](#-быстрый-старт) · [Клавиши](#%EF%B8%8F-клавиши) · [Конфигурация](#%EF%B8%8F-конфигурация) · [Аутентификация](#-аутентификация) · [Разработка](#-разработка) · [English version](README.md)
 
@@ -322,6 +322,8 @@ go run .                      # запустить локально
 
 Коммиты следуют [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `ci:`…) — changelog релиза генерируется из них.
 
+Полное руководство — в [CONTRIBUTING.md](CONTRIBUTING.md); перед сообщением о проблеме безопасности загляните в [SECURITY.md](SECURITY.md).
+
 ---
 
 ## 🧩 На чём построено
@@ -336,8 +338,21 @@ go run .                      # запустить локально
 
 ---
 
+## 📄 Лицензия
+
+Двойное лицензирование — выбирайте любую из двух на своё усмотрение:
+
+- **MIT** — [LICENSE-MIT](LICENSE-MIT) · [spdx.org](https://spdx.org/licenses/MIT.html)
+- **Apache License 2.0** — [LICENSE-APACHE](LICENSE-APACHE) · [spdx.org](https://spdx.org/licenses/Apache-2.0.html)
+
+`SPDX-License-Identifier: MIT OR Apache-2.0`
+
+MIT — если нужны максимально короткие условия, Apache 2.0 — если важен явный патентный грант. Любой ваш вклад, если не оговорено иное, распространяется на тех же двух лицензиях без дополнительных условий.
+
+---
+
 <div align="center">
 
-**[MIT](LICENSE)** · Сделано с ☕ [@ilyabrin](https://github.com/ilyabrin) · [Сообщить об ошибке](https://github.com/ilyabrin/yad/issues/new)
+Сделано с ☕ [@ilyabrin](https://github.com/ilyabrin) · [Сообщить об ошибке](https://github.com/ilyabrin/yad/issues/new/choose) · [Политика безопасности](SECURITY.md)
 
 </div>

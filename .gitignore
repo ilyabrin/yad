@@ -1,28 +1,28 @@
-# Binaries for programs and plugins
+# Compiled binaries and libraries
 *.exe
 *.exe~
 *.dll
 *.so
-*.a**
-*.b**
-*.c**
-*.d**
 *.dylib
+*.a
+*.o
+/yad
 
-# Test binary, built with `go test -c`
+# Test binary produced by `go test -c`
 *.test
 
-# Output of the go coverage tool, specifically when used with LiteIDE
+# Coverage output
 *.out
+coverage.*
 
-# Dependency directories (remove the comment below to include it)
+# Dependency directories (uncomment to vendor)
 # vendor/
 
-.DS_Store
-
+# Local scratch space
+dev/
 TODO
-yad
-dev
 
-# VS Code
-.vscode
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store

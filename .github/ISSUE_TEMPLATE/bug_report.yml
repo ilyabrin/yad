@@ -1,0 +1,63 @@
+name: Bug report
+description: Something in yad behaves incorrectly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Found a **security** problem instead? Please don't file it here — see [SECURITY.md](https://github.com/ilyabrin/yad/blob/release/SECURITY.md).
+
+        ⚠️ Never paste the contents of `~/.yad/config.yaml` or any `y0_…` token into an issue.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open yad in a directory with …
+        2. Press `/` and type …
+        3. Press `D`
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: yad version
+      description: Output of `yad --version`
+      placeholder: "yad v1.1.2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other / BSD
+    validations:
+      required: true
+
+  - type: input
+    id: terminal
+    attributes:
+      label: Terminal
+      description: Terminal emulator and, if relevant, multiplexer
+      placeholder: "Alacritty 0.13 + tmux 3.4"
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Error output, a screenshot, or notes about the files involved (non-ASCII names, very long paths, huge directories…).

@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- `SECURITY.md`, `CONTRIBUTING.md`, issue forms and a pull request template
 - Auto token refresh mid-session — when an access token expires during a long session, `yad` silently refreshes it without requiring a restart
 - Default sort order from config (`default_sort` field in `~/.yad/config.yaml`)
 - Last visited directory restored on next launch (`last_path` field in config)
@@ -29,6 +30,12 @@ All notable changes to this project will be documented in this file.
 - CI now runs on Linux, macOS and Windows with `-race`, coverage, `gofmt`/`go vet`/`golangci-lint` checks and a cross-compile matrix
 - Dependabot watches GitHub Actions in addition to Go modules, with grouped weekly PRs
 - README rewritten for both languages with a task-oriented structure, an OAuth flow diagram and a full configuration reference
+- **Licensing clarified: the project is now explicitly dual-licensed `MIT OR Apache-2.0`.** The repository previously shipped an Apache-2.0 `LICENSE` file while both READMEs claimed MIT; there are now `LICENSE-MIT` and `LICENSE-APACHE`, and the copyright placeholder in the Apache text is filled in
+- `.gitignore` patterns `*.a**`/`*.b**`/`*.c**`/`*.d**` replaced with explicit rules — they silently excluded unrelated paths such as `.claude/` and would have swallowed files like `.codecov.yml`
+
+### Removed
+
+- `.yad.yaml` — a leftover from an earlier CLI design describing an `accounts:`/`language:` config format the application never read
 
 ## [v1.1.2] — 2026-05-09
 

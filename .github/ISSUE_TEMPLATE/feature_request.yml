@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest a capability or a keybinding
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the task, not the solution — it often has a simpler answer than expected.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like yad to do?
+      description: If it involves a new key, say which one and why it fits.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered

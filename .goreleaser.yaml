@@ -39,7 +39,8 @@ archives:
     files:
       - README.md
       - README.ru.md
-      - LICENSE
+      - LICENSE-MIT
+      - LICENSE-APACHE
       - CHANGELOG.md
 
 checksum:
