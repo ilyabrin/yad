@@ -25,7 +25,6 @@ builds:
     ldflags:
       - -s -w
       - -X main.version={{ .Version }}
-      - -X github.com/ilyabrin/yad/internal/auth.clientSecret={{ .Env.YANDEX_CLIENT_SECRET }}
 
 archives:
   - id: yad

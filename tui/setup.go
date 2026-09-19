@@ -42,6 +42,11 @@ type exchangeResultMsg struct {
 type SetupModel struct {
 	oauthCfg *auth.Config
 
+	// pkce is generated once per setup session. Its verifier lives only in
+	// memory: it is never written to the config file, so quitting before the
+	// code is entered simply means starting the sign-in again.
+	pkce *auth.PKCE
+
 	step        setupStep
 	authURL     string
 	browserOpen bool // true if we successfully opened the browser
@@ -69,8 +74,21 @@ func NewSetupModel(oauthCfg *auth.Config) SetupModel {
 	var firstStep setupStep
 	var placeholder, authURL string
 
+	var pkce *auth.PKCE
+
 	if fullOAuth {
-		u, err := auth.AuthURL(oauthCfg)
+		p, err := auth.NewPKCE()
+		if err != nil {
+			return SetupModel{
+				step:    stepError,
+				errMsg:  err.Error(),
+				spinner: sp,
+				input:   ti,
+			}
+		}
+		pkce = p
+
+		u, err := auth.AuthURL(oauthCfg, pkce.Challenge)
 		if err != nil {
 			return SetupModel{
 				step:    stepError,
@@ -94,6 +112,7 @@ func NewSetupModel(oauthCfg *auth.Config) SetupModel {
 
 	return SetupModel{
 		oauthCfg:  oauthCfg,
+		pkce:      pkce,
 		step:      firstStep,
 		authURL:   authURL,
 		input:     ti,
@@ -176,12 +195,16 @@ func (m SetupModel) handleKey(msg tea.KeyMsg) (SetupModel, tea.Cmd) {
 				m.step = stepExchange
 				oauthCfg := m.oauthCfg
 				code := value
+				var verifier string
+				if m.pkce != nil {
+					verifier = m.pkce.Verifier
+				}
 				return m, tea.Batch(
 					m.spinner.Tick,
 					func() tea.Msg {
 						ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 						defer cancel()
-						resp, err := auth.ExchangeCode(ctx, code, oauthCfg)
+						resp, err := auth.ExchangeCode(ctx, code, verifier, oauthCfg)
 						return exchangeResultMsg{resp: resp, err: err}
 					},
 				)
