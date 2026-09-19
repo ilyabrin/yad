@@ -28,7 +28,7 @@ type OAuthConfig struct {
 
 // Config is persisted to ~/.yad/config.yaml.
 type Config struct {
-	// OAuth credentials (optional - overrides build-time ldflags values)
+	// OAuth credentials (optional - only needed for your own application)
 	OAuth OAuthConfig `yaml:"oauth,omitempty"`
 
 	// Tokens obtained via OAuth flow

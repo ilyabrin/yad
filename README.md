@@ -100,13 +100,8 @@ cd yad
 go build -o yad .
 ```
 
-To produce a build with the full OAuth flow enabled, inject your client secret at link time:
-
-```sh
-go build \
-  -ldflags "-X github.com/ilyabrin/yad/internal/auth.clientSecret=YOUR_SECRET" \
-  -o yad .
-```
+Sign-in works the same in a build you made yourself as in a release
+download: YaD uses PKCE and needs no client secret.
 
 </details>
 
@@ -276,9 +271,9 @@ last_path: "disk:/photos"
 ## 🔒 Security
 
 - Config is written with mode `0600` and the parent directory with `0700` — readable only by you.
-- The OAuth **client ID is public by design**; the **client secret** is injected at release build time via `-ldflags` and never appears in this repository. This is the same approach used by `gh` and `heroku`.
-- The secret protects the token-exchange endpoint. It does **not** grant access to anyone's data.
-- Prefer full control? Register your own application and set `oauth.client_id` / `oauth.client_secret`.
+- Sign-in uses **PKCE** ([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636)), so there is **no client secret** anywhere: not in this repository, not in the released binaries, not on your disk. Every sign-in generates a one-time secret that never leaves your machine.
+- The OAuth **client ID is public by design**, the same approach `gh` and `heroku` take. On its own it grants access to nothing.
+- Prefer full control? Register your own application and set `oauth.client_id` in `~/.yad/config.yaml`, plus `oauth.client_secret` if your application requires one.
 
 > [!WARNING]
 > `~/.yad/config.yaml` contains live credentials. Don't commit it, sync it, or include it in shell dotfile repos.
