@@ -12,11 +12,6 @@ import (
 	"github.com/ilyabrin/disk"
 )
 
-// --- Operation result messages ---
-
-type opSuccessMsg struct{ info string }
-type opErrMsg struct{ err error }
-
 // --- Upload ---
 
 type uploadProgressMsg disk.UploadProgress
@@ -41,13 +36,6 @@ func startUploadAsync(client *disk.Client, localPath, remotePath string) (<-chan
 		close(done)
 	}()
 	return ch, done
-}
-
-// cmdUpload starts an upload and returns the first progress tick.
-// Subsequent progress is delivered via cmdWaitUpload.
-func cmdUpload(client *disk.Client, localPath, remotePath string) tea.Cmd {
-	ch, done := startUploadAsync(client, localPath, remotePath)
-	return cmdWaitUpload(ch, done)
 }
 
 // cmdWaitUpload reads the next progress event or the done signal.
@@ -100,11 +88,6 @@ func startDownloadAsync(client *disk.Client, remotePath, localPath string) (<-ch
 		close(done)
 	}()
 	return ch, done
-}
-
-func cmdDownload(client *disk.Client, remotePath, localPath string) tea.Cmd {
-	ch, done := startDownloadAsync(client, remotePath, localPath)
-	return cmdWaitDownload(ch, done)
 }
 
 // cmdStartDownload lazily starts a download goroutine inside a tea.Cmd,
