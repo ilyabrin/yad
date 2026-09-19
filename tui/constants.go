@@ -30,6 +30,16 @@ const (
 	timeoutTransfer = 30 * time.Minute // upload / download
 )
 
+// Asynchronous server-side operations (currently only upload-from-URL) are
+// polled rather than waited on, since the API exposes no push notification.
+const (
+	operationPollInterval = 1 * time.Second
+
+	// operationSuccess is the terminal status the API reports for an operation
+	// that completed. The package only exports the in-progress one.
+	operationSuccess = "success"
+)
+
 // Status icons used in user-facing messages.
 const (
 	iconOK  = "✓"

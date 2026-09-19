@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
@@ -224,15 +225,58 @@ func cmdCopyToClipboard(text string) tea.Cmd {
 
 type uploadFromURLDoneMsg struct{ err error }
 
-func cmdUploadFromURL(client *disk.Client, remoteURL, destDir string) tea.Cmd {
+// cmdUploadFromURL asks Yandex Disk to fetch remoteURL and store it at
+// destPath, then waits for that to actually happen.
+//
+// The API answers 202 Accepted with a link to an operation and only starts
+// downloading afterwards, so returning as soon as the request succeeds would
+// report success while the file is still on its way and absent from the
+// listing we are about to reload.
+func cmdUploadFromURL(client *disk.Client, remoteURL, destPath string) tea.Cmd {
 	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), timeoutOp)
+		ctx, cancel := context.WithTimeout(context.Background(), timeoutTransfer)
 		defer cancel()
-		_, errResp := client.UploadFile(ctx, destDir, remoteURL)
+
+		link, errResp := client.UploadFile(ctx, destPath, remoteURL)
 		if errResp != nil {
 			return uploadFromURLDoneMsg{err: newAPIError(errResp)}
 		}
-		return uploadFromURLDoneMsg{}
+
+		// A 200 carries no operation to poll: the transfer is already done.
+		if link == nil || link.Href == "" {
+			return uploadFromURLDoneMsg{}
+		}
+
+		return uploadFromURLDoneMsg{err: waitForOperation(ctx, client, link.Href)}
+	}
+}
+
+// waitForOperation polls an asynchronous operation until it leaves the
+// in-progress state, the context expires, or the API stops answering.
+func waitForOperation(ctx context.Context, client *disk.Client, href string) error {
+	ticker := time.NewTicker(operationPollInterval)
+	defer ticker.Stop()
+
+	for {
+		op, err := client.GetOperationStatus(ctx, href)
+		if err != nil {
+			return err
+		}
+
+		switch op.Status {
+		case disk.OperationInProgress:
+			// keep waiting
+		case operationSuccess:
+			return nil
+		default:
+			return fmt.Errorf("upload failed on the server (status %q)", op.Status)
+		}
+
+		select {
+		case <-ticker.C:
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 }
 

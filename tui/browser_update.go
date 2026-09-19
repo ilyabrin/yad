@@ -150,6 +150,9 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 
 	case uploadFromURLDoneMsg:
 		if msg.err != nil {
+			// Clear the spinner started when the upload was dispatched,
+			// otherwise it keeps running behind the error message.
+			m.loading = false
 			return m.showMessage(iconErr+" "+msg.err.Error(), true), nil
 		}
 		m.loading = true
@@ -338,7 +341,13 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 				if filename == "" {
 					return m, nil
 				}
-				return m, cmdUploadFromURL(m.client, src, path.Join(m.path, filename))
+				// The server fetches the file itself and we wait for it, which
+				// can take a while: show the spinner meanwhile.
+				m.loading = true
+				return m, tea.Batch(
+					cmdUploadFromURL(m.client, src, path.Join(m.path, filename)),
+					m.spinner.Tick,
+				)
 			}
 			if filename == "" {
 				filename = path.Base(src)
