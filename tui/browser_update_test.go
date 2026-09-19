@@ -3,7 +3,6 @@ package tui
 import (
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/ilyabrin/disk"
 )
 
@@ -227,11 +226,3 @@ func TestDownloadDoneMsg_Error_ClearsPending(t *testing.T) {
 type errTest string
 
 func (e errTest) Error() string { return string(e) }
-
-// unwrapCmd runs a tea.Cmd and returns the message it produces (nil-safe).
-func unwrapCmd(cmd tea.Cmd) tea.Msg {
-	if cmd == nil {
-		return nil
-	}
-	return cmd()
-}
