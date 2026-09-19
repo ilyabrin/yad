@@ -1,9 +1,9 @@
 <div align="center">
 
-# 📁 YaD — Yandex.Disk in your terminal
+# 📁 YaD
 
-**A fast, keyboard-driven TUI for [Yandex.Disk](https://disk.yandex.ru).**
-Browse, upload, download, publish and restore files without ever leaving the shell.
+**Your Yandex.Disk, right in the terminal.**
+Browse, upload, download, share and restore files without opening a browser.
 
 [![CI](https://github.com/ilyabrin/yad/actions/workflows/ci.yml/badge.svg)](https://github.com/ilyabrin/yad/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/ilyabrin/yad?sort=semver&color=00ADD8)](https://github.com/ilyabrin/yad/releases/latest)
@@ -11,75 +11,58 @@ Browse, upload, download, publish and restore files without ever leaving the she
 [![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#-licence)
 
-[Quick start](#-quick-start) · [Keybindings](#%EF%B8%8F-keybindings) · [Configuration](#%EF%B8%8F-configuration) · [Authentication](#-authentication) · [Contributing](#-contributing) · [Русская версия](README.ru.md)
+[Install](#-install) · [First run](#-first-run) · [Keys](#️-keys) · [Settings](#️-settings) · [Privacy](#-privacy-and-safety) · [Русская версия](README.ru.md)
 
 </div>
 
 ---
 
-## ✨ What you get
+## 👋 Is this for you?
 
-|                    | |
-| ------------------ | ---------------------------------------------------------------------------- |
-| 🗂 **Browse**       | Full-screen file browser with pagination, live `/` filter and 6 sort modes    |
-| ⬆️ **Upload**       | Local files *or* remote URLs, with a real-time progress bar                   |
-| ⬇️ **Download**     | Single file or everything you selected, queued automatically                  |
-| ✂️ **Manage**       | Create directories, rename, delete — individually or in bulk                  |
-| 🔗 **Publish**      | One key to publish, copy the public link, or open it in your browser          |
-| 🗑 **Trash**        | Restore items, delete them for good, or empty the bin                         |
-| 📊 **Disk info**    | Storage breakdown with a visual usage bar                                     |
-| 🔐 **OAuth 2.0**    | Guided first-run setup, tokens stored at `0600`, silent background refresh    |
-| 💾 **Remembers you**| Default sort order and last visited directory restored on the next launch     |
+If you keep files on [Yandex.Disk](https://disk.yandex.ru) and you would rather
+not click through a web page to move them around, yes.
+
+YaD is a small program that runs inside your terminal window and shows your
+Disk as a list you can walk through with the arrow keys. You do not need to
+know Go, and you do not need to be a programmer. You need a Yandex account and
+a terminal.
+
+Everything happens over your own account. YaD talks to Yandex directly, and
+nothing passes through anyone else's server.
+
+---
+
+## ✨ What you can do
+
+|                      |                                                                        |
+| -------------------- | ---------------------------------------------------------------------- |
+| 🗂️ **Browse**        | Walk through folders, search the current page with `/`, sort six ways  |
+| ⬆️ **Upload**        | Send a file from your computer, or hand Yandex a link and let it fetch |
+| ⬇️ **Download**      | One file, or everything you ticked, queued for you automatically       |
+| ✂️ **Organise**      | Make folders, rename, delete, one at a time or in bulk                 |
+| 🔗 **Share**         | One key publishes a file, copies its link, or opens it in your browser |
+| 🗑️ **Undo mistakes** | Restore things from the bin, or empty it for good                      |
+| 📊 **Check space**   | See what is using your storage, with a bar you can read at a glance    |
+| 🔐 **Sign in once**  | A short guided sign-in on first launch, then it remembers you          |
+| 💾 **Pick up again** | Reopens the folder you were last in, with the sort order you chose     |
 
 <div align="center">
 
-*Published files are tinted green and marked with `⇡`.*
+*Shared files are tinted green and marked with `⇡`.*
 
 </div>
 
 ---
 
-## 🚀 Quick start
+## 📦 Install
 
-```sh
-go install github.com/ilyabrin/yad@latest
-yad
-```
+### Download a ready-made copy
 
-That's it — `yad` walks you through authentication on first launch and stores the result in `~/.yad/config.yaml`.
-
-```console
-$ yad              # open the file browser
-$ yad --help       # print keybindings and config paths
-$ yad --version    # print version
-```
-
-> [!TIP]
-> Already have a token? Skip the wizard entirely:
-> ```sh
-> YANDEX_DISK_TOKEN=y0_AgAA... yad
-> ```
-
----
-
-## 📦 Installation
+The simplest route, and the one to take if you are not sure. Grab the archive
+for your system from the [latest release](https://github.com/ilyabrin/yad/releases/latest).
 
 <details open>
-<summary><b>go install</b> — quickest</summary>
-
-```sh
-go install github.com/ilyabrin/yad@latest
-```
-
-> [!NOTE]
-> Binaries built this way have **no embedded OAuth client secret**, so the wizard asks you to paste a token manually instead of running the automatic code exchange. See [Authentication](#-authentication).
-
-</details>
-
-<details>
-<summary><b>Pre-built binaries</b> — recommended</summary>
-
-Grab the archive for your platform from the [latest release](https://github.com/ilyabrin/yad/releases/latest) and put `yad` on your `PATH`:
+<summary><b>macOS and Linux</b></summary>
 
 ```sh
 tar -xzf yad-<version>-<os>-<arch>.tar.gz
@@ -87,12 +70,39 @@ sudo mv yad /usr/local/bin/
 yad --version
 ```
 
-Checksums are published as `checksums.txt` alongside the archives.
+On macOS the first launch may be blocked because the file came from the
+internet. Right-click `yad` in Finder, choose Open, and confirm once.
 
 </details>
 
 <details>
-<summary><b>From source</b></summary>
+<summary><b>Windows</b></summary>
+
+Unzip the archive, then move `yad.exe` somewhere permanent, for example
+`C:\Users\<you>\bin`, and add that folder to your `PATH`:
+
+```powershell
+Expand-Archive yad-<version>-windows-amd64.zip -DestinationPath .
+yad.exe --version
+```
+
+Windows Terminal or PowerShell 7 both work well. The classic `cmd.exe` window
+will run YaD but renders the colours less prettily.
+
+</details>
+
+Every release ships a `checksums.txt` next to the archives if you want to
+verify what you downloaded.
+
+### Build it yourself
+
+If you already have [Go](https://go.dev) 1.25 or newer:
+
+```sh
+go install github.com/ilyabrin/yad@latest
+```
+
+Or from a clone:
 
 ```sh
 git clone https://github.com/ilyabrin/yad
@@ -100,96 +110,50 @@ cd yad
 go build -o yad .
 ```
 
-Sign-in works the same in a build you made yourself as in a release
-download: YaD uses PKCE and needs no client secret.
+Signing in works exactly the same in a copy you built yourself as in a release
+download. There is nothing extra to configure.
 
-</details>
-
-**Requirements:** Go 1.25+ (only to build) · Linux, macOS or Windows · any 256-colour terminal.
-
----
-
-## ⌨️ Keybindings
-
-### File browser
-
-<table>
-<tr><th colspan="2">Navigate</th><th colspan="2">Act</th></tr>
-<tr>
-<td><kbd>↑</kbd> <kbd>k</kbd></td><td>move up</td>
-<td><kbd>u</kbd></td><td>upload a local file</td>
-</tr>
-<tr>
-<td><kbd>↓</kbd> <kbd>j</kbd></td><td>move down</td>
-<td><kbd>U</kbd></td><td>upload from a URL</td>
-</tr>
-<tr>
-<td><kbd>↵</kbd> <kbd>→</kbd> <kbd>l</kbd></td><td>open directory</td>
-<td><kbd>d</kbd></td><td>download (bulk if selected)</td>
-</tr>
-<tr>
-<td><kbd>←</kbd> <kbd>h</kbd> <kbd>⌫</kbd></td><td>go to parent</td>
-<td><kbd>n</kbd></td><td>new directory</td>
-</tr>
-<tr>
-<td><kbd>/</kbd></td><td>filter by name (live)</td>
-<td><kbd>r</kbd></td><td>rename</td>
-</tr>
-<tr>
-<td><kbd>s</kbd></td><td>cycle sort order</td>
-<td><kbd>D</kbd></td><td>delete (bulk if selected)</td>
-</tr>
-<tr>
-<td><kbd>Space</kbd></td><td>toggle selection</td>
-<td><kbd>p</kbd></td><td>publish / show public link</td>
-</tr>
-<tr>
-<td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>select / deselect all visible</td>
-<td><kbd>c</kbd></td><td>copy public URL</td>
-</tr>
-<tr>
-<td><kbd>Esc</kbd></td><td>clear filter, then selection</td>
-<td><kbd>o</kbd></td><td>open public URL in browser</td>
-</tr>
-<tr>
-<td><kbd>R</kbd> <kbd>Ctrl</kbd>+<kbd>R</kbd></td><td>refresh listing</td>
-<td><kbd>m</kbd></td><td>file metadata</td>
-</tr>
-<tr>
-<td><kbd>t</kbd></td><td>open trash</td>
-<td><kbd>i</kbd></td><td>disk usage info</td>
-</tr>
-<tr>
-<td><kbd>q</kbd> <kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>quit</td>
-<td colspan="2"></td>
-</tr>
-</table>
-
-> [!NOTE]
-> <kbd>/</kbd> filters the **current page** (100 items). Pagination is server-side, so clear the filter with <kbd>Esc</kbd> before paging with <kbd>↑</kbd>/<kbd>↓</kbd>.
-
-### Trash · <kbd>t</kbd>
-
-| Key                                   | Action                    |
-| ------------------------------------- | ------------------------- |
-| <kbd>↑</kbd> <kbd>k</kbd> / <kbd>↓</kbd> <kbd>j</kbd> | move                      |
-| <kbd>r</kbd>                          | restore item              |
-| <kbd>D</kbd>                          | delete permanently        |
-| <kbd>E</kbd>                          | empty trash               |
-| <kbd>R</kbd> <kbd>Ctrl</kbd>+<kbd>R</kbd> | refresh               |
-| <kbd>q</kbd> <kbd>←</kbd> <kbd>Esc</kbd> | back to browser        |
-
-### Disk info · <kbd>i</kbd>
-
-| Key                                      | Action          |
-| ---------------------------------------- | --------------- |
-| <kbd>q</kbd> <kbd>←</kbd> <kbd>Esc</kbd> | back to browser |
+**You will need:** Linux, macOS or Windows, and a terminal that can show
+256 colours. Go is needed only if you build it yourself.
 
 ---
 
-## 🔐 Authentication
+## 🚀 First run
 
-On first launch `yad` runs a short wizard:
+```sh
+yad
+```
+
+YaD opens your Disk straight away, unless it does not know who you are yet.
+On the very first launch it walks you through signing in:
+
+1. It shows you a link and tries to open your browser for you.
+2. You sign in to Yandex and allow YaD to reach your Disk.
+3. Yandex shows a short code on the page.
+4. You paste that code back into the terminal.
+
+That is the whole thing, and it happens once. YaD saves the result in
+`~/.yad/config.yaml` and signs you in by itself from then on. When the access
+eventually expires, it renews quietly in the background without asking again.
+
+> [!TIP]
+> Already have a Yandex token and want to skip the sign-in entirely?
+>
+> ```sh
+> YANDEX_DISK_TOKEN=y0_AgAA... yad
+> ```
+>
+> Handy for scripts, automation, or a one-off session on someone else's machine.
+
+There are two other things YaD can tell you:
+
+```console
+yad --help       # the keys, and where settings live
+yad --version    # which version you have
+```
+
+<details>
+<summary><b>What happens under the hood</b></summary>
 
 ```mermaid
 sequenceDiagram
@@ -198,138 +162,277 @@ sequenceDiagram
     participant Y as yad
     participant O as oauth.yandex.ru
 
-    Y->>U: show authorisation URL (and open the browser)
+    Y->>Y: generate a one-time secret (PKCE verifier)
+    Y->>U: show the sign-in link, open the browser
     U->>O: sign in and grant access
-    O-->>U: display a short verification code
+    O-->>U: display a short code
     U->>Y: paste the code
-    Y->>O: exchange code for tokens
-    O-->>Y: access_token + refresh_token
+    Y->>O: send the code plus the one-time secret
+    O-->>Y: access token + refresh token
     Y->>Y: save to ~/.yad/config.yaml (mode 0600)
 ```
 
-After that, tokens load automatically. When the access token expires, `yad` refreshes it silently in the background — you never see the wizard again.
+The one-time secret is created fresh for each sign-in and never leaves your
+machine. It is what lets YaD prove the code is really its own, without having
+to carry a permanent password around. See [Privacy and safety](#-privacy-and-safety).
 
-### Token sources, in priority order
-
-| # | Source                         | When to use                              |
-| - | ------------------------------ | ---------------------------------------- |
-| 1 | `YANDEX_DISK_TOKEN` env var    | CI, scripting, throwaway sessions        |
-| 2 | `access_token` in the config   | normal interactive use (set by the wizard) |
-
-> [!IMPORTANT]
-> Setting `YANDEX_DISK_TOKEN` disables automatic refresh — the env var is treated as an explicit override that `yad` must not replace.
-
-<details>
-<summary><b>Using your own Yandex application</b></summary>
-
-Register an app at [oauth.yandex.ru](https://oauth.yandex.ru) with the `cloud_api:disk.read` and `cloud_api:disk.write` scopes, then add the credentials to `~/.yad/config.yaml`:
-
-```yaml
-oauth:
-  client_id: "your_client_id"
-  client_secret: "your_client_secret"
-```
-
-These override the build-time defaults entirely.
+If you close YaD midway through signing in, just start again from the link.
+The half-finished attempt is simply forgotten.
 
 </details>
 
 ---
 
-## ⚙️ Configuration
+## ⌨️ Keys
 
-Stored at `~/.yad/config.yaml`, created automatically with mode `0600`.
+Nothing to memorise up front: run `yad --help` whenever you forget. Arrow keys
+work everywhere, and the `hjkl` alternatives are there for people who like them.
+
+### Browsing your files
+
+<table>
+<tr><th colspan="2">Moving around</th><th colspan="2">Doing things</th></tr>
+<tr>
+<td><kbd>↑</kbd> <kbd>k</kbd></td><td>move up</td>
+<td><kbd>u</kbd></td><td>upload a file from this computer</td>
+</tr>
+<tr>
+<td><kbd>↓</kbd> <kbd>j</kbd></td><td>move down</td>
+<td><kbd>U</kbd></td><td>upload from a link</td>
+</tr>
+<tr>
+<td><kbd>↵</kbd> <kbd>→</kbd> <kbd>l</kbd></td><td>open folder</td>
+<td><kbd>d</kbd></td><td>download (everything ticked, if any)</td>
+</tr>
+<tr>
+<td><kbd>←</kbd> <kbd>h</kbd> <kbd>⌫</kbd></td><td>go up one folder</td>
+<td><kbd>n</kbd></td><td>new folder</td>
+</tr>
+<tr>
+<td><kbd>/</kbd></td><td>search by name as you type</td>
+<td><kbd>r</kbd></td><td>rename</td>
+</tr>
+<tr>
+<td><kbd>s</kbd></td><td>change sort order</td>
+<td><kbd>D</kbd></td><td>delete (everything ticked, if any)</td>
+</tr>
+<tr>
+<td><kbd>Space</kbd></td><td>tick or untick this item</td>
+<td><kbd>p</kbd></td><td>share, or show the existing link</td>
+</tr>
+<tr>
+<td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>tick or untick everything visible</td>
+<td><kbd>c</kbd></td><td>copy the share link</td>
+</tr>
+<tr>
+<td><kbd>Esc</kbd></td><td>clear the search, then the ticks</td>
+<td><kbd>o</kbd></td><td>open the share link in your browser</td>
+</tr>
+<tr>
+<td><kbd>R</kbd> <kbd>Ctrl</kbd>+<kbd>R</kbd></td><td>reload the list</td>
+<td><kbd>m</kbd></td><td>details about this file</td>
+</tr>
+<tr>
+<td><kbd>t</kbd></td><td>open the bin</td>
+<td><kbd>i</kbd></td><td>how much space you have left</td>
+</tr>
+<tr>
+<td><kbd>q</kbd> <kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>quit</td>
+<td colspan="2"></td>
+</tr>
+</table>
+
+> [!NOTE]
+> <kbd>/</kbd> searches the page you are looking at, which holds 100 items.
+> Yandex sends the list a page at a time, so clear the search with <kbd>Esc</kbd>
+> before moving to another page.
+
+### In the bin · <kbd>t</kbd>
+
+| Key                                                   | What it does        |
+| ----------------------------------------------------- | ------------------- |
+| <kbd>↑</kbd> <kbd>k</kbd> / <kbd>↓</kbd> <kbd>j</kbd> | move                |
+| <kbd>r</kbd>                                          | put this back       |
+| <kbd>D</kbd>                                          | delete it for good  |
+| <kbd>E</kbd>                                          | empty the whole bin |
+| <kbd>R</kbd> <kbd>Ctrl</kbd>+<kbd>R</kbd>             | reload              |
+| <kbd>q</kbd> <kbd>←</kbd> <kbd>Esc</kbd>              | back to your files  |
+
+### Space used · <kbd>i</kbd>
+
+| Key                                      | What it does       |
+| ---------------------------------------- | ------------------ |
+| <kbd>q</kbd> <kbd>←</kbd> <kbd>Esc</kbd> | back to your files |
+
+---
+
+## ⚙️ Settings
+
+YaD keeps its settings in `~/.yad/config.yaml` (on Windows,
+`C:\Users\<you>\.yad\config.yaml`). It creates the file for you, so you only
+need to open it if you want to change something.
 
 ```yaml
-# ── Written by the OAuth wizard — you normally never touch these ──
+# Written when you sign in. You normally never touch these.
 access_token: "y0_AgAA..."
 refresh_token: "1:abc..."
 token_expiry: "2026-06-01T12:00:00Z"
 
-# ── Optional: bring your own registered Yandex application ──
-oauth:
-  client_id: "your_client_id"
-  client_secret: "your_client_secret"
-
-# ── Optional: UI preferences ──
+# Optional: how you like things to look.
 default_sort: "-modified"
 last_path: "disk:/photos"
+
+# Optional: only if you registered your own Yandex application.
+oauth:
+  client_id: "your_client_id"
 ```
 
-| Key             | Type   | Default  | Description                                                                     |
-| --------------- | ------ | -------- | ------------------------------------------------------------------------------- |
-| `default_sort`  | string | `name`   | One of `name`, `-name`, `modified`, `-modified`, `size`, `-size` (`-` = descending) |
-| `last_path`     | string | `/`      | Directory reopened on launch; updated on exit. Set to `""` to always start at root |
-| `oauth.*`       | string | —        | Overrides the built-in OAuth application                                        |
+| Setting        | What it does                                                                              |
+| -------------- | ----------------------------------------------------------------------------------------- |
+| `default_sort` | Starting sort order: `name`, `modified` or `size`. A leading `-` reverses it              |
+| `last_path`    | Folder to reopen on launch, updated when you quit. Set to `""` to always start at the top |
+| `oauth.*`      | Only needed if you use your own Yandex application instead of the built-in one            |
 
-| Environment variable | Effect                                                     |
-| -------------------- | ---------------------------------------------------------- |
-| `YANDEX_DISK_TOKEN`  | Overrides the stored access token and disables auto-refresh |
+| Environment variable | What it does                                                             |
+| -------------------- | ------------------------------------------------------------------------ |
+| `YANDEX_DISK_TOKEN`  | Uses this token instead of the saved one, and leaves the saved one alone |
+
+> [!IMPORTANT]
+> While `YANDEX_DISK_TOKEN` is set, YaD will not renew the token by itself.
+> It treats the variable as a deliberate choice and does not overrule it.
+
+<details>
+<summary><b>Using your own Yandex application</b></summary>
+
+Most people never need this. It is useful if you want the access to appear
+under your own application in your Yandex account, or if your organisation
+requires it.
+
+Register an application at [oauth.yandex.ru](https://oauth.yandex.ru) with the
+`cloud_api:disk.read` and `cloud_api:disk.write` permissions, then add it to
+`~/.yad/config.yaml`:
+
+```yaml
+oauth:
+  client_id: "your_client_id"
+  # Only if your application is a confidential one that requires a secret.
+  # YaD does not need one for its own sign-in.
+  client_secret: "your_client_secret"
+```
+
+This replaces the built-in application entirely.
+
+</details>
 
 ---
 
-## 🔒 Security
+## 🔒 Privacy and safety
 
-- Config is written with mode `0600` and the parent directory with `0700` — readable only by you.
-- Sign-in uses **PKCE** ([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636)), so there is **no client secret** anywhere: not in this repository, not in the released binaries, not on your disk. Every sign-in generates a one-time secret that never leaves your machine.
-- The OAuth **client ID is public by design**, the same approach `gh` and `heroku` take. On its own it grants access to nothing.
-- Prefer full control? Register your own application and set `oauth.client_id` in `~/.yad/config.yaml`, plus `oauth.client_secret` if your application requires one.
+- **Your files stay between you and Yandex.** YaD has no server of its own and
+  sends nothing anywhere else.
+- **Your credentials are stored for your eyes only.** The settings file is
+  written so that only your user account can read it (`0600`), inside a folder
+  with the same restriction (`0700`).
+- **There is no password hidden in the program.** Signing in uses
+  [PKCE](https://datatracker.ietf.org/doc/html/rfc7636), which makes a one-time
+  secret for each sign-in that never leaves your machine. Nothing sensitive is
+  baked into the downloadable binaries, so there is nothing to extract from them.
+- **The application identifier is public on purpose**, just as it is for tools
+  like `gh` and `heroku`. On its own it opens nothing.
 
 > [!WARNING]
-> `~/.yad/config.yaml` contains live credentials. Don't commit it, sync it, or include it in shell dotfile repos.
+> `~/.yad/config.yaml` is the key to your Disk. Do not commit it to a
+> repository, sync it to shared storage, or include it in a dotfiles collection.
+>
+> If you think it has leaked, remove YaD's access at
+> [yandex.ru/id/security/applications](https://yandex.ru/id/security/applications)
+> and delete the file. Signing in again gives you fresh credentials.
+
+Found a security problem? Please read [SECURITY.md](SECURITY.md) instead of
+opening a public issue.
 
 ---
 
-## 🧑‍💻 Contributing
+## 🤔 Something went wrong
+
+**It says the code is wrong, but I copied it correctly.**
+If you closed YaD between opening the link and pasting the code, the attempt
+was discarded. Open the link again and use the new code.
+
+**Colours look broken, or characters show up as boxes.**
+Your terminal needs 256-colour support and a font with common symbols. On
+Windows, try Windows Terminal rather than the classic console window.
+
+**I want to start completely fresh.**
+Delete `~/.yad/config.yaml` and run `yad` again.
+
+**It cannot find `yad` after I installed it.**
+The program is not on your `PATH`. Either move it to a folder that already is
+(`/usr/local/bin` on macOS and Linux), or add its folder to `PATH`.
+
+Still stuck? [Open an issue](https://github.com/ilyabrin/yad/issues/new/choose),
+and please say which version (`yad --version`) and which system you are on.
+
+---
+
+## 🧑‍💻 For developers
+
+<details>
+<summary><b>Getting started with the code</b></summary>
 
 ```sh
 git clone https://github.com/ilyabrin/yad && cd yad
-go test ./...                 # unit tests
+go test ./...                 # the tests
 go test -race -cover ./...    # what CI runs
 gofmt -l . && go vet ./...    # what CI checks
-go run .                      # try it locally
+go run .                      # try your changes
 ```
+
+</details>
 
 <details>
-<summary><b>Project layout</b></summary>
+<summary><b>How the project is laid out</b></summary>
 
-```
+```text
 .
-├── yad.go              # entrypoint: flags, client resolution, session persistence
-├── config.go           # ~/.yad/config.yaml load/save + precedence rules
-├── internal/auth/      # Yandex OAuth 2.0 (authorise, exchange, refresh)
+├── yad.go              # entrypoint: flags, client setup, session persistence
+├── config.go           # ~/.yad/config.yaml load and save, precedence rules
+├── internal/auth/      # Yandex OAuth 2.0 with PKCE
 └── tui/
     ├── app.go          # root Bubbletea model, screen routing, token refresh
-    ├── setup.go        # first-run OAuth wizard screen
-    ├── browser_*.go    # file browser — model / update / view
-    ├── trash.go        # trash screen
-    ├── diskinfo.go     # disk usage screen
-    ├── ops.go          # async API commands (upload, download, publish…)
-    ├── dialog.go       # confirm / input / progress overlays
-    ├── text.go         # width-aware, ANSI-safe text truncation
+    ├── setup.go        # first-run sign-in screen
+    ├── browser_*.go    # file browser: model, update, view
+    ├── trash.go        # the bin
+    ├── diskinfo.go     # storage usage
+    ├── ops.go          # async API commands (upload, download, share)
+    ├── dialog.go       # confirm, input and progress overlays
+    ├── text.go         # width-aware, ANSI-safe truncation
     ├── keys.go         # keybinding map
     └── styles.go       # lipgloss palette
 ```
 
-The browser follows the Elm architecture: **model** holds state, **update** turns messages into new state plus commands, **view** is a pure function of the model. API calls always happen inside a `tea.Cmd`, never in `Update`.
+The browser follows the Elm architecture: **model** holds state, **update**
+turns messages into new state plus commands, **view** is a pure function of the
+model. API calls always happen inside a `tea.Cmd`, never in `Update`.
 
 </details>
 
-Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `ci:`…) — the release changelog is generated from them.
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/)
+(`feat:`, `fix:`, `docs:`, `ci:`), and the release notes are generated from them.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide, and [SECURITY.md](SECURITY.md) before reporting anything security-related.
+[CONTRIBUTING.md](CONTRIBUTING.md) has the full guide.
 
 ---
 
 ## 🧩 Built with
 
-| Library | Role |
-| ------- | ---- |
-| [charmbracelet/bubbletea](https://github.com/charmbracelet/bubbletea) | TUI framework (Elm architecture) |
+| Library                                                               | Role                              |
+| --------------------------------------------------------------------- | --------------------------------- |
+| [charmbracelet/bubbletea](https://github.com/charmbracelet/bubbletea) | TUI framework (Elm architecture)  |
 | [charmbracelet/bubbles](https://github.com/charmbracelet/bubbles)     | spinner, text input, key bindings |
-| [charmbracelet/lipgloss](https://github.com/charmbracelet/lipgloss)   | terminal styling and layout |
-| [ilyabrin/disk](https://github.com/ilyabrin/disk)                     | Yandex.Disk REST API client |
-| [atotto/clipboard](https://github.com/atotto/clipboard)               | cross-platform clipboard access |
+| [charmbracelet/lipgloss](https://github.com/charmbracelet/lipgloss)   | terminal styling and layout       |
+| [ilyabrin/disk](https://github.com/ilyabrin/disk)                     | Yandex.Disk REST API client       |
+| [atotto/clipboard](https://github.com/atotto/clipboard)               | cross-platform clipboard access   |
 
 ---
 
@@ -337,12 +440,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide, and [SECURITY.md](SEC
 
 Dual-licensed, at your option, under either of:
 
-- **MIT** — [LICENSE-MIT](LICENSE-MIT) · [spdx.org](https://spdx.org/licenses/MIT.html)
-- **Apache License 2.0** — [LICENSE-APACHE](LICENSE-APACHE) · [spdx.org](https://spdx.org/licenses/Apache-2.0.html)
+- **MIT**: [LICENSE-MIT](LICENSE-MIT) · [spdx.org](https://spdx.org/licenses/MIT.html)
+- **Apache License 2.0**: [LICENSE-APACHE](LICENSE-APACHE) · [spdx.org](https://spdx.org/licenses/Apache-2.0.html)
 
 `SPDX-License-Identifier: MIT OR Apache-2.0`
 
-Pick whichever suits you — MIT if you want the shortest possible terms, Apache 2.0 if you need its explicit patent grant. Unless you state otherwise, any contribution you submit is dual-licensed the same way, with no additional terms.
+Pick whichever suits you: MIT for the shortest possible terms, Apache 2.0 if
+you need its explicit patent grant. Unless you say otherwise, anything you
+contribute is dual-licensed the same way, with no extra conditions.
 
 ---
 
