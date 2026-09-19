@@ -30,9 +30,9 @@ You can expect an acknowledgement within **7 days** and a status update within *
 
 ## What is not in scope
 
-- **Extracting the OAuth client secret from a release binary.** It is embedded at build time and is recoverable with `strings`. This is a known and accepted trade-off, [documented in the README](README.md#-security): the secret only protects the token-exchange endpoint and grants no access to user data. Register your own application if this matters to you.
-- **The OAuth client ID being public.** It is public by design.
-- Vulnerabilities in Yandex.Disk itself — report those to [Yandex](https://yandex.com/bugbounty/).
+- **The OAuth client ID being public.** It is public by design, and on its own it grants access to nothing. This is standard for open-source command-line tools.
+- **The absence of a client secret.** Sign-in uses PKCE ([RFC 7636](https://datatracker.ietf.org/doc/html/rfc7636)) precisely so that no secret has to ship inside the binaries. See [Privacy and safety](README.md#-privacy-and-safety).
+- Vulnerabilities in Yandex.Disk itself, which should go to [Yandex](https://yandex.com/bugbounty/).
 - Attacks requiring an already-compromised local account. `~/.yad/config.yaml` is written `0600`; anyone who can read it as your user can read your tokens by design.
 
 ## Handling your own credentials
