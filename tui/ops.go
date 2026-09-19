@@ -142,8 +142,10 @@ func cmdMkdir(client *disk.Client, path string) tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), timeoutOp)
 		defer cancel()
-		_, errResp := client.CreateDir(ctx, path)
-		if errResp != nil {
+		// CreateDirAll rather than CreateDir so that typing a nested path such
+		// as "trips/2026/iceland" works: the API only creates one level per
+		// request, and the intermediate directories may not exist yet.
+		if errResp := client.CreateDirAll(ctx, path); errResp != nil {
 			return mkdirDoneMsg{err: newAPIError(errResp)}
 		}
 		return mkdirDoneMsg{}
