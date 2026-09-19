@@ -184,7 +184,7 @@ func postToken(ctx context.Context, data url.Values) (*TokenResponse, error) {
 			ErrorDescription string `json:"error_description"`
 		}
 		_ = json.NewDecoder(resp.Body).Decode(&errBody)
-		return nil, fmt.Errorf("Yandex OAuth error %d: %s - %s",
+		return nil, fmt.Errorf("token request rejected by Yandex (HTTP %d): %s - %s",
 			resp.StatusCode, errBody.Error, errBody.ErrorDescription)
 	}
 

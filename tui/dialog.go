@@ -165,11 +165,11 @@ func (p ProgressOverlay) View(width int) string {
 			StyleProgressEmpty.Render(strings.Repeat(" ", barWidth-filled))
 
 		if p.Total > 0 {
-			b.WriteString(fmt.Sprintf("%s / %s  %.0f%%\n",
+			fmt.Fprintf(&b, "%s / %s  %.0f%%\n",
 				disk.FormatFileSize(p.Current),
 				disk.FormatFileSize(p.Total),
 				p.Percentage,
-			))
+			)
 		} else {
 			b.WriteString(disk.FormatFileSize(p.Current) + "\n")
 		}
