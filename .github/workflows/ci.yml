@@ -44,7 +44,9 @@ jobs:
 
       - uses: golangci/golangci-lint-action@v8
         with:
-          version: latest
+          # Pinned: "latest" means a new linter release can turn CI red with
+          # no change of ours, which is exactly what happened with 2.13.2.
+          version: v2.13.2
 
   test:
     name: Test (${{ matrix.os }})
@@ -61,6 +63,10 @@ jobs:
           go-version-file: go.mod
 
       - name: Test (race + coverage)
+        # PowerShell, the default shell on Windows runners, splits the
+        # unquoted -coverprofile=coverage.out into two arguments and go test
+        # then fails on a package called ".out". Use one shell everywhere.
+        shell: bash
         run: go test -race -covermode=atomic -coverprofile=coverage.out ./...
 
       - name: Coverage summary
