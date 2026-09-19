@@ -4,6 +4,8 @@ Thanks for taking the time. Bug reports, fixes and focused features are all welc
 
 > Found a **security** problem? Do not open an issue — see [SECURITY.md](SECURITY.md).
 
+By taking part you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Getting set up
 
 ```sh
