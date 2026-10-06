@@ -317,7 +317,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			m.pendingUploadSrc = localPath
 			m.pendingUploadIsURL = false
 			suggested := path.Base(localPath)
-			m.inputDlg = NewInputDialog("Upload — destination name", "Enter filename on Disk (↵ to keep as is)", suggested)
+			m.inputDlg = NewInputDialog("Upload: destination name", "Enter filename on Disk (↵ to keep as is)", suggested)
 			m.inputDlg.SetValue(suggested)
 			m.mode = modeInputUploadName
 		}
@@ -378,7 +378,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			if suggested == "." || suggested == "/" {
 				suggested = ""
 			}
-			m.inputDlg = NewInputDialog("Upload URL — destination name", "Enter filename on Disk (↵ to keep as is)", "filename")
+			m.inputDlg = NewInputDialog("Upload URL: destination name", "Enter filename on Disk (↵ to keep as is)", "filename")
 			m.inputDlg.SetValue(suggested)
 			m.mode = modeInputUploadName
 		}
@@ -713,7 +713,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		}
 		url := e.resource.PublicURL
 		if url == "" {
-			return m.showMessage(iconErr+" No public URL — press p to publish first", true), nil
+			return m.showMessage(iconErr+" No public URL. Press p to publish first", true), nil
 		}
 		return m, cmdCopyToClipboard(url)
 	}

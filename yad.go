@@ -17,7 +17,7 @@ import (
 //	go build -ldflags "-X main.version=v0.1.0"
 var version = "dev"
 
-const helpText = `yad — Yandex.Disk terminal UI
+const helpText = `yad: Yandex.Disk terminal UI
 
 Usage:
   yad [flag]
