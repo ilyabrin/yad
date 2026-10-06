@@ -31,7 +31,7 @@ require (
 
 require (
 	github.com/charmbracelet/bubbletea v1.3.10
-	github.com/ilyabrin/disk v1.2.1
+	github.com/ilyabrin/disk v1.2.2
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1
