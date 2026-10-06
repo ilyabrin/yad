@@ -4,17 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v1.2.0] - 2026-10-07
+
 ### Added
 
-- `SECURITY.md`, `CONTRIBUTING.md`, issue forms and a pull request template
+- **Signing in needs no client secret.** It uses PKCE, so a copy built with `go install` or from a clone signs in exactly like a release download. Before, a build from source could only accept a pasted token
+- Nested folders in one step: `n` accepts a path such as `trips/2026/iceland` and creates the missing levels
+- Live `/` filter by name over the current page
+- The current path is shown in the title bar
+- Quitting while an upload or download is running asks for confirmation first
 - Auto token refresh mid-session: when an access token expires during a long session, `yad` silently refreshes it without requiring a restart
 - Default sort order from config (`default_sort` field in `~/.yad/config.yaml`)
 - Last visited directory restored on next launch (`last_path` field in config)
 - Pagination indicators `▲`/`▼` showing when more items exist above or below the visible page
 - Dedicated overdraft error screen with a clear remediation hint when Yandex Disk API is disabled due to storage quota exceeded
+- `SECURITY.md`, `CONTRIBUTING.md`, a code of conduct, issue forms and a pull request template
 
 ### Fixed
 
+- **Uploads and downloads stopped after 30 seconds.** The underlying client applied its request timeout to the whole transfer, so any file that took longer, roughly anything over 35 MB on a 10 Mbit/s link, was cut off midway. Fixed in `ilyabrin/disk` v1.2.1
+- **Upload from URL reported success too early.** Yandex fetches the file in the background, and `yad` said it was done before it was. It now waits for the transfer to finish and reports a failure if Yandex could not fetch the file
 - **Actions targeted the wrong file while a filter was active.** The list rendered filtered entries but delete, rename, download, publish, copy-URL and metadata all indexed the unfiltered page, so they operated on a resource the user could not see. All cursor-based actions now resolve through a single filter-aware accessor
 - Cursor could move past the end of a filtered list, and `↑`/`↓` triggered page loads while filtering
 - `Ctrl+A` selected hidden entries instead of only the visible (filtered) ones
@@ -26,16 +35,19 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Dependencies updated to their latest releases (`ilyabrin/disk` v1.2.0, charmbracelet stack, `golang.org/x/*`); Go 1.25
-- CI now runs on Linux, macOS and Windows with `-race`, coverage, `gofmt`/`go vet`/`golangci-lint` checks and a cross-compile matrix
+- Release builds no longer embed an OAuth client secret, and none is stored anywhere
+- Dependencies updated: `ilyabrin/disk` v1.2.2, the charmbracelet stack, `golang.org/x/*`; Go 1.25
+- CI runs on Linux, macOS and Windows with `-race`, coverage, `gofmt`, `go vet`, `go mod tidy` and `golangci-lint` (pinned to v2.13.2), plus a cross-compile matrix
 - Dependabot watches GitHub Actions in addition to Go modules, with grouped weekly PRs
-- README rewritten for both languages with a task-oriented structure, an OAuth flow diagram and a full configuration reference
+- Both READMEs rewritten so people who are not developers can install and use `yad`: download first, Windows instructions, plain-language sign-in steps and a troubleshooting section
 - **Licensing clarified: the project is now explicitly dual-licensed `MIT OR Apache-2.0`.** The repository previously shipped an Apache-2.0 `LICENSE` file while both READMEs claimed MIT; there are now `LICENSE-MIT` and `LICENSE-APACHE`, and the copyright placeholder in the Apache text is filled in
-- `.gitignore` patterns `*.a**`/`*.b**`/`*.c**`/`*.d**` replaced with explicit rules, because they silently excluded unrelated paths such as `.claude/` and would have swallowed files like `.codecov.yml`
+- `.gitignore` patterns `*.a**`/`*.b**`/`*.c**`/`*.d**` replaced with explicit rules, because they silently excluded unrelated paths and would have swallowed files like `.codecov.yml`
+- Line endings are pinned to LF in the repository
 
 ### Removed
 
 - `.yad.yaml`, a leftover from an earlier CLI design describing an `accounts:`/`language:` config format the application never read
+- Unused internal commands and message types
 
 ## [v1.1.2] - 2026-05-09
 
@@ -51,7 +63,7 @@ All notable changes to this project will be documented in this file.
 
 - Sort cycle (name → date → size, ascending/descending) via `s` key
 
-## [v1.1.1] - 2026-04-xx
+## [v1.1.1]
 
 ### Changed
 
@@ -72,7 +84,8 @@ All notable changes to this project will be documented in this file.
 - `YANDEX_DISK_TOKEN` environment variable for CI / scripting
 - Support for user-supplied OAuth credentials via config (`oauth.client_id`, `oauth.client_secret`)
 
-[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.1.2...HEAD
+[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.2.0...HEAD
+[v1.2.0]: https://github.com/ilyabrin/yad/compare/v1.1.2...v1.2.0
 [v1.1.2]: https://github.com/ilyabrin/yad/compare/v1.1.1...v1.1.2
 [v1.1.1]: https://github.com/ilyabrin/yad/compare/v0.1.0...v1.1.1
 [v0.1.0]: https://github.com/ilyabrin/yad/releases/tag/v0.1.0
