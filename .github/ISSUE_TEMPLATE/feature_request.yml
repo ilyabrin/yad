@@ -6,7 +6,7 @@ body:
     id: problem
     attributes:
       label: What are you trying to do?
-      description: Describe the task, not the solution — it often has a simpler answer than expected.
+      description: Describe the task, not the solution. It often has a simpler answer than expected.
     validations:
       required: true
 
