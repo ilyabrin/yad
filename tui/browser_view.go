@@ -259,10 +259,20 @@ func (m BrowserModel) viewStatusBar() string {
 		StyleStatusKey.Render("t") + " trash",
 		StyleStatusKey.Render("q") + " quit",
 	}
+	// A bar wider than the window wraps and pushes the title off screen, so
+	// drop hints from the end until it fits, always keeping "quit".
+	room := m.width - 2 - lipgloss.Width(left) - 1
 	right := strings.Join(hints, "  ")
+	for len(hints) > 1 && lipgloss.Width(right) > room {
+		hints = append(hints[:len(hints)-2], hints[len(hints)-1])
+		right = strings.Join(hints, "  ")
+	}
+	if lipgloss.Width(right) > room {
+		right = ""
+	}
 
 	gap := max(m.width-lipgloss.Width(left)-lipgloss.Width(right)-2, 1)
-	bar := left + spaces(gap) + right
+	bar := truncateRight(left+spaces(gap)+right, max(m.width-2, 0))
 	return StyleStatusBar.Width(m.width).Render(bar)
 }
 
