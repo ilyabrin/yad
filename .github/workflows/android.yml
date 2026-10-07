@@ -1,0 +1,55 @@
+name: Android
+
+# Release builds have no cgo, so on Android Go resolves names on its own and
+# finds no DNS server (there is no /etc/resolv.conf). internal/dns fixes that;
+# this resolves a real host inside an Android emulator to prove it.
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "internal/dns/**"
+      - "yad.go"
+      - ".github/workflows/android.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dns:
+    name: DNS in an Android emulator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      # The emulator runs x86_64 images. Go links android/amd64 only through
+      # the NDK; netgo keeps Go's own resolver, as in the release builds.
+      - name: Build the test for Android
+        run: |
+          cc="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android24-clang"
+          CGO_ENABLED=1 CC="$cc" GOOS=android GOARCH=amd64 \
+            go test -c -tags netgo -o dns.test ./internal/dns
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Resolve cloud-api.yandex.net on Android
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: default
+          script: |
+            adb push dns.test /data/local/tmp/dns.test
+            adb shell chmod 755 /data/local/tmp/dns.test
+            adb shell 'ls /etc/resolv.conf || echo "no /etc/resolv.conf, as expected"'
+            adb shell 'cd /data/local/tmp && YAD_NETWORK_TEST=1 ./dns.test -test.v -test.run TestLookupOnThisDevice' | tee out.txt
+            grep -q -- "--- PASS: TestLookupOnThisDevice" out.txt
