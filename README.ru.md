@@ -62,13 +62,18 @@ YaD это небольшая программа, которая работае�
 В каждом [релизе](https://github.com/ilyabrin/yad/releases/latest) лежит по
 архиву на систему. Какой ваш, видно по окончанию имени после номера версии:
 
-| Ваш компьютер                                    | Скачайте файл, который заканчивается на |
-| ------------------------------------------------ | --------------------------------------- |
-| Windows                                          | `windows-amd64.zip`                     |
-| Mac с чипом Apple (M1, M2, M3, M4 и новее)       | `darwin-arm64.tar.gz`                   |
-| Mac с процессором Intel                          | `darwin-amd64.tar.gz`                   |
-| Linux на обычном ПК или сервере                  | `linux-amd64.tar.gz`                    |
-| Linux на ARM, например 64-битный Raspberry Pi    | `linux-arm64.tar.gz`                    |
+| Ваш компьютер                                     | Скачайте файл, который заканчивается на                    |
+| ------------------------------------------------- | ---------------------------------------------------------- |
+| Windows                                           | `windows-amd64.zip`                                        |
+| Windows на ARM, например ноутбук на Snapdragon    | `windows-arm64.zip`                                        |
+| Mac с чипом Apple (M1, M2, M3, M4 и новее)        | `darwin-arm64.tar.gz`                                      |
+| Mac с процессором Intel                           | `darwin-amd64.tar.gz`                                      |
+| Linux на обычном ПК или сервере                   | `linux-amd64.tar.gz`                                       |
+| Linux на 64-битном ARM, например Raspberry Pi 4/5 | `linux-arm64.tar.gz`                                       |
+| Linux на старом 32-битном Raspberry Pi            | `linux-armv7` или `armv6`                                  |
+| Linux на старом 32-битном ПК                      | `linux-386.tar.gz`                                         |
+| Linux на RISC-V                                   | `linux-riscv64.tar.gz`                                     |
+| FreeBSD, OpenBSD или NetBSD                       | `freebsd-`, `openbsd-` или `netbsd-` с `amd64` или `arm64` |
 
 <details>
 <summary><b>Не знаете, какой у вас?</b></summary>
@@ -77,9 +82,11 @@ YaD это небольшая программа, которая работае�
   *Чип*, например Apple M2, берите `darwin-arm64`. Если указан *Процессор*
   Intel, берите `darwin-amd64`.
 - **Linux:** выполните `uname -m`. `x86_64` означает `linux-amd64`, `aarch64`
-  означает `linux-arm64`.
-- **Ноутбуки на Windows с ARM:** тоже берите `windows-amd64`. Windows 11
-  запускает его через встроенную эмуляцию.
+  означает `linux-arm64`, `armv7l` означает `linux-armv7`, `armv6l` означает
+  `linux-armv6` (Raspberry Pi Zero и 1), `i686` означает `linux-386`.
+- **Windows:** откройте «Параметры → Система → О системе». Если там
+  *процессор на базе ARM*, берите `windows-arm64`, иначе `windows-amd64`.
+- **BSD:** выполните `uname -m`. `amd64` и `arm64` совпадают с именами файлов.
 
 </details>
 

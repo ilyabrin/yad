@@ -69,6 +69,12 @@ jobs:
         shell: bash
         run: go test -race -covermode=atomic -coverprofile=coverage.out ./...
 
+      - name: Test on 32-bit
+        # Sizes from the API exceed 2^31; this catches code that would
+        # overflow int on 386 and 32-bit ARM. Runs natively on x86 Linux.
+        if: matrix.os == 'ubuntu-latest'
+        run: GOARCH=386 go test ./...
+
       - name: Coverage summary
         if: matrix.os == 'ubuntu-latest'
         run: go tool cover -func=coverage.out | tail -n 1 >> "$GITHUB_STEP_SUMMARY"
@@ -104,3 +110,25 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: go build -trimpath -ldflags "-s -w" -o /dev/null .
+
+  build-more:
+    # The other release targets, in one job to save runner minutes.
+    name: Build (other platforms)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - name: Cross-compile
+        env:
+          CGO_ENABLED: "0"
+        run: |
+          for target in windows/arm64 linux/386 linux/arm/6 linux/arm/7                         linux/riscv64 freebsd/amd64 freebsd/arm64                         openbsd/amd64 openbsd/arm64 netbsd/amd64; do
+            IFS=/ read -r goos goarch goarm <<< "$target"
+            echo "::group::$target"
+            GOOS=$goos GOARCH=$goarch GOARM=$goarm               go build -trimpath -ldflags "-s -w" -o /dev/null .
+            echo "::endgroup::"
+          done

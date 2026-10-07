@@ -310,7 +310,7 @@ func (m BrowserModel) viewMetadata(e entry) string {
 	sb.WriteString(row("Name", r.Name))
 	sb.WriteString(row("Type", kind))
 	if !e.isDir() {
-		sb.WriteString(row("Size", disk.FormatFileSize(int64(r.Size))))
+		sb.WriteString(row("Size", disk.FormatFileSize(r.Size)))
 		sb.WriteString(row("MIME", r.MimeType))
 		if r.MediaType != "" {
 			sb.WriteString(row("Media", r.MediaType))

@@ -449,7 +449,7 @@ func (m TrashModel) viewList(height int) string {
 
 		row := lipgloss.JoinHorizontal(lipgloss.Top,
 			lipgloss.NewStyle().Width(nameWidth+2).Render(nameStyled),
-			StyleSize.Render(disk.FormatFileSize(int64(item.Size))),
+			StyleSize.Render(disk.FormatFileSize(item.Size)),
 			"  ",
 			StyleDate.Render(deleted),
 			"  ",

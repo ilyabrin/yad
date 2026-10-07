@@ -53,7 +53,7 @@ func (e entry) sizeStr() string {
 	if e.isDir() {
 		return "-"
 	}
-	return disk.FormatFileSize(int64(e.resource.Size))
+	return disk.FormatFileSize(e.resource.Size)
 }
 
 func (e entry) modifiedStr() string {

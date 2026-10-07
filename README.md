@@ -64,13 +64,18 @@ Every [release](https://github.com/ilyabrin/yad/releases/latest) has one
 archive per system. The part of the name after the version tells you which is
 which:
 
-| Your computer                                  | Download the file ending in |
-| ---------------------------------------------- | --------------------------- |
-| Windows                                        | `windows-amd64.zip`         |
-| Mac with an Apple chip (M1, M2, M3, M4 and on) | `darwin-arm64.tar.gz`       |
-| Mac with an Intel processor                    | `darwin-amd64.tar.gz`       |
-| Linux on a regular PC or server                | `linux-amd64.tar.gz`        |
-| Linux on ARM, such as a 64-bit Raspberry Pi    | `linux-arm64.tar.gz`        |
+| Your computer                                   | Download the file ending in                                 |
+| ----------------------------------------------- | ----------------------------------------------------------- |
+| Windows                                         | `windows-amd64.zip`                                         |
+| Windows on ARM, such as a Snapdragon laptop     | `windows-arm64.zip`                                         |
+| Mac with an Apple chip (M1, M2, M3, M4 and on)  | `darwin-arm64.tar.gz`                                       |
+| Mac with an Intel processor                     | `darwin-amd64.tar.gz`                                       |
+| Linux on a regular PC or server                 | `linux-amd64.tar.gz`                                        |
+| Linux on 64-bit ARM, such as a Raspberry Pi 4/5 | `linux-arm64.tar.gz`                                        |
+| Linux on an older 32-bit Raspberry Pi           | `linux-armv7` or `armv6`                                    |
+| Linux on an old 32-bit PC                       | `linux-386.tar.gz`                                          |
+| Linux on RISC-V                                 | `linux-riscv64.tar.gz`                                      |
+| FreeBSD, OpenBSD or NetBSD                      | `freebsd-`, `openbsd-` or `netbsd-` with `amd64` or `arm64` |
 
 <details>
 <summary><b>Not sure which one you have?</b></summary>
@@ -79,9 +84,11 @@ which:
   *Chip* such as Apple M2, take `darwin-arm64`. If it lists an Intel
   *Processor*, take `darwin-amd64`.
 - **Linux:** run `uname -m`. `x86_64` means `linux-amd64`, `aarch64` means
-  `linux-arm64`.
-- **Windows on ARM laptops:** take `windows-amd64` as well. Windows 11 runs it
-  through its built-in emulation.
+  `linux-arm64`, `armv7l` means `linux-armv7`, `armv6l` means `linux-armv6`
+  (Raspberry Pi Zero and 1), `i686` means `linux-386`.
+- **Windows:** open *Settings → System → About*. *ARM-based processor* means
+  `windows-arm64`, anything else `windows-amd64`.
+- **BSD:** run `uname -m`. `amd64` and `arm64` match the file names.
 
 </details>
 

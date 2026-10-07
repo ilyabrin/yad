@@ -27,7 +27,7 @@ import (
 // file is one entry of the sample Disk.
 type file struct {
 	name     string
-	size     int
+	size     int64
 	modified string
 	mime     string
 	media    string
@@ -45,6 +45,7 @@ var tree = map[string][]file{
 		dir("Projects", "2026-10-05T11:03:00+00:00"),
 		dir("Music", "2026-06-14T20:15:00+00:00"),
 		dir("Отпуск 2026", "2026-08-30T16:22:00+00:00"),
+		{"backup-2026.zip", 5_368_709_120, "2026-09-15T03:00:00+00:00", "application/zip", "compressed"},
 		{"budget-2026.xlsx", 48_230, "2026-09-30T08:41:00+00:00", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "spreadsheet"},
 		{"notes.md", 6_144, "2026-10-06T21:10:00+00:00", "text/markdown", "document"},
 		{"presentation.pdf", 2_412_544, "2026-10-01T14:55:00+00:00", "application/pdf", "document"},
@@ -99,8 +100,8 @@ func main() {
 
 func diskInfo(w http.ResponseWriter, _ *http.Request) {
 	reply(w, http.StatusOK, map[string]any{
-		"total_space":   int64(214_748_364_800), // 200 GB
-		"used_space":    int64(87_431_285_964),
+		"total_space":   int64(2_199_023_255_552), // 2 TB, a real Yandex 360 plan
+		"used_space":    int64(1_317_351_872_102),
 		"trash_size":    7_240_367,
 		"max_file_size": int64(53_687_091_200),
 		"is_paid":       true,

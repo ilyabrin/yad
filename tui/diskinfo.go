@@ -160,9 +160,9 @@ func (m DiskInfoModel) viewContent() string {
 		return labelStyle.Render(label) + valueStyle.Render(value) + "\n"
 	}
 
-	used := int64(m.info.UsedSpace)
-	total := int64(m.info.TotalSpace)
-	trash := int64(m.info.TrashSize)
+	used := m.info.UsedSpace
+	total := m.info.TotalSpace
+	trash := m.info.TrashSize
 
 	usedPct := 0.0
 	if total > 0 {
@@ -197,7 +197,7 @@ func (m DiskInfoModel) viewContent() string {
 	content.WriteString(row("Used", disk.FormatFileSize(used)+fmt.Sprintf("  (%.1f%%)", usedPct)))
 	content.WriteString(row("Free", disk.FormatFileSize(total-used)))
 	content.WriteString(row("Trash", disk.FormatFileSize(trash)))
-	content.WriteString(row("Max file size", disk.FormatFileSize(int64(m.info.MaxFileSize))))
+	content.WriteString(row("Max file size", disk.FormatFileSize(m.info.MaxFileSize)))
 	content.WriteString("\n")
 
 	// Usage bar
