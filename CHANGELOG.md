@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v1.7.0] - 2026-10-07
+
+### Added
+
+- Android, in Termux: an `android-arm64` archive, and a README install that picks it, or `linux-armv7` on 32-bit phones and TV boxes
+- Links open in the device's browser on Android, through `termux-open-url`
+
+### Fixed
+
+- On Android, name lookups failed because there is no `/etc/resolv.conf`. yad now reads Termux's own copy, or uses the servers Termux ships with
+
 ## [v1.6.0] - 2026-10-07
 
 ### Added
@@ -137,7 +148,8 @@ All notable changes to this project will be documented in this file.
 - `YANDEX_DISK_TOKEN` environment variable for CI / scripting
 - Support for user-supplied OAuth credentials via config (`oauth.client_id`, `oauth.client_secret`)
 
-[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.7.0...HEAD
+[v1.7.0]: https://github.com/ilyabrin/yad/compare/v1.6.0...v1.7.0
 [v1.6.0]: https://github.com/ilyabrin/yad/compare/v1.5.0...v1.6.0
 [v1.5.0]: https://github.com/ilyabrin/yad/compare/v1.4.0...v1.5.0
 [v1.4.0]: https://github.com/ilyabrin/yad/compare/v1.3.0...v1.4.0
