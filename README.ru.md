@@ -167,6 +167,24 @@ $expected = (Select-String -Path checksums.txt -Pattern "windows-amd64").Line.Sp
 
 </details>
 
+### Или через Homebrew или Scoop
+
+Через [Homebrew](https://brew.sh) на macOS или Linux:
+
+```sh
+brew install --cask ilyabrin/tap/yad
+```
+
+Через [Scoop](https://scoop.sh) на Windows:
+
+```powershell
+scoop bucket add ilyabrin https://github.com/ilyabrin/scoop-bucket
+scoop install ilyabrin/yad
+```
+
+В обоих случаях `yad` сразу окажется в `PATH`, а новые версии ставятся
+командой `brew upgrade` или `scoop update yad`.
+
 ### Или установите пакет для Linux
 
 В релизах есть ещё пакеты `.deb`, `.rpm` и `.apk` для Linux. Они сами кладут
