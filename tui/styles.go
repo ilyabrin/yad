@@ -71,6 +71,12 @@ var (
 			Bold(true)
 
 	// Dialogs / overlays
+	// StyleQR draws a QR code dark on light whatever the terminal theme: an
+	// inverted code, light on dark, is one some phone cameras will not read.
+	StyleQR = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#000000")).
+		Background(lipgloss.Color("#FFFFFF"))
+
 	StyleDialog = lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(colorPrimary).
