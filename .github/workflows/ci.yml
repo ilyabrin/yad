@@ -126,9 +126,17 @@ jobs:
         env:
           CGO_ENABLED: "0"
         run: |
-          for target in windows/arm64 linux/386 linux/arm/6 linux/arm/7                         linux/riscv64 freebsd/amd64 freebsd/arm64                         openbsd/amd64 openbsd/arm64 netbsd/amd64; do
+          targets="
+            windows/arm64
+            linux/386 linux/arm/6 linux/arm/7 linux/riscv64
+            freebsd/amd64 freebsd/arm64
+            openbsd/amd64 openbsd/arm64
+            netbsd/amd64
+            android/arm64
+          "
+          for target in $targets; do
             IFS=/ read -r goos goarch goarm <<< "$target"
             echo "::group::$target"
-            GOOS=$goos GOARCH=$goarch GOARM=$goarm               go build -trimpath -ldflags "-s -w" -o /dev/null .
+            GOOS=$goos GOARCH=$goarch GOARM=$goarm go build -trimpath -ldflags "-s -w" -o /dev/null .
             echo "::endgroup::"
           done

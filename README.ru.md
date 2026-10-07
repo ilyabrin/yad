@@ -74,6 +74,7 @@ YaD это небольшая программа, которая работае�
 | Linux на старом 32-битном ПК                      | `linux-386.tar.gz`                                         |
 | Linux на RISC-V                                   | `linux-riscv64.tar.gz`                                     |
 | FreeBSD, OpenBSD или NetBSD                       | `freebsd-`, `openbsd-` или `netbsd-` с `amd64` или `arm64` |
+| Телефон или планшет на Android, в Termux          | `android-arm64.tar.gz`                                     |
 
 <details>
 <summary><b>Не знаете, какой у вас?</b></summary>
@@ -140,6 +141,32 @@ yad --version
 
 Windows Terminal и PowerShell 7 подходят одинаково хорошо. Классическое окно
 `cmd.exe` тоже запустит YaD, но цвета будут выглядеть хуже.
+
+</details>
+
+<details>
+<summary><b>Android (Termux)</b></summary>
+
+Установите [Termux](https://termux.dev) из F-Droid или с GitHub, откройте его и
+выполните:
+
+```sh
+pkg install -y curl
+tag=$(curl -fsSL https://api.github.com/repos/ilyabrin/yad/releases/latest | grep -m1 '"tag_name"' | cut -d '"' -f 4)
+case "$(dpkg --print-architecture)" in
+  aarch64) file=android-arm64 ;;
+  *) file=linux-armv7 ;;
+esac
+curl -fLO "https://github.com/ilyabrin/yad/releases/download/$tag/yad-${tag#v}-$file.tar.gz"
+tar -xzf "yad-${tag#v}-$file.tar.gz" yad && mv yad "$PREFIX/bin/"
+yad --version
+```
+
+Так же ставится на телефон, планшет и ТВ-приставку: старым и 32-битным
+устройствам достанется сборка `linux-armv7`, она тоже работает в Termux.
+Ссылка для входа откроется в браузере устройства. Чтобы копировать ссылки на
+файлы, поставьте ещё приложение **Termux:API** и выполните
+`pkg install termux-api`.
 
 </details>
 

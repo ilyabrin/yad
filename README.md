@@ -76,6 +76,7 @@ which:
 | Linux on an old 32-bit PC                       | `linux-386.tar.gz`                                          |
 | Linux on RISC-V                                 | `linux-riscv64.tar.gz`                                      |
 | FreeBSD, OpenBSD or NetBSD                      | `freebsd-`, `openbsd-` or `netbsd-` with `amd64` or `arm64` |
+| Android phone or tablet, in Termux              | `android-arm64.tar.gz`                                      |
 
 <details>
 <summary><b>Not sure which one you have?</b></summary>
@@ -142,6 +143,30 @@ yad --version
 
 Windows Terminal or PowerShell 7 both work well. The classic `cmd.exe` window
 will run YaD but renders the colours less prettily.
+
+</details>
+
+<details>
+<summary><b>Android (Termux)</b></summary>
+
+Install [Termux](https://termux.dev) from F-Droid or GitHub, open it and run:
+
+```sh
+pkg install -y curl
+tag=$(curl -fsSL https://api.github.com/repos/ilyabrin/yad/releases/latest | grep -m1 '"tag_name"' | cut -d '"' -f 4)
+case "$(dpkg --print-architecture)" in
+  aarch64) file=android-arm64 ;;
+  *) file=linux-armv7 ;;
+esac
+curl -fLO "https://github.com/ilyabrin/yad/releases/download/$tag/yad-${tag#v}-$file.tar.gz"
+tar -xzf "yad-${tag#v}-$file.tar.gz" yad && mv yad "$PREFIX/bin/"
+yad --version
+```
+
+This works on phones, tablets and Android TV boxes alike: older and 32-bit
+devices get the `linux-armv7` build, which runs in Termux too. Sign-in links
+open in the device's browser. To copy share links, also install
+the **Termux:API** app and run `pkg install termux-api`.
 
 </details>
 

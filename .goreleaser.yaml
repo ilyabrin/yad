@@ -26,6 +26,7 @@ builds:
       - openbsd_amd64
       - openbsd_arm64
       - netbsd_amd64
+      - android_arm64
     flags:
       - -trimpath
     ldflags:

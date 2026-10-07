@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/ilyabrin/disk"
 	"github.com/ilyabrin/yad/internal/auth"
+	"github.com/ilyabrin/yad/internal/dns"
 	"github.com/ilyabrin/yad/tui"
 )
 
@@ -48,6 +50,8 @@ Keybindings (inside the app):
 Source: https://github.com/ilyabrin/yad`
 
 func main() {
+	dns.Setup(runtime.GOOS)
+
 	if len(os.Args) == 2 {
 		switch os.Args[1] {
 		case "--version", "-v":

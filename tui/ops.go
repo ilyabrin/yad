@@ -292,6 +292,9 @@ func cmdOpenBrowser(url string) tea.Cmd {
 			cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", url)
 		case "darwin":
 			cmd = exec.Command("open", url)
+		case "android":
+			// Ships with Termux (termux-tools); plain Android has no such command.
+			cmd = exec.Command("termux-open-url", url)
 		default:
 			cmd = exec.Command("xdg-open", url)
 		}
