@@ -113,7 +113,7 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.err != nil {
 			return a.goFatalAuth(m.err)
 		}
-		newClient, err := disk.New(m.token)
+		newClient, err := NewClient(m.token)
 		if err != nil {
 			return a.goFatalAuth(err)
 		}
@@ -133,7 +133,7 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case SetupDoneMsg:
 		a.tokenResult = &m
-		client, err := disk.New(m.AccessToken)
+		client, err := NewClient(m.AccessToken)
 		if err != nil {
 			// Token rejected - go back to setup
 			a.setup = NewSetupModel(nil)

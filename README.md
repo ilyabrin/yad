@@ -13,6 +13,8 @@ Browse, upload, download, share and restore files without opening a browser.
 
 [Install](#-install) · [First run](#-first-run) · [Keys](#️-keys) · [Settings](#️-settings) · [Privacy](#-privacy-and-safety) · [Help](#-something-went-wrong) · [Русская версия](README.ru.md)
 
+<img src="docs/demo.gif" alt="YaD in a terminal: opening the Photos folder, filtering by name, sharing a photo, then checking free space and the bin" width="900">
+
 </div>
 
 ---
@@ -518,6 +520,8 @@ go run .                      # try your changes
 ├── yad.go              # entrypoint: flags, client setup, session persistence
 ├── config.go           # ~/.yad/config.yaml load and save, precedence rules
 ├── internal/auth/      # Yandex OAuth 2.0 with PKCE
+├── internal/qr/        # QR code for the sign-in link, no dependencies
+├── tools/demo/         # fake Disk API and the script for the README animation
 └── tui/
     ├── app.go          # root Bubbletea model, screen routing, token refresh
     ├── setup.go        # first-run sign-in screen
@@ -534,6 +538,23 @@ go run .                      # try your changes
 The browser follows the Elm architecture: **model** holds state, **update**
 turns messages into new state plus commands, **view** is a pure function of the
 model. API calls always happen inside a `tea.Cmd`, never in `Update`.
+
+</details>
+
+<details>
+<summary><b>Recording the README animation</b></summary>
+
+The animation is made with [VHS](https://github.com/charmbracelet/vhs) against
+a fake Disk API filled with sample files, so no real account is shown:
+
+```sh
+go build -o yad . && go run ./tools/demo &
+PATH="$PWD:$PATH" vhs tools/demo/demo.tape   # writes docs/demo.gif
+```
+
+yad talks to the fake API because `YANDEX_DISK_API_URL` points it there. The
+same variable works for a proxy. Your access token goes to that address too, so
+only use one you trust.
 
 </details>
 

@@ -139,7 +139,7 @@ func resolveClient(cfg *Config, oauthCfg *auth.Config) (*disk.Client, error) {
 		}
 	}
 
-	client, err := disk.New(token)
+	client, err := tui.NewClient(token)
 	if err != nil {
 		return nil, fmt.Errorf("creating disk client: %w", err)
 	}

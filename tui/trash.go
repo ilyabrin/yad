@@ -351,12 +351,12 @@ func (m TrashModel) viewBase() string {
 
 	// Title bar
 	title := StyleTitle.Render("  YaD  ·  Trash")
-	count := fmt.Sprintf(" %d items", len(m.items))
-	gap := m.width - lipgloss.Width(title) - len(count)
+	count := StylePath.Render(fmt.Sprintf(" %d items", len(m.items)))
+	gap := m.width - lipgloss.Width(title) - lipgloss.Width(count)
 	if gap < 0 {
 		gap = 0
 	}
-	b.WriteString(title + StylePath.Render(count) + spaces(gap))
+	b.WriteString(title + count + spaces(gap))
 	b.WriteByte('\n')
 
 	contentHeight := m.height - 2
@@ -418,7 +418,9 @@ func (m TrashModel) viewList(height int) string {
 		start = m.cursor
 	}
 
-	nameWidth := max(m.width-colSizeWidth-colDateWidth-trashOriginWidth-colRowPadding, colNameMinWidth)
+	// the two-space gaps before the date and origin columns take 2 more cells
+	// than colDateWidth already counts; miss them and every row wraps
+	nameWidth := max(m.width-colSizeWidth-colDateWidth-trashOriginWidth-colRowPadding-2, colNameMinWidth)
 	originWidth := trashOriginWidth
 
 	var rows []string
