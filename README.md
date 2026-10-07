@@ -168,6 +168,24 @@ Change the system name in the command to match the archive you downloaded.
 
 </details>
 
+### Or use Homebrew or Scoop
+
+With [Homebrew](https://brew.sh) on macOS or Linux:
+
+```sh
+brew install --cask ilyabrin/tap/yad
+```
+
+With [Scoop](https://scoop.sh) on Windows:
+
+```powershell
+scoop bucket add ilyabrin https://github.com/ilyabrin/scoop-bucket
+scoop install ilyabrin/yad
+```
+
+Either way `yad` lands on your `PATH`, and `brew upgrade` or `scoop update yad`
+brings new versions.
+
 ### Or install a Linux package
 
 Releases also carry `.deb`, `.rpm` and `.apk` packages for Linux. They put

@@ -27,3 +27,6 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Fine-grained token that can write to ilyabrin/homebrew-tap and
+          # ilyabrin/scoop-bucket only.
+          PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}

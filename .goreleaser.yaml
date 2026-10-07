@@ -115,3 +115,38 @@ release:
   draft: false
   prerelease: auto
   name_template: "{{ .Tag }}"
+
+# Homebrew (macOS) and Scoop (Windows). Both live in their own repositories,
+# which the default GITHUB_TOKEN cannot write to, hence PACKAGES_TOKEN.
+homebrew_casks:
+  - name: yad
+    binaries:
+      - yad
+    homepage: https://github.com/ilyabrin/yad
+    description: Your Yandex.Disk in the terminal
+    license: MIT OR Apache-2.0
+    directory: Casks
+    # Releases are not notarised, so Gatekeeper would refuse to start yad
+    # until the quarantine flag is cleared.
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/yad"]
+          end
+    skip_upload: auto
+    repository:
+      owner: ilyabrin
+      name: homebrew-tap
+      token: "{{ .Env.PACKAGES_TOKEN }}"
+
+scoops:
+  - name: yad
+    homepage: https://github.com/ilyabrin/yad
+    description: Your Yandex.Disk in the terminal
+    license: MIT OR Apache-2.0
+    skip_upload: auto
+    repository:
+      owner: ilyabrin
+      name: scoop-bucket
+      token: "{{ .Env.PACKAGES_TOKEN }}"
