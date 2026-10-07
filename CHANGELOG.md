@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v1.7.1] - 2026-10-08
+
+### Fixed
+
+- Deleting a file showed an error although the file was gone
+- Uploading a file that already exists failed instead of replacing it
+- Moving a large folder could not follow the move to the end
+
+### Changed
+
+- Dependencies: `ilyabrin/disk` v1.4.0
+
 ## [v1.7.0] - 2026-10-07
 
 ### Added
@@ -148,7 +160,8 @@ All notable changes to this project will be documented in this file.
 - `YANDEX_DISK_TOKEN` environment variable for CI / scripting
 - Support for user-supplied OAuth credentials via config (`oauth.client_id`, `oauth.client_secret`)
 
-[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.7.1...HEAD
+[v1.7.1]: https://github.com/ilyabrin/yad/compare/v1.7.0...v1.7.1
 [v1.7.0]: https://github.com/ilyabrin/yad/compare/v1.6.0...v1.7.0
 [v1.6.0]: https://github.com/ilyabrin/yad/compare/v1.5.0...v1.6.0
 [v1.5.0]: https://github.com/ilyabrin/yad/compare/v1.4.0...v1.5.0
