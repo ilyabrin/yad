@@ -168,6 +168,27 @@ Change the system name in the command to match the archive you downloaded.
 
 </details>
 
+### Or install a Linux package
+
+Releases also carry `.deb`, `.rpm` and `.apk` packages for Linux. They put
+`yad` on your `PATH` for you, and your package manager can remove it later.
+Download the one for your system from the
+[release page](https://github.com/ilyabrin/yad/releases/latest), then:
+
+```sh
+sudo apt install ./yadisk-*-linux-amd64.deb     # Debian, Ubuntu, Mint
+sudo dnf install ./yadisk-*-linux-amd64.rpm     # Fedora, RHEL
+sudo apk add --allow-untrusted ./yadisk-*-linux-amd64.apk   # Alpine
+```
+
+Swap `amd64` for your architecture, as in the table above.
+
+> [!NOTE]
+> The package is called **yadisk**, but the command is still `yad`. Some
+> distributions ship an unrelated program called yad (*Yet Another Dialog*)
+> that also installs a `yad` command. The two cannot be installed together:
+> your package manager will ask before replacing one with the other.
+
 ### Or build it yourself
 
 If you already have [Go](https://go.dev) 1.25 or newer:

@@ -167,6 +167,27 @@ $expected = (Select-String -Path checksums.txt -Pattern "windows-amd64").Line.Sp
 
 </details>
 
+### Или установите пакет для Linux
+
+В релизах есть ещё пакеты `.deb`, `.rpm` и `.apk` для Linux. Они сами кладут
+`yad` в `PATH`, а удалить его потом можно менеджером пакетов. Скачайте пакет
+для своей системы со [страницы релиза](https://github.com/ilyabrin/yad/releases/latest)
+и выполните:
+
+```sh
+sudo apt install ./yadisk-*-linux-amd64.deb     # Debian, Ubuntu, Mint
+sudo dnf install ./yadisk-*-linux-amd64.rpm     # Fedora, RHEL
+sudo apk add --allow-untrusted ./yadisk-*-linux-amd64.apk   # Alpine
+```
+
+Замените `amd64` на свою архитектуру, как в таблице выше.
+
+> [!NOTE]
+> Пакет называется **yadisk**, но команда по-прежнему `yad`. В некоторых
+> дистрибутивах есть другая программа с именем yad (*Yet Another Dialog*),
+> которая тоже ставит команду `yad`. Вместе их установить нельзя: менеджер
+> пакетов спросит, прежде чем заменить одну другой.
+
 ### Или соберите сами
 
 Если у вас уже установлен [Go](https://go.dev) 1.25 или новее:
