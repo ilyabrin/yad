@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ilyabrin/yad/internal/auth"
+	"github.com/ilyabrin/yad/internal/qr"
 )
 
 // setupStep tracks which stage of the OAuth flow we're in.
@@ -49,7 +50,8 @@ type SetupModel struct {
 
 	step        setupStep
 	authURL     string
-	browserOpen bool // true if we successfully opened the browser
+	qrLines     []string // the sign-in link as a QR code; nil if it could not be built
+	browserOpen bool     // true if we successfully opened the browser
 
 	input   textinput.Model
 	spinner spinner.Model
@@ -73,6 +75,7 @@ func NewSetupModel(oauthCfg *auth.Config) SetupModel {
 
 	var firstStep setupStep
 	var placeholder, authURL string
+	var qrLines []string
 
 	var pkce *auth.PKCE
 
@@ -98,6 +101,9 @@ func NewSetupModel(oauthCfg *auth.Config) SetupModel {
 			}
 		}
 		authURL = u
+		if code, err := qr.Encode(u, qr.L); err == nil {
+			qrLines = code.HalfBlocks(qrQuietZone)
+		}
 		firstStep = stepShowURL
 		placeholder = "Paste the verification code from Yandex…"
 	} else {
@@ -115,6 +121,7 @@ func NewSetupModel(oauthCfg *auth.Config) SetupModel {
 		pkce:      pkce,
 		step:      firstStep,
 		authURL:   authURL,
+		qrLines:   qrLines,
 		input:     ti,
 		spinner:   sp,
 		fullOAuth: fullOAuth,
@@ -239,6 +246,7 @@ func (m SetupModel) View() string {
 	switch m.step {
 	case stepShowURL:
 		b.WriteString(m.viewShowURL())
+		b.WriteString(m.viewQR(b.String()))
 	case stepEnterCode:
 		b.WriteString(m.viewEnterCode())
 	case stepExchange:
@@ -314,6 +322,42 @@ func (m SetupModel) viewExchange() string {
 // --- Helpers ----------------------------------------------------------------
 
 // cmdOpenBrowser tries to open url in the system default browser.
+
+// viewQR shows the sign-in link as a QR code under the dialog, so it can be
+// opened on a phone, which helps most when this machine has no browser.
+// above is everything already on screen; the code is only drawn when it fits
+// below that, because a QR code cut off by the terminal cannot be scanned.
+func (m SetupModel) viewQR(above string) string {
+	if len(m.qrLines) == 0 || m.width == 0 || m.height == 0 {
+		return ""
+	}
+
+	// The dialog does not wrap the long URL, so count the rows the terminal
+	// will really use, then a blank line and the caption.
+	need := rowsOnScreen(above, m.width) + 2 + len(m.qrLines)
+	if lipgloss.Width(m.qrLines[0]) > m.width || need > m.height {
+		return "\n\n" + StyleMuted("Make the window taller or zoom out to see a QR code for your phone.")
+	}
+
+	var b strings.Builder
+	b.WriteString("\n\n")
+	b.WriteString(StyleMuted("Or scan this with your phone:"))
+	for _, line := range m.qrLines {
+		b.WriteString("\n")
+		b.WriteString(StyleQR.Render(line))
+	}
+	return b.String()
+}
+
+// rowsOnScreen counts the terminal rows s occupies once lines wider than the
+// terminal wrap.
+func rowsOnScreen(s string, width int) int {
+	rows := 0
+	for _, line := range strings.Split(s, "\n") {
+		rows += max(1, (lipgloss.Width(line)+width-1)/width)
+	}
+	return rows
+}
 
 func wrapWidth(termWidth int) int {
 	w := termWidth - setupWrapMargin

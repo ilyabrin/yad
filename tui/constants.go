@@ -16,6 +16,11 @@ const (
 	dialogMargin   = 8  // horizontal space consumed by dialog border + outer padding
 	dialogMinWidth = 40 // minimum dialog width to remain readable
 
+	// qrQuietZone is the light margin around the sign-in QR code, in modules.
+	// The standard asks for 4; 2 saves two terminal rows, and two independent
+	// decoders read every sign-in code with it against a dark background.
+	qrQuietZone = 2
+
 	// setupWrap* — text wrap bounds used in the OAuth setup screen.
 	setupWrapMargin = 8  // subtracted from terminal width before clamping
 	setupWrapMin    = 40 // minimum wrap width
