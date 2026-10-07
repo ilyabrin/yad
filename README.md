@@ -200,7 +200,8 @@ yad
 YaD opens your Disk straight away, unless it does not know who you are yet.
 On the very first launch it walks you through signing in:
 
-1. It shows you a link and tries to open your browser for you.
+1. It shows you a link, plus a QR code when the window is big enough, and
+   tries to open your browser for you.
 2. You sign in to Yandex and allow YaD to reach your Disk.
 3. Yandex shows a short code on the page.
 4. You paste that code back into the terminal.
@@ -211,8 +212,8 @@ eventually expires, it renews quietly in the background without asking again.
 
 > [!TIP]
 > **No browser on this machine?** That is fine, for example over SSH. YaD
-> prints the link, so you can open it on your phone or laptop and paste the
-> code back here.
+> prints the link, and a QR code when the window is big enough, so you can
+> open it on your phone and paste the code back here.
 
 > [!TIP]
 > Already have a Yandex token and want to skip the sign-in entirely?

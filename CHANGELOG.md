@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- The sign-in screen shows the link as a QR code when the window is big enough, so it can be opened on a phone. Useful over SSH or anywhere without a browser. The encoder is built in, with no new dependency
+
 ## [v1.2.0] - 2026-10-07
 
 ### Added
