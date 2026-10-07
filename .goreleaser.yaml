@@ -48,6 +48,50 @@ archives:
       - LICENSE-APACHE
       - CHANGELOG.md
 
+nfpms:
+  - id: yad
+    # "yad" is taken in Debian, Ubuntu and Fedora by Yet Another Dialog, which
+    # also installs /usr/bin/yad. Use another package name and declare the
+    # conflict, so a package manager asks instead of replacing it silently.
+    package_name: yadisk
+    file_name_template: "yadisk-{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ with .Arm }}v{{ . }}{{ end }}"
+    vendor: Ilya Brin
+    homepage: https://github.com/ilyabrin/yad
+    maintainer: Ilya Brin <464157+ilyabrin@users.noreply.github.com>
+    description: |-
+      Your Yandex.Disk in the terminal.
+      Browse, upload, download, share and restore files without opening
+      a browser.
+    license: MIT OR Apache-2.0
+    section: utils
+    formats:
+      - deb
+      - rpm
+      - apk
+    conflicts:
+      - yad
+    suggests:
+      - xclip
+      - xsel
+      - wl-clipboard
+    contents:
+      - src: README.md
+        dst: /usr/share/doc/yadisk/README.md
+        file_info:
+          mode: 0644
+      - src: CHANGELOG.md
+        dst: /usr/share/doc/yadisk/CHANGELOG.md
+        file_info:
+          mode: 0644
+      - src: LICENSE-MIT
+        dst: /usr/share/doc/yadisk/LICENSE-MIT
+        file_info:
+          mode: 0644
+      - src: LICENSE-APACHE
+        dst: /usr/share/doc/yadisk/LICENSE-APACHE
+        file_info:
+          mode: 0644
+
 checksum:
   name_template: "checksums.txt"
   algorithm: sha256
