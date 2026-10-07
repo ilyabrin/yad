@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: ["release"]
+    branches: ["main"]
   pull_request:
-    branches: ["release"]
+    branches: ["main"]
 
 # Cancel superseded runs on the same ref — saves minutes on rapid pushes.
 concurrency:
