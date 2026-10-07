@@ -55,35 +55,78 @@ YaD это небольшая программа, которая работае�
 
 ## 📦 Установка
 
-### Скачать готовую сборку
+### 1. Выберите файл для своего компьютера
 
-Самый простой путь и тот, который стоит выбрать, если вы не уверены. Возьмите
-архив для своей системы из [последнего релиза](https://github.com/ilyabrin/yad/releases/latest).
+В каждом [релизе](https://github.com/ilyabrin/yad/releases/latest) лежит по
+архиву на систему. Какой ваш, видно по окончанию имени после номера версии:
+
+| Ваш компьютер                                    | Скачайте файл, который заканчивается на |
+| ------------------------------------------------ | --------------------------------------- |
+| Windows                                          | `windows-amd64.zip`                     |
+| Mac с чипом Apple (M1, M2, M3, M4 и новее)       | `darwin-arm64.tar.gz`                   |
+| Mac с процессором Intel                          | `darwin-amd64.tar.gz`                   |
+| Linux на обычном ПК или сервере                  | `linux-amd64.tar.gz`                    |
+| Linux на ARM, например 64-битный Raspberry Pi    | `linux-arm64.tar.gz`                    |
+
+<details>
+<summary><b>Не знаете, какой у вас?</b></summary>
+
+- **Mac:** откройте меню Apple и выберите «Об этом Mac». Если там указан
+  *Чип*, например Apple M2, берите `darwin-arm64`. Если указан *Процессор*
+  Intel, берите `darwin-amd64`.
+- **Linux:** выполните `uname -m`. `x86_64` означает `linux-amd64`, `aarch64`
+  означает `linux-arm64`.
+- **Ноутбуки на Windows с ARM:** тоже берите `windows-amd64`. Windows 11
+  запускает его через встроенную эмуляцию.
+
+</details>
+
+### 2. Положите его туда, где терминал его найдёт
 
 <details open>
 <summary><b>macOS и Linux</b></summary>
 
+В папке, куда вы сохранили архив:
+
 ```sh
-tar -xzf yad-<версия>-<ос>-<архитектура>.tar.gz
+tar -xzf yad-*.tar.gz yad
 sudo mv yad /usr/local/bin/
 yad --version
 ```
 
-В macOS первый запуск может быть заблокирован, потому что файл скачан из
-интернета. Нажмите на `yad` в Finder правой кнопкой, выберите «Открыть» и
-подтвердите один раз.
+**Не хотите `sudo`?** Положите программу в свою папку. В большинстве
+дистрибутивов Linux `~/.local/bin` уже есть в `PATH`:
+
+```sh
+mkdir -p ~/.local/bin && mv yad ~/.local/bin/
+```
+
+**В macOS** система может отказаться запускать программу, скачанную через
+браузер, с сообщением, что не может проверить её на вредоносность. Снимите эту
+отметку один раз:
+
+```sh
+xattr -d com.apple.quarantine /usr/local/bin/yad
+```
 
 </details>
 
 <details>
 <summary><b>Windows</b></summary>
 
-Распакуйте архив, переложите `yad.exe` в постоянное место, например
-`C:\Users\<вы>\bin`, и добавьте эту папку в `PATH`:
+В PowerShell, в папке, куда вы сохранили архив:
 
 ```powershell
-Expand-Archive yad-<версия>-windows-amd64.zip -DestinationPath .
-yad.exe --version
+$dest = "$env:LOCALAPPDATA\Programs\yad"
+Expand-Archive -Path yad-*-windows-amd64.zip -DestinationPath $dest -Force
+[Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path", "User") + ";$dest", "User")
+```
+
+Последняя строка добавляет папку в `PATH`, поэтому выполните её один раз. Затем
+откройте **новое** окно терминала и проверьте:
+
+```powershell
+yad --version
 ```
 
 Windows Terminal и PowerShell 7 подходят одинаково хорошо. Классическое окно
@@ -91,10 +134,31 @@ Windows Terminal и PowerShell 7 подходят одинаково хорош�
 
 </details>
 
-Рядом с архивами в каждом релизе лежит `checksums.txt`, если хотите проверить
-то, что скачали.
+<details>
+<summary><b>Проверить скачанное (по желанию)</b></summary>
 
-### Собрать самостоятельно
+В каждом релизе лежит `checksums.txt`. Положите его рядом с архивом и
+выполните:
+
+```sh
+# Linux
+grep linux-amd64 checksums.txt | sha256sum -c
+
+# macOS
+grep darwin-arm64 checksums.txt | shasum -a 256 -c
+```
+
+```powershell
+# Windows: выведет True, если файл цел
+$expected = (Select-String -Path checksums.txt -Pattern "windows-amd64").Line.Split()[0]
+(Get-FileHash (Get-Item yad-*-windows-amd64.zip)).Hash -eq $expected
+```
+
+Поменяйте название системы в команде на то, что у скачанного вами архива.
+
+</details>
+
+### Или соберите сами
 
 Если у вас уже установлен [Go](https://go.dev) 1.25 или новее:
 
@@ -113,8 +177,10 @@ go build -o yad .
 Вход работает совершенно одинаково в собственной сборке и в скачанном релизе.
 Ничего дополнительно настраивать не нужно.
 
-**Что понадобится:** Linux, macOS или Windows и терминал, умеющий в 256 цветов.
-Go нужен, только если вы собираете программу сами.
+### Что понадобится
+
+- Linux, macOS или Windows и терминал, умеющий в 256 цветов.
+- Go, только если вы собираете программу сами.
 
 ---
 

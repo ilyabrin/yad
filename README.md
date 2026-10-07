@@ -56,34 +56,79 @@ nothing passes through anyone else's server.
 
 ## 📦 Install
 
-### Download a ready-made copy
+### 1. Pick the file for your computer
 
-The simplest route, and the one to take if you are not sure. Grab the archive
-for your system from the [latest release](https://github.com/ilyabrin/yad/releases/latest).
+Every [release](https://github.com/ilyabrin/yad/releases/latest) has one
+archive per system. The part of the name after the version tells you which is
+which:
+
+| Your computer                                  | Download the file ending in |
+| ---------------------------------------------- | --------------------------- |
+| Windows                                        | `windows-amd64.zip`         |
+| Mac with an Apple chip (M1, M2, M3, M4 and on) | `darwin-arm64.tar.gz`       |
+| Mac with an Intel processor                    | `darwin-amd64.tar.gz`       |
+| Linux on a regular PC or server                | `linux-amd64.tar.gz`        |
+| Linux on ARM, such as a 64-bit Raspberry Pi    | `linux-arm64.tar.gz`        |
+
+<details>
+<summary><b>Not sure which one you have?</b></summary>
+
+- **Mac:** open the Apple menu and choose *About This Mac*. If it lists a
+  *Chip* such as Apple M2, take `darwin-arm64`. If it lists an Intel
+  *Processor*, take `darwin-amd64`.
+- **Linux:** run `uname -m`. `x86_64` means `linux-amd64`, `aarch64` means
+  `linux-arm64`.
+- **Windows on ARM laptops:** take `windows-amd64` as well. Windows 11 runs it
+  through its built-in emulation.
+
+</details>
+
+### 2. Put it where your terminal can find it
 
 <details open>
 <summary><b>macOS and Linux</b></summary>
 
+In the folder where you saved the archive:
+
 ```sh
-tar -xzf yad-<version>-<os>-<arch>.tar.gz
+tar -xzf yad-*.tar.gz yad
 sudo mv yad /usr/local/bin/
 yad --version
 ```
 
-On macOS the first launch may be blocked because the file came from the
-internet. Right-click `yad` in Finder, choose Open, and confirm once.
+**Rather not use `sudo`?** Put it in your own folder instead. On most Linux
+systems `~/.local/bin` is already on your `PATH`:
+
+```sh
+mkdir -p ~/.local/bin && mv yad ~/.local/bin/
+```
+
+**On macOS**, the system may refuse to start a program downloaded with a
+browser, saying it cannot check it for malicious software. Clear that flag
+once:
+
+```sh
+xattr -d com.apple.quarantine /usr/local/bin/yad
+```
 
 </details>
 
 <details>
 <summary><b>Windows</b></summary>
 
-Unzip the archive, then move `yad.exe` somewhere permanent, for example
-`C:\Users\<you>\bin`, and add that folder to your `PATH`:
+In PowerShell, in the folder where you saved the archive:
 
 ```powershell
-Expand-Archive yad-<version>-windows-amd64.zip -DestinationPath .
-yad.exe --version
+$dest = "$env:LOCALAPPDATA\Programs\yad"
+Expand-Archive -Path yad-*-windows-amd64.zip -DestinationPath $dest -Force
+[Environment]::SetEnvironmentVariable("Path", [Environment]::GetEnvironmentVariable("Path", "User") + ";$dest", "User")
+```
+
+The last line adds the folder to your `PATH`, so run it only once. Then open a
+**new** terminal window and check:
+
+```powershell
+yad --version
 ```
 
 Windows Terminal or PowerShell 7 both work well. The classic `cmd.exe` window
@@ -91,10 +136,30 @@ will run YaD but renders the colours less prettily.
 
 </details>
 
-Every release ships a `checksums.txt` next to the archives if you want to
-verify what you downloaded.
+<details>
+<summary><b>Check the download (optional)</b></summary>
 
-### Build it yourself
+Every release ships a `checksums.txt`. Put it next to the archive and run:
+
+```sh
+# Linux
+grep linux-amd64 checksums.txt | sha256sum -c
+
+# macOS
+grep darwin-arm64 checksums.txt | shasum -a 256 -c
+```
+
+```powershell
+# Windows: prints True when the file is intact
+$expected = (Select-String -Path checksums.txt -Pattern "windows-amd64").Line.Split()[0]
+(Get-FileHash (Get-Item yad-*-windows-amd64.zip)).Hash -eq $expected
+```
+
+Change the system name in the command to match the archive you downloaded.
+
+</details>
+
+### Or build it yourself
 
 If you already have [Go](https://go.dev) 1.25 or newer:
 
@@ -113,8 +178,10 @@ go build -o yad .
 Signing in works exactly the same in a copy you built yourself as in a release
 download. There is nothing extra to configure.
 
-**You will need:** Linux, macOS or Windows, and a terminal that can show
-256 colours. Go is needed only if you build it yourself.
+### What you need
+
+- Linux, macOS or Windows, and a terminal that can show 256 colours.
+- Go, only if you build it yourself.
 
 ---
 
