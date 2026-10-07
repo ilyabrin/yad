@@ -11,7 +11,7 @@ Browse, upload, download, share and restore files without opening a browser.
 [![Go](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go&logoColor=white)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#-licence)
 
-[Install](#-install) · [First run](#-first-run) · [Keys](#️-keys) · [Settings](#️-settings) · [Privacy](#-privacy-and-safety) · [Русская версия](README.ru.md)
+[Install](#-install) · [First run](#-first-run) · [Keys](#️-keys) · [Settings](#️-settings) · [Privacy](#-privacy-and-safety) · [Help](#-something-went-wrong) · [Русская версия](README.ru.md)
 
 </div>
 
@@ -39,7 +39,7 @@ nothing passes through anyone else's server.
 | 🗂️ **Browse**        | Walk through folders, search the current page with `/`, sort six ways  |
 | ⬆️ **Upload**        | Send a file from your computer, or hand Yandex a link and let it fetch |
 | ⬇️ **Download**      | One file, or everything you ticked, queued for you automatically       |
-| ✂️ **Organise**      | Make folders, rename, delete, one at a time or in bulk                 |
+| ✂️ **Organise**      | Make folders, nested ones too, rename, delete, alone or in bulk        |
 | 🔗 **Share**         | One key publishes a file, copies its link, or opens it in your browser |
 | 🗑️ **Undo mistakes** | Restore things from the bin, or empty it for good                      |
 | 📊 **Check space**   | See what is using your storage, with a bar you can read at a glance    |
@@ -183,6 +183,12 @@ download. There is nothing extra to configure.
 - Linux, macOS or Windows, and a terminal that can show 256 colours.
 - Go, only if you build it yourself.
 
+> [!NOTE]
+> **On Linux**, copying a share link needs a clipboard tool, and many systems
+> do not have one installed. Install `xclip` or `xsel` on X11, or
+> `wl-clipboard` on Wayland, for example `sudo apt install xclip`. Everything
+> else works without it.
+
 ---
 
 ## 🚀 First run
@@ -202,6 +208,11 @@ On the very first launch it walks you through signing in:
 That is the whole thing, and it happens once. YaD saves the result in
 `~/.yad/config.yaml` and signs you in by itself from then on. When the access
 eventually expires, it renews quietly in the background without asking again.
+
+> [!TIP]
+> **No browser on this machine?** That is fine, for example over SSH. YaD
+> prints the link, so you can open it on your phone or laptop and paste the
+> code back here.
 
 > [!TIP]
 > Already have a Yandex token and want to skip the sign-in entirely?
@@ -252,8 +263,9 @@ The half-finished attempt is simply forgotten.
 
 ## ⌨️ Keys
 
-Nothing to memorise up front: run `yad --help` whenever you forget. Arrow keys
-work everywhere, and the `hjkl` alternatives are there for people who like them.
+Nothing to memorise up front. The line at the bottom of the screen always lists
+the main keys, and `yad --help` prints them all. Arrow keys work everywhere, and
+the `hjkl` alternatives are there for people who like them.
 
 ### Browsing your files
 
@@ -273,7 +285,7 @@ work everywhere, and the `hjkl` alternatives are there for people who like them.
 </tr>
 <tr>
 <td><kbd>←</kbd> <kbd>h</kbd> <kbd>⌫</kbd></td><td>go up one folder</td>
-<td><kbd>n</kbd></td><td>new folder</td>
+<td><kbd>n</kbd></td><td>new folder, or a path like <code>a/b/c</code></td>
 </tr>
 <tr>
 <td><kbd>/</kbd></td><td>search by name as you type</td>
@@ -422,23 +434,63 @@ opening a public issue.
 
 ## 🤔 Something went wrong
 
-**It says the code is wrong, but I copied it correctly.**
-If you closed YaD between opening the link and pasting the code, the attempt
+<details>
+<summary><b>The terminal says it cannot find <code>yad</code></b></summary>
+
+The program is not on your `PATH`. On macOS and Linux, check that you moved it
+into `/usr/local/bin` or `~/.local/bin`. On Windows, make sure you ran the
+`PATH` line from the install steps, then open a **new** terminal window: one
+that was already open will not see the change.
+
+</details>
+
+<details>
+<summary><b>macOS says it cannot check yad for malicious software</b></summary>
+
+The browser marked the download as coming from the internet. Clear that flag
+once:
+
+```sh
+xattr -d com.apple.quarantine /usr/local/bin/yad
+```
+
+</details>
+
+<details>
+<summary><b>Copying a share link fails on Linux</b></summary>
+
+YaD hands the link to a clipboard tool, and none is installed. Install `xclip`
+or `xsel` on X11, or `wl-clipboard` on Wayland. You can still read the link on
+screen with <kbd>p</kbd>.
+
+</details>
+
+<details>
+<summary><b>It says the sign-in code is wrong, but I copied it correctly</b></summary>
+
+If you closed YaD between opening the link and pasting the code, that attempt
 was discarded. Open the link again and use the new code.
 
-**Colours look broken, or characters show up as boxes.**
+</details>
+
+<details>
+<summary><b>Colours look broken, or characters show up as boxes</b></summary>
+
 Your terminal needs 256-colour support and a font with common symbols. On
 Windows, try Windows Terminal rather than the classic console window.
 
-**I want to start completely fresh.**
-Delete `~/.yad/config.yaml` and run `yad` again.
+</details>
 
-**It cannot find `yad` after I installed it.**
-The program is not on your `PATH`. Either move it to a folder that already is
-(`/usr/local/bin` on macOS and Linux), or add its folder to `PATH`.
+<details>
+<summary><b>I want to start completely fresh</b></summary>
 
-Still stuck? [Open an issue](https://github.com/ilyabrin/yad/issues/new/choose),
-and please say which version (`yad --version`) and which system you are on.
+Delete `~/.yad/config.yaml` and run `yad` again. You will be asked to sign in.
+
+</details>
+
+Still stuck? [Ask in Discussions](https://github.com/ilyabrin/yad/discussions)
+or [open an issue](https://github.com/ilyabrin/yad/issues/new/choose), and
+please say which version (`yad --version`) and which system you are on.
 
 ---
 
