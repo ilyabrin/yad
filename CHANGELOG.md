@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v1.5.0] - 2026-10-07
+
+### Added
+
+- Downloads for more computers: Windows on ARM, 32-bit Linux PCs, older Raspberry Pi (`armv6` and `armv7`), RISC-V, and FreeBSD, OpenBSD and NetBSD. Fifteen archives instead of five
+- The README tells you which archive to pick, with the `uname -m` values for Linux
+
+### Fixed
+
+- 32-bit builds can read a Disk or a file over 2 GB. Fixed in `ilyabrin/disk` v1.3.0
+
+### Changed
+
+- Dependencies: `ilyabrin/disk` v1.3.0
+- CI builds every release target and also runs the tests as 32-bit
+
 ## [v1.4.0] - 2026-10-07
 
 ### Added
@@ -113,7 +129,8 @@ All notable changes to this project will be documented in this file.
 - `YANDEX_DISK_TOKEN` environment variable for CI / scripting
 - Support for user-supplied OAuth credentials via config (`oauth.client_id`, `oauth.client_secret`)
 
-[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.5.0...HEAD
+[v1.5.0]: https://github.com/ilyabrin/yad/compare/v1.4.0...v1.5.0
 [v1.4.0]: https://github.com/ilyabrin/yad/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/ilyabrin/yad/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/ilyabrin/yad/compare/v1.1.2...v1.2.0
