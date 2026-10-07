@@ -4,9 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v1.3.0] - 2026-10-07
+
 ### Added
 
 - The sign-in screen shows the link as a QR code when the window is big enough, so it can be opened on a phone. Useful over SSH or anywhere without a browser. The encoder is built in, with no new dependency
+
+### Fixed
+
+- **The trash screen was always empty.** The underlying client read the trash listing from the wrong place in Yandex's response, so "Trash is empty" showed even with files in the trash. Fixed in `ilyabrin/disk` v1.2.3
+
+### Changed
+
+- The README walks through installing step by step: which archive suits which computer, commands for each system including adding `yad` to `PATH` on Windows, and how to check a download against `checksums.txt`
+- The README documents that copying a share link on Linux needs `xclip`, `xsel` or `wl-clipboard`, and that sign-in works without a browser, over SSH for example. Troubleshooting is a list of collapsible questions
+- Dependencies: `ilyabrin/disk` v1.2.3. `kr/pretty`, `go-spew` and `go-difflib` leave the module graph
+- The default branch is now `main`
 
 ## [v1.2.0] - 2026-10-07
 
@@ -88,7 +101,8 @@ All notable changes to this project will be documented in this file.
 - `YANDEX_DISK_TOKEN` environment variable for CI / scripting
 - Support for user-supplied OAuth credentials via config (`oauth.client_id`, `oauth.client_secret`)
 
-[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.3.0...HEAD
+[v1.3.0]: https://github.com/ilyabrin/yad/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/ilyabrin/yad/compare/v1.1.2...v1.2.0
 [v1.1.2]: https://github.com/ilyabrin/yad/compare/v1.1.1...v1.1.2
 [v1.1.1]: https://github.com/ilyabrin/yad/compare/v0.1.0...v1.1.1
