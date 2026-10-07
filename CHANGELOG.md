@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v1.6.0] - 2026-10-07
+
+### Added
+
+- Linux packages: `.deb`, `.rpm` and `.apk` for amd64, arm64, 386, armv6, armv7 and riscv64. They are named `yadisk`, because Debian, Ubuntu and Fedora already ship an unrelated `yad` (Yet Another Dialog); the command is still `yad`, and the package manager asks before replacing the other program
+- Homebrew on macOS and Linux: `brew install --cask ilyabrin/tap/yad`
+- Scoop on Windows: `scoop bucket add ilyabrin https://github.com/ilyabrin/scoop-bucket`, then `scoop install ilyabrin/yad`
+
 ## [v1.5.0] - 2026-10-07
 
 ### Added
@@ -129,7 +137,8 @@ All notable changes to this project will be documented in this file.
 - `YANDEX_DISK_TOKEN` environment variable for CI / scripting
 - Support for user-supplied OAuth credentials via config (`oauth.client_id`, `oauth.client_secret`)
 
-[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.6.0...HEAD
+[v1.6.0]: https://github.com/ilyabrin/yad/compare/v1.5.0...v1.6.0
 [v1.5.0]: https://github.com/ilyabrin/yad/compare/v1.4.0...v1.5.0
 [v1.4.0]: https://github.com/ilyabrin/yad/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/ilyabrin/yad/compare/v1.2.0...v1.3.0
