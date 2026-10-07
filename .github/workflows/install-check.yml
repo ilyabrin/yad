@@ -1,0 +1,126 @@
+name: Install check
+
+# Installs a published release the way users do (Homebrew, Scoop, Linux
+# packages) and checks that the installed yad reports the right version.
+on:
+  # After every release.
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+  # By hand, for any release.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to check, such as v1.6.0 (empty: the latest)"
+        required: false
+  # When this file changes, so a pull request shows that it still works.
+  pull_request:
+    branches: ["main"]
+    paths: [".github/workflows/install-check.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    name: Pick the release
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.pick.outputs.tag }}
+      version: ${{ steps.pick.outputs.version }}
+    steps:
+      - id: pick
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_TAG: ${{ github.event.workflow_run.head_branch }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          tag="${RUN_TAG:-$INPUT_TAG}"
+          if [ -z "$tag" ]; then
+            tag="$(gh release view -R "$GITHUB_REPOSITORY" --json tagName --jq .tagName)"
+          fi
+          echo "Checking $tag"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+
+  homebrew:
+    name: Homebrew (${{ matrix.os }})
+    needs: version
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    steps:
+      - name: Put brew on PATH (Linux)
+        if: runner.os == 'Linux'
+        run: echo "/home/linuxbrew/.linuxbrew/bin" >> "$GITHUB_PATH"
+
+      - name: Install
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+        run: brew install --cask ilyabrin/tap/yad
+
+      - name: Check the version
+        run: yad --version | tee /dev/stderr | grep -qx "yad ${{ needs.version.outputs.version }}"
+
+      - name: Check the quarantine flag is cleared (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          bin="$(readlink -f "$(command -v yad)")"
+          if xattr -p com.apple.quarantine "$bin" 2>/dev/null; then
+            echo "::error::$bin is still quarantined; Gatekeeper would block it"
+            exit 1
+          fi
+
+  scoop:
+    name: Scoop (windows-latest)
+    needs: version
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Install Scoop
+        run: |
+          Invoke-RestMethod -Uri https://get.scoop.sh -OutFile install-scoop.ps1
+          ./install-scoop.ps1 -RunAsAdmin
+          "$env:USERPROFILE\scoop\shims" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+
+      - name: Install
+        run: |
+          scoop bucket add ilyabrin https://github.com/ilyabrin/scoop-bucket
+          scoop install ilyabrin/yad
+
+      - name: Check the version
+        run: |
+          $got = (yad --version).Trim()
+          Write-Output $got
+          if ($got -ne "yad ${{ needs.version.outputs.version }}") { exit 1 }
+
+  packages:
+    name: Package (${{ matrix.distro }})
+    needs: version
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { distro: debian, image: "debian:stable-slim", ext: deb, install: "apt-get update -qq && apt-get install -y -qq ./pkg" }
+          - { distro: fedora, image: "fedora:latest", ext: rpm, install: "dnf install -y -q ./pkg" }
+          - { distro: alpine, image: "alpine:latest", ext: apk, install: "apk add -q --allow-untrusted ./pkg" }
+    steps:
+      - name: Download the package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "${{ needs.version.outputs.tag }}" -R "$GITHUB_REPOSITORY" \
+            --pattern "yadisk-*-linux-amd64.${{ matrix.ext }}"
+          mkdir pkgdir && mv yadisk-* "pkgdir/pkg.${{ matrix.ext }}"
+
+      - name: Install and check the version
+        run: |
+          docker run --rm -v "$PWD/pkgdir:/w" -w /w "${{ matrix.image }}" sh -c '
+            ${{ matrix.install }}.${{ matrix.ext }} &&
+            yad --version | tee /dev/stderr | grep -qx "yad ${{ needs.version.outputs.version }}"'
