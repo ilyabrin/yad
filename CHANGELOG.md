@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v1.4.0] - 2026-10-07
+
+### Added
+
+- `YANDEX_DISK_API_URL` points yad at another API address: a proxy, or a local server for tests. Your access token is sent there too, so only use one you trust
+- The README opens with a short animation of yad at work, recorded against sample files
+
+### Fixed
+
+- **The trash screen pushed its title off the top.** Each row was two characters wider than the window and wrapped onto a second line
+- **The file list lost its title in narrow windows** or while filtering: the key hints at the bottom wrapped onto a second line. Hints now drop from the end until they fit, and "q quit" always stays
+
 ## [v1.3.0] - 2026-10-07
 
 ### Added
@@ -101,7 +113,8 @@ All notable changes to this project will be documented in this file.
 - `YANDEX_DISK_TOKEN` environment variable for CI / scripting
 - Support for user-supplied OAuth credentials via config (`oauth.client_id`, `oauth.client_secret`)
 
-[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.4.0...HEAD
+[v1.4.0]: https://github.com/ilyabrin/yad/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/ilyabrin/yad/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/ilyabrin/yad/compare/v1.1.2...v1.2.0
 [v1.1.2]: https://github.com/ilyabrin/yad/compare/v1.1.1...v1.1.2
