@@ -52,9 +52,15 @@ Sleep 1s
 Enter
 Sleep 800ms
 
-# Share a photo
+# Share a photo with a link that works for 7 days
 Type "p"
-Sleep 2s
+Sleep 1.2s
+Right
+Sleep 500ms
+Right
+Sleep 1s
+Enter
+Sleep 2.5s
 
 # Close the link, clear the filter, go back; then disk info and the trash
 Escape
