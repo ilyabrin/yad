@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v1.8.0] - 2026-10-08
+
+### Added
+
+- Protect a shared link: before sharing, `p` asks how long the link should work (forever, 1, 7 or 30 days) and for an optional password. Enter alone shares an ordinary link, as before. If the protection cannot be applied, the file is not left shared
+
+### Fixed
+
+- Custom properties and batch operations, through `ilyabrin/disk` v1.5.0
+
+### Changed
+
+- Dependencies: `ilyabrin/disk` v1.5.0
+
 ## [v1.7.1] - 2026-10-08
 
 ### Fixed
@@ -160,7 +174,8 @@ All notable changes to this project will be documented in this file.
 - `YANDEX_DISK_TOKEN` environment variable for CI / scripting
 - Support for user-supplied OAuth credentials via config (`oauth.client_id`, `oauth.client_secret`)
 
-[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.7.1...HEAD
+[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.8.0...HEAD
+[v1.8.0]: https://github.com/ilyabrin/yad/compare/v1.7.1...v1.8.0
 [v1.7.1]: https://github.com/ilyabrin/yad/compare/v1.7.0...v1.7.1
 [v1.7.0]: https://github.com/ilyabrin/yad/compare/v1.6.0...v1.7.0
 [v1.6.0]: https://github.com/ilyabrin/yad/compare/v1.5.0...v1.6.0
