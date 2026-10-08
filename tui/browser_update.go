@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
@@ -137,6 +138,7 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 		}
 		m.mode = modePublicURL
 		m.publicURL = msg.publicURL
+		m.linkProtection = msg.protection
 		m.loading = true
 		return m, m.reloadCmd()
 
@@ -465,6 +467,20 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		}
 		return m, nil
 
+	case modeShare:
+		dlg, submitted, cancelled := m.shareDlg.Update(msg)
+		m.shareDlg = dlg
+		switch {
+		case cancelled:
+			m.mode = modeNormal
+		case submitted:
+			m.mode = modeNormal
+			if e, ok := m.currentEntry(); ok {
+				return m, cmdPublish(m.client, e.resource.Path, dlg.Settings(time.Now()))
+			}
+		}
+		return m, nil
+
 	case modePublicURL:
 		switch msg.String() {
 		case "c":
@@ -701,10 +717,13 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		}
 		if e.resource.PublicURL != "" {
 			m.publicURL = e.resource.PublicURL
+			m.linkProtection = ""
 			m.mode = modePublicURL
 			return m, nil
 		}
-		return m, cmdPublish(m.client, e.resource.Path)
+		m.shareDlg = NewShareDialog(e.resource.Name)
+		m.mode = modeShare
+		return m, nil
 
 	case key.Matches(msg, m.keys.CopyURL):
 		e, ok := m.currentEntry()

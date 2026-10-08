@@ -36,17 +36,17 @@ nothing passes through anyone else's server.
 
 ## ✨ What you can do
 
-|                      |                                                                        |
-| -------------------- | ---------------------------------------------------------------------- |
-| 🗂️ **Browse**        | Walk through folders, search the current page with `/`, sort six ways  |
-| ⬆️ **Upload**        | Send a file from your computer, or hand Yandex a link and let it fetch |
-| ⬇️ **Download**      | One file, or everything you ticked, queued for you automatically       |
-| ✂️ **Organise**      | Make folders, nested ones too, rename, delete, alone or in bulk        |
-| 🔗 **Share**         | One key publishes a file, copies its link, or opens it in your browser |
-| 🗑️ **Undo mistakes** | Restore things from the bin, or empty it for good                      |
-| 📊 **Check space**   | See what is using your storage, with a bar you can read at a glance    |
-| 🔐 **Sign in once**  | A short guided sign-in on first launch, then it remembers you          |
-| 💾 **Pick up again** | Reopens the folder you were last in, with the sort order you chose     |
+|                      |                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 🗂️ **Browse**        | Walk through folders, search the current page with `/`, sort six ways                                        |
+| ⬆️ **Upload**        | Send a file from your computer, or hand Yandex a link and let it fetch                                       |
+| ⬇️ **Download**      | One file, or everything you ticked, queued for you automatically                                             |
+| ✂️ **Organise**      | Make folders, nested ones too, rename, delete, alone or in bulk                                              |
+| 🔗 **Share**         | One key publishes a file, with an optional password and expiry, copies its link, or opens it in your browser |
+| 🗑️ **Undo mistakes** | Restore things from the bin, or empty it for good                                                            |
+| 📊 **Check space**   | See what is using your storage, with a bar you can read at a glance                                          |
+| 🔐 **Sign in once**  | A short guided sign-in on first launch, then it remembers you                                                |
+| 💾 **Pick up again** | Reopens the folder you were last in, with the sort order you chose                                           |
 
 <div align="center">
 
@@ -371,7 +371,7 @@ the `hjkl` alternatives are there for people who like them.
 </tr>
 <tr>
 <td><kbd>Space</kbd></td><td>tick or untick this item</td>
-<td><kbd>p</kbd></td><td>share, or show the existing link</td>
+<td><kbd>p</kbd></td><td>share, or show the existing link. Before sharing you can set how long the link works (1, 7 or 30 days) and a password</td>
 </tr>
 <tr>
 <td><kbd>Ctrl</kbd>+<kbd>A</kbd></td><td>tick or untick everything visible</td>

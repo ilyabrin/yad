@@ -36,10 +36,16 @@ func (m BrowserModel) View() string {
 			msgView = StyleDialog.Render(StyleSuccess.Render(m.message) + "\n\n" + StyleMuted("Press any key to continue"))
 		}
 		return renderOverlay(base, msgView, m.width, m.height)
+	case modeShare:
+		return renderOverlay(base, m.shareDlg.View(m.width), m.width, m.height)
 	case modePublicURL:
 		urlStyle := lipgloss.NewStyle().Foreground(colorAccent)
+		protection := ""
+		if m.linkProtection != "" {
+			protection = StyleMuted(m.linkProtection) + "\n\n"
+		}
 		content := StyleSuccess.Render("⇡ Public link") + "\n\n" +
-			urlStyle.Render(m.publicURL) + "\n\n" +
+			urlStyle.Render(m.publicURL) + "\n\n" + protection +
 			StyleStatusKey.Render("c") + " copy   " +
 			StyleStatusKey.Render("o") + " open   " +
 			StyleStatusKey.Render("u") + " unpublish   " +

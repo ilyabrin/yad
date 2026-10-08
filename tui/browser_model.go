@@ -33,6 +33,7 @@ const (
 	modeInputUploadName               // confirm/change filename before upload (local or URL)
 	modeFilter                        // live name filter — search bar shown in status bar
 	modeConfirmQuit                   // quit confirmation while transfer is in progress
+	modeShare                         // link lifetime and password before publishing
 )
 
 // entry is a single row in the file list.
@@ -114,6 +115,8 @@ type BrowserModel struct {
 	message        string // shown in modeMessage
 	messageIsError bool
 	publicURL      string // shown in modePublicURL
+	linkProtection string // how the link in modePublicURL is protected, if known
+	shareDlg       ShareDialog
 
 	// Upload staging
 	pendingUploadSrc   string // local path or URL held between step 1 and step 2

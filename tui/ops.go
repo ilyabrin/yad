@@ -172,29 +172,34 @@ func cmdRename(client *disk.Client, from, to string) tea.Cmd {
 // --- Publish / Unpublish ---
 
 type publishDoneMsg struct {
-	publicURL string // non-empty means resource is now public
-	err       error
+	publicURL  string // non-empty means resource is now public
+	protection string // how the link is protected, for the screen
+	err        error
 }
 
 type unpublishDoneMsg struct{ err error }
 
-func cmdPublish(client *disk.Client, path string) tea.Cmd {
+// cmdPublish publishes path, protecting the link with settings when they
+// are not nil. If the protection cannot be applied, disk unpublishes again,
+// so a link meant to be protected is never left open.
+func cmdPublish(client *disk.Client, path string, settings *disk.PublicSettings) tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), timeoutOp)
 		defer cancel()
 
-		_, errResp := client.PublishResource(ctx, path)
+		_, errResp := client.PublishResourceWithSettings(ctx, path, settings)
 		if errResp != nil {
 			return publishDoneMsg{err: newAPIError(errResp)}
 		}
+		protection := protectionSummary(settings)
 
 		// Fetch updated metadata to get the public URL
 		resource, errResp := client.GetMetadata(ctx, path)
 		if errResp != nil {
 			// Published OK but couldn't fetch URL - not fatal
-			return publishDoneMsg{publicURL: ""}
+			return publishDoneMsg{protection: protection}
 		}
-		return publishDoneMsg{publicURL: resource.PublicURL}
+		return publishDoneMsg{publicURL: resource.PublicURL, protection: protection}
 	}
 }
 

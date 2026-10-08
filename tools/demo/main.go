@@ -90,6 +90,7 @@ func main() {
 	mux.HandleFunc("GET /v1/disk/resources", resources)
 	mux.HandleFunc("PUT /v1/disk/resources/publish", publish(true))
 	mux.HandleFunc("PUT /v1/disk/resources/unpublish", publish(false))
+	mux.HandleFunc("PATCH /v1/disk/public/resources/public-settings", publicSettings)
 	mux.HandleFunc("GET /v1/disk/trash/resources", trashList)
 	mux.HandleFunc("/", notFound)
 
@@ -153,6 +154,20 @@ func publish(on bool) http.HandlerFunc {
 			"method": http.MethodGet,
 		})
 	}
+}
+
+// publicSettings accepts link protection for a published file, as the real
+// API does after publishing.
+func publicSettings(w http.ResponseWriter, r *http.Request) {
+	p := clean(r.URL.Query().Get("path"))
+	mu.Lock()
+	ok := published[p]
+	mu.Unlock()
+	if !ok {
+		notFound(w, r)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 // trashList answers in the real shape: the trash root is a resource and its
