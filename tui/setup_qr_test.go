@@ -67,7 +67,10 @@ func TestSetupOffersAHintWhenTheQRCodeDoesNotFit(t *testing.T) {
 }
 
 func TestSetupSaysNothingAboutQRBeforeItKnowsTheWindowSize(t *testing.T) {
-	view := ansi.Strip(setupAt(t, 0, 0).View())
+	m := setupAt(t, 0, 0)
+	// The link carries a random PKCE challenge, which now and then spells
+	// "QR" or "scan" by chance, so look at the screen around it.
+	view := strings.ReplaceAll(ansi.Strip(m.View()), m.authURL, "")
 	if strings.Contains(view, "QR") || strings.Contains(view, "scan") {
 		t.Error("without a window size there is nothing to decide yet")
 	}
