@@ -153,6 +153,13 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return a, func() tea.Msg { return tea.WindowSizeMsg{Width: a.width, Height: a.height} }
 	}
 
+	// Hotkeys work in a Cyrillic layout too, except where the user types
+	// text: the setup screen's code field and the browser's text fields.
+	if km, ok := msg.(tea.KeyMsg); ok && a.screen != screenSetup &&
+		(a.screen != screenBrowser || !a.browser.TypingText()) {
+		msg = latinKey(km)
+	}
+
 	// Fatal error screen: only q/esc/ctrl+c to quit
 	if a.screen == screenFatalError {
 		if km, ok := msg.(tea.KeyMsg); ok {

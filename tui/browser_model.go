@@ -210,6 +210,18 @@ func (m BrowserModel) IsInputActive() bool {
 	return m.mode != modeNormal
 }
 
+// TypingText reports whether keys go into a text field (the filter, a name,
+// a path, a password) rather than to the hotkeys.
+func (m BrowserModel) TypingText() bool {
+	switch m.mode {
+	case modeFilter, modeShare,
+		modeInputNewDir, modeInputRename, modeInputUpload, modeInputUploadName,
+		modeInputUploadURL, modeInputDownload, modeInputDownloadDir:
+		return true
+	}
+	return false
+}
+
 // showMessage sets the model into modeMessage with the given text.
 func (m BrowserModel) showMessage(msg string, isError bool) BrowserModel {
 	m.mode = modeMessage

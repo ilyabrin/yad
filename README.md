@@ -341,6 +341,10 @@ Nothing to memorise up front. The line at the bottom of the screen always lists
 the main keys, and `yad --help` prints them all. Arrow keys work everywhere, and
 the `hjkl` alternatives are there for people who like them.
 
+Keys work in a Russian or Ukrainian keyboard layout too: <kbd>в</kbd> does
+what <kbd>d</kbd> does, since it is the same key. Only when you type a name or
+a filter do the letters stay as they are.
+
 ### Browsing your files
 
 <table>
