@@ -51,5 +51,8 @@ jobs:
             adb push dns.test /data/local/tmp/dns.test
             adb shell chmod 755 /data/local/tmp/dns.test
             adb shell 'ls /etc/resolv.conf || echo "no /etc/resolv.conf, as expected"'
-            adb shell 'cd /data/local/tmp && YAD_NETWORK_TEST=1 ./dns.test -test.v -test.run TestLookupOnThisDevice' | tee out.txt
+            # Right after boot the emulator may have no network yet, and it
+            # does not pass ping, so retry the lookup itself for up to a
+            # minute; the last attempt prints its result.
+            adb shell 'cd /data/local/tmp && for i in $(seq 1 20); do YAD_NETWORK_TEST=1 ./dns.test -test.run TestLookupOnThisDevice >/dev/null 2>&1 && break; sleep 3; done; YAD_NETWORK_TEST=1 ./dns.test -test.v -test.run TestLookupOnThisDevice' | tee out.txt
             grep -q -- "--- PASS: TestLookupOnThisDevice" out.txt
