@@ -82,7 +82,12 @@ func (m BrowserModel) viewBase() string {
 
 func (m BrowserModel) viewTitleBar() string {
 	title := StyleTitle.Render("  YaD")
+	// The sort order, then the interface language; L switches it. In a
+	// narrow window the language goes first, so the path keeps its room.
 	sortStr := StyleMuted("  " + sortLabel(m.sort))
+	if lang := StyleMuted("  " + strings.ToUpper(i18n.Current().String())); m.width-lipgloss.Width(title)-lipgloss.Width(sortStr+lang)-2 >= minPathWidth {
+		sortStr += lang
+	}
 
 	titleW := lipgloss.Width(title)
 	sortW := lipgloss.Width(sortStr)
@@ -264,6 +269,7 @@ func (m BrowserModel) viewStatusBar() string {
 		StyleStatusKey.Render("s") + i18n.T("hint.sort"),
 		StyleStatusKey.Render("p") + i18n.T("hint.publish"),
 		StyleStatusKey.Render("t") + i18n.T("hint.trash"),
+		StyleStatusKey.Render("L") + i18n.T("hint.language"),
 		StyleStatusKey.Render("q") + i18n.T("hint.quit"),
 	}
 	return statusBar(m.width, left, hints)

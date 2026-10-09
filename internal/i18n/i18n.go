@@ -103,6 +103,18 @@ func Set(l Lang) {
 // Current is the language in use.
 func Current() Lang { return current }
 
+// Next is the language after the current one, in alphabetical order and
+// round again: with English and Russian, it switches between the two.
+func Next() Lang {
+	langs := Languages()
+	for i, l := range langs {
+		if l == current {
+			return langs[(i+1)%len(langs)]
+		}
+	}
+	return English
+}
+
 func lookup(key string) entry {
 	if e, ok := catalogs[current][key]; ok {
 		return e

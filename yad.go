@@ -90,6 +90,10 @@ func run() error {
 			cfg.LastPath = p
 			changed = true
 		}
+		if l := a.ChosenLanguage(); l != "" && l != cfg.Language {
+			cfg.Language = l
+			changed = true
+		}
 		if changed {
 			if saveErr := SaveConfig(cfg); saveErr != nil {
 				fmt.Fprintf(os.Stderr, "warning: could not save config: %v\n", saveErr)

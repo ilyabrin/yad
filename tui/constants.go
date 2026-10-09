@@ -10,6 +10,7 @@ const (
 	colPubMarkWidth = 2  // "⇡ " or "  "
 	colRowPadding   = 4  // PaddingLeft(1) + mark glyph (2) + inner gap (1)
 	colNameMinWidth = 10 // minimum usable name column width
+	minPathWidth    = 12 // title bar room the path keeps before the language code goes
 
 	trashOriginWidth = 20 // truncated "deleted from" path column in trash view
 

@@ -186,6 +186,18 @@ func TestDetect(t *testing.T) {
 	}
 }
 
+func TestNextGoesRound(t *testing.T) {
+	defer Set(English)
+	seen := map[Lang]bool{}
+	for range Languages() {
+		seen[Current()] = true
+		Set(Next())
+	}
+	if len(seen) != len(Languages()) || Current() != English {
+		t.Errorf("Next visited %v and ended on %v; want every language once, back to English", seen, Current())
+	}
+}
+
 func TestMissingTranslationFallsBackToEnglish(t *testing.T) {
 	defer Set(English)
 	Set("xx") // no such file

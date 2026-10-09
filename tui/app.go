@@ -1,10 +1,13 @@
 package tui
 
 import (
+	"os"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ilyabrin/disk"
 	"github.com/ilyabrin/yad/internal/auth"
+	"github.com/ilyabrin/yad/internal/i18n"
 )
 
 type screen int
@@ -55,6 +58,10 @@ type App struct {
 	width  int
 	height int
 	client *disk.Client
+
+	// languageChosen is set when the user switches the language with L,
+	// so main() saves it to the config.
+	languageChosen bool
 }
 
 // New creates the App.
@@ -188,6 +195,15 @@ func (a *App) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					a.trash.Init(),
 					func() tea.Msg { return tea.WindowSizeMsg{Width: a.width, Height: a.height} },
 				)
+			case "L":
+				i18n.Set(i18n.Next())
+				a.languageChosen = true
+				// Built when the browser was; everything else is drawn anew.
+				a.browser.filterInput.Placeholder = i18n.T("browser.filter_placeholder")
+				if os.Getenv("YAD_LANG") != "" {
+					a.browser = a.browser.showMessage(i18n.T("app.language_env_overrides"), false)
+				}
+				return a, nil
 			case "i":
 				a.screen = screenDiskInfo
 				a.diskInfo = NewDiskInfoModel(a.client)
@@ -262,6 +278,15 @@ func (a *App) TokenResult() *SetupDoneMsg {
 
 // LastPath returns the directory the browser was in when the app exited.
 // Empty when the browser was never shown (e.g. setup screen).
+// ChosenLanguage is the language the user switched to with L, for main()
+// to save, or "" when they did not switch.
+func (a *App) ChosenLanguage() string {
+	if !a.languageChosen {
+		return ""
+	}
+	return i18n.Current().String()
+}
+
 func (a *App) LastPath() string {
 	if a.screen == screenBrowser || a.screen == screenFatalError {
 		return a.browser.path

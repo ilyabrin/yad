@@ -395,7 +395,7 @@ a filter do the letters stay as they are.
 </tr>
 <tr>
 <td><kbd>q</kbd> <kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>quit</td>
-<td colspan="2"></td>
+<td><kbd>L</kbd></td><td>switch between English and Russian; YaD remembers it</td>
 </tr>
 </table>
 
@@ -445,12 +445,12 @@ oauth:
   client_id: "your_client_id"
 ```
 
-| Setting        | What it does                                                                              |
-| -------------- | ----------------------------------------------------------------------------------------- |
-| `default_sort` | Starting sort order: `name`, `modified` or `size`. A leading `-` reverses it              |
-| `last_path`    | Folder to reopen on launch, updated when you quit. Set to `""` to always start at the top |
-| `language`     | Interface language: `ru`, `en`, or `auto` (the default) to follow the system              |
-| `oauth.*`      | Only needed if you use your own Yandex application instead of the built-in one            |
+| Setting        | What it does                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| `default_sort` | Starting sort order: `name`, `modified` or `size`. A leading `-` reverses it                           |
+| `last_path`    | Folder to reopen on launch, updated when you quit. Set to `""` to always start at the top              |
+| `language`     | Interface language: `ru`, `en`, or `auto` (the default) to follow the system. <kbd>L</kbd> sets it too |
+| `oauth.*`      | Only needed if you use your own Yandex application instead of the built-in one                         |
 
 | Environment variable | What it does                                                                    |
 | -------------------- | ------------------------------------------------------------------------------- |

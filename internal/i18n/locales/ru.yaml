@@ -1,4 +1,5 @@
 # Русский. Ключи те же, что в en.yaml.
+app.language_env_overrides: "Язык переключён. Задана YAD_LANG, поэтому при следующем запуске язык выберет она."
 auth.token_request_rejected_by_yandex: "Яндекс отклонил запрос токена (HTTP %d): %s - %s"
 browser.abort_in_progress_and_quit: "Прервать %s и выйти?"
 browser.any_other_key_to_close: "любая другая клавиша закроет"
@@ -78,6 +79,7 @@ cli.help: |-
     p                  поделиться         i  о Диске
     c                  копировать ссылку  t  корзина
     o                  открыть ссылку     q  выход
+    L                  сменить язык
 
   Исходный код: https://github.com/ilyabrin/yad
 common.loading: " Загрузка…"
@@ -116,6 +118,7 @@ hint.download: " скачать"
 hint.empty_trash: " очистить"
 hint.esc_cancel: "Esc отмена"
 hint.filter: " фильтр"
+hint.language: " язык"
 hint.mkdir: " папка"
 hint.move: " выбор"
 hint.next_field: " следующее поле   "

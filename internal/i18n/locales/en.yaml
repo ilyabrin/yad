@@ -1,4 +1,5 @@
 # English: the source of every key. Keep keys sorted.
+app.language_env_overrides: "Language switched. YAD_LANG is set, so it decides the language on the next start."
 auth.token_request_rejected_by_yandex: "token request rejected by Yandex (HTTP %d): %s - %s"
 browser.abort_in_progress_and_quit: "Abort %s in progress and quit?"
 browser.any_other_key_to_close: "any other key to close"
@@ -75,6 +76,7 @@ cli.help: |-
     p                  publish         i  disk info
     c                  copy URL        t  trash
     o                  open link       q  quit
+    L                  switch language
 
   Source: https://github.com/ilyabrin/yad
 common.loading: " Loading…"
@@ -113,6 +115,7 @@ hint.download: " download"
 hint.empty_trash: " empty"
 hint.esc_cancel: "Esc cancel"
 hint.filter: " filter"
+hint.language: " lang"
 hint.mkdir: " mkdir"
 hint.move: " move"
 hint.next_field: " next field   "
