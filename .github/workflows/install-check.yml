@@ -107,9 +107,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { distro: debian, image: "debian:stable-slim", ext: deb, install: "apt-get update -qq && apt-get install -y -qq ./pkg" }
-          - { distro: fedora, image: "fedora:latest", ext: rpm, install: "dnf install -y -q ./pkg" }
-          - { distro: alpine, image: "alpine:latest", ext: apk, install: "apk add -q --allow-untrusted ./pkg" }
+          - { distro: debian, image: "mirror.gcr.io/library/debian:stable-slim", ext: deb, install: "apt-get update -qq && apt-get install -y -qq ./pkg" }
+          - { distro: fedora, image: "mirror.gcr.io/library/fedora:latest", ext: rpm, install: "dnf install -y -q ./pkg" }
+          - { distro: alpine, image: "mirror.gcr.io/library/alpine:latest", ext: apk, install: "apk add -q --allow-untrusted ./pkg" }
     steps:
       - name: Download the package
         env:
