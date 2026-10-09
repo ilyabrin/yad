@@ -6,19 +6,22 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/x/ansi"
 	"github.com/ilyabrin/disk"
+	"github.com/ilyabrin/yad/internal/i18n"
 )
 
 // linkLifetimes are the choices for how long a new public link works. The
 // first one, forever, is the default and means no expiry.
-var linkLifetimes = []struct {
-	label string
-	d     time.Duration
-}{
-	{"forever", 0},
-	{"1 day", 24 * time.Hour},
-	{"7 days", 7 * 24 * time.Hour},
-	{"30 days", 30 * 24 * time.Hour},
+var linkLifetimes = []time.Duration{0, 24 * time.Hour, 7 * 24 * time.Hour, 30 * 24 * time.Hour}
+
+// lifetimeLabel names a choice of linkLifetimes in the current language.
+func lifetimeLabel(d time.Duration) string {
+	if d == 0 {
+		return i18n.T("share.forever")
+	}
+	days := int(d / (24 * time.Hour))
+	return i18n.N("share.days", days)
 }
 
 // ShareDialog asks how to protect a link before a file is published: how
@@ -34,7 +37,7 @@ type ShareDialog struct {
 // NewShareDialog builds the dialog for the resource called name.
 func NewShareDialog(name string) ShareDialog {
 	pw := textinput.New()
-	pw.Placeholder = "none"
+	pw.Placeholder = i18n.T("share.none")
 	pw.EchoMode = textinput.EchoPassword
 	pw.EchoCharacter = '•'
 	pw.Width = 24
@@ -78,7 +81,7 @@ func (d ShareDialog) Update(msg tea.KeyMsg) (ShareDialog, bool, bool) {
 // link. now is when the link is created, which the expiry counts from.
 func (d ShareDialog) Settings(now time.Time) *disk.PublicSettings {
 	s := &disk.PublicSettings{Password: d.password.Value()}
-	if lt := linkLifetimes[d.lifetime].d; lt > 0 {
+	if lt := linkLifetimes[d.lifetime]; lt > 0 {
 		s.ExpiresAt = now.Add(lt)
 	}
 	if s.Password == "" && s.ExpiresAt.IsZero() {
@@ -95,10 +98,10 @@ func protectionSummary(s *disk.PublicSettings) string {
 	}
 	var parts []string
 	if s.Password != "" {
-		parts = append(parts, "password")
+		parts = append(parts, i18n.T("share.protected_password"))
 	}
 	if !s.ExpiresAt.IsZero() {
-		parts = append(parts, "expires "+s.ExpiresAt.Format("2 Jan 15:04"))
+		parts = append(parts, i18n.T("share.expires")+s.ExpiresAt.Format(i18n.T("share.date_format")))
 	}
 	return "🔒 " + strings.Join(parts, " · ")
 }
@@ -112,30 +115,40 @@ func (d ShareDialog) View(width int) string {
 	}
 
 	var b strings.Builder
-	b.WriteString(StyleDialogTitle.Render("⇡ Share " + truncateRight(d.name, 40)))
+	b.WriteString(StyleDialogTitle.Render(i18n.T("share.title") + truncateRight(d.name, 40)))
 	b.WriteString("\n\n")
 
-	b.WriteString(label("Link works  ", d.focus == 0))
-	b.WriteString("‹ " + linkLifetimes[d.lifetime].label + " ›")
+	b.WriteString(label(pad(i18n.T("share.link_works")), d.focus == 0))
+	b.WriteString("‹ " + lifetimeLabel(linkLifetimes[d.lifetime]) + " ›")
 	b.WriteString("\n")
 	if d.focus == 0 {
-		b.WriteString(StyleMuted("            ←/→ to change"))
+		b.WriteString(StyleMuted(pad("") + i18n.T("share.to_change")))
 	}
 	b.WriteString("\n\n")
 
-	b.WriteString(label("Password    ", d.focus == 1))
+	b.WriteString(label(pad(i18n.T("share.password_label")), d.focus == 1))
 	b.WriteString(d.password.View())
 	b.WriteString("\n")
-	b.WriteString(StyleMuted("            optional; anyone opening the link must enter it"))
+	b.WriteString(StyleMuted(pad("") + i18n.T("share.optional_anyone_opening_the_link")))
 	b.WriteString("\n\n")
 
-	b.WriteString(StyleStatusKey.Render("↵") + " share   " +
-		StyleStatusKey.Render("tab") + " next field   " +
-		StyleMuted("Esc cancel"))
+	b.WriteString(StyleStatusKey.Render("↵") + i18n.T("hint.share") +
+		StyleStatusKey.Render("tab") + i18n.T("hint.next_field") +
+		StyleMuted(i18n.T("hint.esc_cancel")))
 
 	// As compact as the link dialog that follows it, but never wider than
 	// the window.
-	return StyleDialog.Width(min(shareDialogWidth, max(width-dialogMargin, dialogMinWidth))).Render(b.String())
+	return StyleDialog.Width(min(shareDialogWidth, dialogWidth(width))).Render(b.String())
 }
 
 const shareDialogWidth = 64
+
+// pad makes field labels one width, so the values line up in either
+// language.
+func pad(label string) string {
+	const width = 13
+	if n := width - ansi.StringWidth(label); n > 0 {
+		return label + strings.Repeat(" ", n)
+	}
+	return label + " "
+}

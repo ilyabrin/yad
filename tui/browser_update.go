@@ -2,7 +2,6 @@ package tui
 
 import (
 	"context"
-	"fmt"
 	"path"
 	"strings"
 	"time"
@@ -12,6 +11,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/ilyabrin/disk"
+	"github.com/ilyabrin/yad/internal/i18n"
 )
 
 func (m BrowserModel) Init() tea.Cmd {
@@ -36,7 +36,7 @@ func (m BrowserModel) loadDir(p string, offset int) tea.Cmd {
 		}
 		resource, errResp := m.client.GetMetadataWithOptions(ctx, p, opts)
 		if errResp != nil {
-			return loadedMsg{path: p, err: fmt.Errorf("%s: %s", errResp.Error, errResp.Message)}
+			return loadedMsg{path: p, err: newAPIError(errResp)}
 		}
 
 		var entries []entry
@@ -162,9 +162,9 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 
 	case clipboardDoneMsg:
 		if msg.err != nil {
-			return m.showMessage(iconErr+" Cannot copy to clipboard: "+msg.err.Error(), true), nil
+			return m.showMessage(iconErr+i18n.T("browser.cannot_copy_to_clipboard")+msg.err.Error(), true), nil
 		}
-		return m.showMessage(iconOK+" URL copied to clipboard", false), nil
+		return m.showMessage(iconOK+i18n.T("browser.url_copied_to_clipboard"), false), nil
 
 	case uploadStartedMsg:
 		m.uploadCh = msg.ch
@@ -210,7 +210,7 @@ func (m BrowserModel) Update(msg tea.Msg) (BrowserModel, tea.Cmd) {
 			m.pendingDownloads = m.pendingDownloads[1:]
 			localPath := path.Join(m.downloadDir, path.Base(next))
 			filename := path.Base(next)
-			m.progress = ProgressOverlay{Title: "Downloading", Filename: filename}
+			m.progress = ProgressOverlay{Title: i18n.T("browser.downloading"), Filename: filename}
 			return m, cmdStartDownload(m.client, next, localPath, filename)
 		}
 		m.selected = nil
@@ -319,7 +319,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			m.pendingUploadSrc = localPath
 			m.pendingUploadIsURL = false
 			suggested := path.Base(localPath)
-			m.inputDlg = NewInputDialog("Upload: destination name", "Enter filename on Disk (↵ to keep as is)", suggested)
+			m.inputDlg = NewInputDialog(i18n.T("browser.upload_destination_name"), i18n.T("browser.enter_filename_on_disk_to"), suggested)
 			m.inputDlg.SetValue(suggested)
 			m.mode = modeInputUploadName
 		}
@@ -355,7 +355,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 				filename = path.Base(src)
 			}
 			remotePath := path.Join(m.path, filename)
-			m.progress = ProgressOverlay{Title: "Uploading", Filename: filename}
+			m.progress = ProgressOverlay{Title: i18n.T("browser.uploading"), Filename: filename}
 			m.mode = modeUpload
 			return m, cmdStartUpload(m.client, src, remotePath)
 		}
@@ -380,7 +380,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			if suggested == "." || suggested == "/" {
 				suggested = ""
 			}
-			m.inputDlg = NewInputDialog("Upload URL: destination name", "Enter filename on Disk (↵ to keep as is)", "filename")
+			m.inputDlg = NewInputDialog(i18n.T("browser.upload_url_destination_name"), i18n.T("browser.enter_filename_on_disk_to"), i18n.T("browser.filename"))
 			m.inputDlg.SetValue(suggested)
 			m.mode = modeInputUploadName
 		}
@@ -400,7 +400,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			if localPath == "" || !ok {
 				return m, nil
 			}
-			m.progress = ProgressOverlay{Title: "Downloading", Filename: e.resource.Name}
+			m.progress = ProgressOverlay{Title: i18n.T("browser.downloading"), Filename: e.resource.Name}
 			m.mode = modeDownload
 			return m, cmdStartDownload(m.client, e.resource.Path, localPath, e.resource.Name)
 		}
@@ -426,7 +426,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			first := files[0]
 			filename := path.Base(first)
 			localPath := path.Join(dir, filename)
-			m.progress = ProgressOverlay{Title: "Downloading", Filename: filename}
+			m.progress = ProgressOverlay{Title: i18n.T("browser.downloading"), Filename: filename}
 			m.mode = modeDownload
 			m.pendingDownloads = files[1:]
 			m.downloadDir = dir
@@ -437,11 +437,11 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 	case modeUpload, modeDownload:
 		switch msg.String() {
 		case "q", "ctrl+c":
-			op := "upload"
+			op := i18n.T("browser.op_upload")
 			if m.mode == modeDownload {
-				op = "download"
+				op = i18n.T("browser.op_download")
 			}
-			m.confirm = NewConfirmDialog("Quit", "Abort "+op+" in progress and quit?")
+			m.confirm = NewConfirmDialog(i18n.T("browser.quit_title"), i18n.F("browser.abort_in_progress_and_quit", op))
 			m.mode = modeConfirmQuit
 			return m, nil
 		}
@@ -618,7 +618,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		return m, m.reloadCmd()
 
 	case key.Matches(msg, m.keys.NewDir):
-		m.inputDlg = NewInputDialog("New directory", "Enter name for the new folder", "folder name")
+		m.inputDlg = NewInputDialog(i18n.T("browser.new_directory"), i18n.T("browser.enter_name_for_the_new"), i18n.T("browser.folder_name"))
 		m.mode = modeInputNewDir
 
 	case key.Matches(msg, m.keys.Rename):
@@ -626,7 +626,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		if !ok {
 			return m, nil
 		}
-		m.inputDlg = NewInputDialog("Rename", "", "new name")
+		m.inputDlg = NewInputDialog(i18n.T("browser.rename_title"), "", i18n.T("browser.new_name"))
 		m.inputDlg.SetValue(e.resource.Name)
 		m.mode = modeInputRename
 
@@ -674,24 +674,24 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 			return m, nil
 		}
 		if len(m.selected) > 0 {
-			m.confirm = NewConfirmDialog("Delete", fmt.Sprintf("Delete %d selected items?", len(m.selected)))
+			m.confirm = NewConfirmDialog(i18n.T("browser.delete_title"), i18n.N("browser.delete_selected", len(m.selected)))
 			m.mode = modeConfirmBulkDelete
 		} else {
-			m.confirm = NewConfirmDialog("Delete", "Delete \""+e.resource.Name+"\"?")
+			m.confirm = NewConfirmDialog(i18n.T("browser.delete_title"), i18n.F("browser.delete_one", e.resource.Name))
 			m.mode = modeConfirmDelete
 		}
 
 	case key.Matches(msg, m.keys.Upload):
-		m.inputDlg = NewInputDialog("Upload file", "Enter the local path of the file to upload", "/path/to/file")
+		m.inputDlg = NewInputDialog(i18n.T("browser.upload_file"), i18n.T("browser.enter_the_local_path_of"), "/path/to/file")
 		m.mode = modeInputUpload
 
 	case key.Matches(msg, m.keys.UploadURL):
-		m.inputDlg = NewInputDialog("Upload from URL", "Enter the URL to upload to current directory", "https://")
+		m.inputDlg = NewInputDialog(i18n.T("browser.upload_from_url"), i18n.T("browser.enter_the_url_to_upload"), "https://")
 		m.mode = modeInputUploadURL
 
 	case key.Matches(msg, m.keys.Download):
 		if len(m.selected) > 0 {
-			m.inputDlg = NewInputDialog("Download selected", "Enter local destination directory", "./")
+			m.inputDlg = NewInputDialog(i18n.T("browser.download_selected"), i18n.T("browser.enter_local_destination_directory"), "./")
 			m.inputDlg.SetValue("./")
 			m.mode = modeInputDownloadDir
 		} else {
@@ -700,7 +700,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 				return m, nil
 			}
 			defaultPath := "./" + e.resource.Name
-			m.inputDlg = NewInputDialog("Download file", "Enter local destination path", defaultPath)
+			m.inputDlg = NewInputDialog(i18n.T("browser.download_file"), i18n.T("browser.enter_local_destination_path"), defaultPath)
 			m.inputDlg.SetValue(defaultPath)
 			m.mode = modeInputDownload
 		}
@@ -732,7 +732,7 @@ func (m BrowserModel) handleKey(msg tea.KeyMsg) (BrowserModel, tea.Cmd) {
 		}
 		url := e.resource.PublicURL
 		if url == "" {
-			return m.showMessage(iconErr+" No public URL. Press p to publish first", true), nil
+			return m.showMessage(iconErr+i18n.T("browser.no_public_url_press_p"), true), nil
 		}
 		return m, cmdCopyToClipboard(url)
 	}

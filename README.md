@@ -341,6 +341,10 @@ Nothing to memorise up front. The line at the bottom of the screen always lists
 the main keys, and `yad --help` prints them all. Arrow keys work everywhere, and
 the `hjkl` alternatives are there for people who like them.
 
+Keys work in a Russian or Ukrainian keyboard layout too: <kbd>в</kbd> does
+what <kbd>d</kbd> does, since it is the same key. Only when you type a name or
+a filter do the letters stay as they are.
+
 ### Browsing your files
 
 <table>
@@ -391,7 +395,7 @@ the `hjkl` alternatives are there for people who like them.
 </tr>
 <tr>
 <td><kbd>q</kbd> <kbd>Ctrl</kbd>+<kbd>C</kbd></td><td>quit</td>
-<td colspan="2"></td>
+<td><kbd>L</kbd></td><td>switch between English and Russian; YaD remembers it</td>
 </tr>
 </table>
 
@@ -434,21 +438,24 @@ token_expiry: "2026-06-01T12:00:00Z"
 # Optional: how you like things to look.
 default_sort: "-modified"
 last_path: "disk:/photos"
+language: "ru"
 
 # Optional: only if you registered your own Yandex application.
 oauth:
   client_id: "your_client_id"
 ```
 
-| Setting        | What it does                                                                              |
-| -------------- | ----------------------------------------------------------------------------------------- |
-| `default_sort` | Starting sort order: `name`, `modified` or `size`. A leading `-` reverses it              |
-| `last_path`    | Folder to reopen on launch, updated when you quit. Set to `""` to always start at the top |
-| `oauth.*`      | Only needed if you use your own Yandex application instead of the built-in one            |
+| Setting        | What it does                                                                                           |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| `default_sort` | Starting sort order: `name`, `modified` or `size`. A leading `-` reverses it                           |
+| `last_path`    | Folder to reopen on launch, updated when you quit. Set to `""` to always start at the top              |
+| `language`     | Interface language: `ru`, `en`, or `auto` (the default) to follow the system. <kbd>L</kbd> sets it too |
+| `oauth.*`      | Only needed if you use your own Yandex application instead of the built-in one                         |
 
-| Environment variable | What it does                                                             |
-| -------------------- | ------------------------------------------------------------------------ |
-| `YANDEX_DISK_TOKEN`  | Uses this token instead of the saved one, and leaves the saved one alone |
+| Environment variable | What it does                                                                    |
+| -------------------- | ------------------------------------------------------------------------------- |
+| `YANDEX_DISK_TOKEN`  | Uses this token instead of the saved one, and leaves the saved one alone        |
+| `YAD_LANG`           | Interface language for this run: `ru` or `en`. Wins over the `language` setting |
 
 > [!IMPORTANT]
 > While `YANDEX_DISK_TOKEN` is set, YaD will not renew the token by itself.

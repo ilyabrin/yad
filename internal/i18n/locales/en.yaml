@@ -1,0 +1,201 @@
+# English: the source of every key. Keep keys sorted.
+app.language_env_overrides: "Language switched. YAD_LANG is set, so it decides the language on the next start."
+auth.token_request_rejected_by_yandex: "token request rejected by Yandex (HTTP %d): %s - %s"
+browser.abort_in_progress_and_quit: "Abort %s in progress and quit?"
+browser.any_other_key_to_close: "any other key to close"
+browser.cannot_copy_to_clipboard: " Cannot copy to clipboard: "
+browser.delete_one: "Delete \"%s\"?"
+browser.delete_selected:
+  one: "Delete %d selected item?"
+  other: "Delete %d selected items?"
+browser.delete_title: "Delete"
+browser.download_file: "Download file"
+browser.download_selected: "Download selected"
+browser.downloading: "Downloading"
+browser.empty_directory: "(empty directory)"
+browser.enter_filename_on_disk_to: "Enter filename on Disk (↵ to keep as is)"
+browser.enter_local_destination_directory: "Enter local destination directory"
+browser.enter_local_destination_path: "Enter local destination path"
+browser.enter_name_for_the_new: "Enter name for the new folder"
+browser.enter_the_local_path_of: "Enter the local path of the file to upload"
+browser.enter_the_url_to_upload: "Enter the URL to upload to current directory"
+browser.filename: "filename"
+browser.filter_placeholder: "filter…"
+browser.filter_status: "filter: \"%s\""
+browser.folder_name: "folder name"
+browser.matches:
+  one: "%d match"
+  other: "%d matches"
+browser.more_to_load: "▼  %d more  (↓ to load)"
+browser.new_directory: "New directory"
+browser.new_name: "new name"
+browser.no_matches_for: "no matches for \"%s\""
+browser.no_public_url_press_p: " No public URL. Press p to publish first"
+browser.op_download: "download"
+browser.op_upload: "upload"
+browser.previous_page: "▲ previous page"
+browser.public_link: "⇡ Public link"
+browser.quit_title: "Quit"
+browser.rename_title: "Rename"
+browser.selected:
+  one: "%d selected"
+  other: "%d selected"
+browser.upload_destination_name: "Upload: destination name"
+browser.upload_file: "Upload file"
+browser.upload_from_url: "Upload from URL"
+browser.upload_url_destination_name: "Upload URL: destination name"
+browser.uploading: "Uploading"
+browser.url_copied_to_clipboard: " URL copied to clipboard"
+cli.help: |-
+  yad: Yandex.Disk terminal UI
+
+  Usage:
+    yad [flag]
+
+  Flags:
+    -v, --version   print version and exit
+    -h, --help      print this help and exit
+
+  Config:
+    ~/.yad/config.yaml   tokens and UI preferences
+
+  Environment:
+    YANDEX_DISK_TOKEN   override stored token (useful for CI/scripting)
+    YAD_LANG            interface language for this run: ru or en (otherwise
+                        "language:" in the config, or the system language)
+
+  Keybindings (inside the app):
+    ↑/k  ↓/j           navigate        u  upload file
+    ↵/→/l              open dir        U  upload from URL
+    ←/h/Backspace      go up           d  download
+    Space              select          D  delete
+    Ctrl+A             select all      n  new directory
+    /                  filter by name  r  rename
+    Esc                clear filter    s  cycle sort
+    m                  file info       R  refresh
+    p                  publish         i  disk info
+    c                  copy URL        t  trash
+    o                  open link       q  quit
+    L                  switch language
+
+  Source: https://github.com/ilyabrin/yad
+common.loading: " Loading…"
+common.press_any_key: "Press any key to continue"
+dialog.confirm_esc_cancel: "↵ confirm   Esc cancel"
+dialog.done: " Done  "
+dialog.no: "No"
+dialog.select_confirm_esc_cancel: "←/→ select   ↵ confirm   Esc cancel"
+dialog.yes: "Yes"
+diskinfo.applications: "Applications"
+diskinfo.country: "Country"
+diskinfo.display_name: "Display name"
+diskinfo.downloads: "Downloads"
+diskinfo.free: "Free"
+diskinfo.login: "Login"
+diskinfo.max_file_size: "Max file size"
+diskinfo.no: "no"
+diskinfo.paid_account: "Paid account"
+diskinfo.percent_used: "  %.1f%% used"
+diskinfo.photostream: "Photostream"
+diskinfo.screenshots: "Screenshots"
+diskinfo.social: "Social"
+diskinfo.storage: "Storage"
+diskinfo.system_folders: "System folders"
+diskinfo.title: "  YaD  ·  Disk Info"
+diskinfo.total: "Total"
+diskinfo.trash: "Trash"
+diskinfo.used: "Used"
+diskinfo.user: "User"
+diskinfo.yes: "yes"
+hint.back: " back"
+hint.confirm: " confirm   "
+hint.copy: " copy   "
+hint.delete: " delete"
+hint.download: " download"
+hint.empty_trash: " empty"
+hint.esc_cancel: "Esc cancel"
+hint.filter: " filter"
+hint.language: " lang"
+hint.mkdir: " mkdir"
+hint.move: " move"
+hint.next_field: " next field   "
+hint.open: " open"
+hint.open_link: " open   "
+hint.publish: " publish"
+hint.quit: " quit"
+hint.refresh: " refresh   "
+hint.rename: " rename"
+hint.restore: " restore"
+hint.select: " select"
+hint.share: " share   "
+hint.sort: " sort"
+hint.trash: " trash"
+hint.unpublish: " unpublish   "
+hint.upload: " upload"
+info.any_key_to_close: "any key to close"
+info.created: "Created"
+info.kind_dir: "directory"
+info.kind_file: "file"
+info.media: "Media"
+info.modified: "Modified"
+info.name: "Name"
+info.public: "Public"
+info.size: "Size"
+info.title: " Info"
+info.type: "Type"
+ops.api_access_is_disabled_your: "API access is disabled: your files exceed your available storage."
+ops.authentication_error: "Authentication Error"
+ops.free_up_space_or_upgrade: "Free up space or upgrade your Yandex Disk plan, then restart `yad`."
+ops.re_run_yad_to_authenticate: "Re-run `yad` to authenticate again."
+ops.storage_overdraft: "Storage Overdraft"
+ops.unknown_error: "unknown error"
+ops.upload_failed_on_the_server: "upload failed on the server (status %q)"
+ops.your_session_has_expired_or: "Your session has expired or the token is invalid."
+setup.any_key: "any key"
+setup.authorised_starting_yad: "✓ Authorised! Starting YaD…"
+setup.browser_opened_automatically: "✓ Browser opened automatically"
+setup.could_not_open_browser_automatically: "Could not open browser automatically."
+setup.exchanging_code_for_token: "  Exchanging code for token…"
+setup.get_a_token_at_https: "Get a token at https://oauth.yandex.ru"
+setup.i_ve_authorised_show_code: " - I've authorised, show code input   "
+setup.log_in_and_grant_access: "Log in and grant access. Yandex will show a verification code."
+setup.make_the_window_taller_or: "Make the window taller or zoom out to see a QR code for your phone."
+setup.open_this_url_manually: "Open this URL manually:"
+setup.or_scan_this_with_your: "Or scan this with your phone:"
+setup.paste_the_code_shown_on: "Paste the code shown on the Yandex page:"
+setup.paste_the_verification_code_from: "Paste the verification code from Yandex…"
+setup.paste_token_placeholder: "Paste your Yandex OAuth token…"
+setup.paste_token_title: "Paste your Yandex OAuth token"
+setup.press_any_key_to_exit: "Press any key to exit."
+setup.step_1_authorise_yad: "Step 1 - Authorise YaD"
+setup.step_2_enter_verification_code: "Step 2 - Enter verification code"
+setup.title: "  YaD  ·  Setup"
+share.date_format: "2 Jan 15:04"
+share.days:
+  one: "%d day"
+  other: "%d days"
+share.expires: "expires "
+share.forever: "forever"
+share.link_works: "Link works"
+share.none: "none"
+share.optional_anyone_opening_the_link: "optional; anyone opening the link must enter it"
+share.password_label: "Password"
+share.protected_password: "password"
+share.title: "⇡ Share "
+share.to_change: "←/→ to change"
+sort.date_asc: "date ↑"
+sort.date_desc: "date ↓"
+sort.name_asc: "name ↑"
+sort.name_desc: "name ↓"
+sort.size_asc: "size ↑"
+sort.size_desc: "size ↓"
+trash.delete_permanently: "Delete permanently"
+trash.empty_trash: "Empty trash"
+trash.is_empty: "Trash is empty"
+trash.items:
+  one: "%d item"
+  other: "%d items"
+trash.permanently_delete: "Permanently delete \"%s\"?"
+trash.permanently_delete_all_items_in: "Permanently delete ALL items in trash?"
+trash.title: "  YaD  ·  Trash"
+trash.trash_emptied: " Trash emptied"

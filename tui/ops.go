@@ -2,6 +2,7 @@ package tui
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"runtime"
@@ -11,6 +12,7 @@ import (
 	"github.com/atotto/clipboard"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/ilyabrin/disk"
+	"github.com/ilyabrin/yad/internal/i18n"
 )
 
 // --- Upload ---
@@ -274,7 +276,7 @@ func waitForOperation(ctx context.Context, client *disk.Client, href string) err
 		case operationSuccess:
 			return nil
 		default:
-			return fmt.Errorf("upload failed on the server (status %q)", op.Status)
+			return fmt.Errorf(i18n.T("ops.upload_failed_on_the_server"), op.Status)
 		}
 
 		select {
@@ -325,14 +327,18 @@ func newAPIError(e *disk.ErrorResponse) error {
 	if e == nil {
 		return nil
 	}
-	msg := e.Message
-	if msg == "" {
-		msg = e.Error
+	// Yandex answers in both languages: Message in Russian, Description in
+	// English. Show the one matching the interface, the other as a fallback.
+	first, second := e.Description, e.Message
+	if i18n.Current() == i18n.Russian {
+		first, second = e.Message, e.Description
 	}
-	if e.Description != "" {
-		msg += ": " + e.Description
+	for _, msg := range []string{first, second, e.Error} {
+		if msg != "" {
+			return errors.New(msg)
+		}
 	}
-	return fmt.Errorf("%s", msg)
+	return errors.New(i18n.T("ops.unknown_error"))
 }
 
 // isAuthError reports whether err is an authentication failure (HTTP 401/403
@@ -352,9 +358,9 @@ func isAuthError(err error) bool {
 // Used when a token refresh has failed or is not available.
 func authFatalMsg(err error) *fatalErrorMsg {
 	return &fatalErrorMsg{
-		title:  "Authentication Error",
-		body:   "Your session has expired or the token is invalid.",
-		hint:   "Re-run `yad` to authenticate again.",
+		title:  i18n.T("ops.authentication_error"),
+		body:   i18n.T("ops.your_session_has_expired_or"),
+		hint:   i18n.T("ops.re_run_yad_to_authenticate"),
 		detail: err,
 	}
 }
@@ -374,9 +380,9 @@ func asFatalErrorMsg(err error) *fatalErrorMsg {
 	if strings.Contains(s, "DiskAPIDisabledForOverdraftUserError") ||
 		strings.Contains(s, "OverDraft") || strings.Contains(s, "overdraft") {
 		return &fatalErrorMsg{
-			title:  "Storage Overdraft",
-			body:   "API access is disabled: your files exceed your available storage.",
-			hint:   "Free up space or upgrade your Yandex Disk plan, then restart `yad`.",
+			title:  i18n.T("ops.storage_overdraft"),
+			body:   i18n.T("ops.api_access_is_disabled_your"),
+			hint:   i18n.T("ops.free_up_space_or_upgrade"),
 			detail: err,
 		}
 	}

@@ -24,6 +24,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/ilyabrin/yad/internal/i18n"
 )
 
 // ---- Build-time constants --------------------------------------------------
@@ -220,7 +222,7 @@ func postToken(ctx context.Context, data url.Values) (*TokenResponse, error) {
 			ErrorDescription string `json:"error_description"`
 		}
 		_ = json.NewDecoder(resp.Body).Decode(&errBody)
-		return nil, fmt.Errorf("token request rejected by Yandex (HTTP %d): %s - %s",
+		return nil, fmt.Errorf(i18n.T("auth.token_request_rejected_by_yandex"),
 			resp.StatusCode, errBody.Error, errBody.ErrorDescription)
 	}
 

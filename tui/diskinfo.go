@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ilyabrin/disk"
+	"github.com/ilyabrin/yad/internal/i18n"
 )
 
 // --- Messages ---------------------------------------------------------------
@@ -114,12 +115,12 @@ func (m DiskInfoModel) View() string {
 	var b strings.Builder
 
 	// Title bar
-	title := StyleTitle.Render("  YaD  ·  Disk Info")
+	title := StyleTitle.Render(i18n.T("diskinfo.title"))
 	b.WriteString(title + strings.Repeat(" ", max(0, m.width-lipgloss.Width(title))))
 	b.WriteByte('\n')
 
 	if m.loading {
-		msg := m.spinner.View() + " Loading…"
+		msg := m.spinner.View() + i18n.T("common.loading")
 		for i := 0; i < m.height/2-1; i++ {
 			b.WriteByte('\n')
 		}
@@ -135,7 +136,7 @@ func (m DiskInfoModel) View() string {
 
 	// Status bar
 	b.WriteByte('\n')
-	hints := StyleStatusKey.Render("R") + " refresh   " + StyleStatusKey.Render("q/←") + " back"
+	hints := StyleStatusKey.Render("R") + i18n.T("hint.refresh") + StyleStatusKey.Render("q/←") + i18n.T("hint.back")
 	b.WriteString(StyleStatusBar.Width(m.width).Render(hints))
 
 	return b.String()
@@ -173,7 +174,7 @@ func (m DiskInfoModel) viewContent() string {
 	filled := int(float64(barWidth) * usedPct / 100)
 	bar := StyleProgressFull.Render(strings.Repeat(" ", filled)) +
 		StyleProgressEmpty.Render(strings.Repeat(" ", barWidth-filled))
-	pctLabel := fmt.Sprintf("  %.1f%% used", usedPct)
+	pctLabel := i18n.F("diskinfo.percent_used", usedPct)
 
 	var content strings.Builder
 
@@ -181,23 +182,23 @@ func (m DiskInfoModel) viewContent() string {
 
 	// User section
 	if m.info.User != nil {
-		content.WriteString(StyleDialogTitle.PaddingLeft(4).Render("User"))
+		content.WriteString(StyleDialogTitle.PaddingLeft(4).Render(i18n.T("diskinfo.user")))
 		content.WriteString("\n")
-		content.WriteString(row("Login", m.info.User.Login))
-		content.WriteString(row("Display name", m.info.User.DisplayName))
-		content.WriteString(row("Country", m.info.User.Country))
-		content.WriteString(row("Paid account", boolStr(m.info.IsPaid)))
+		content.WriteString(row(i18n.T("diskinfo.login"), m.info.User.Login))
+		content.WriteString(row(i18n.T("diskinfo.display_name"), m.info.User.DisplayName))
+		content.WriteString(row(i18n.T("diskinfo.country"), m.info.User.Country))
+		content.WriteString(row(i18n.T("diskinfo.paid_account"), boolStr(m.info.IsPaid)))
 		content.WriteString("\n")
 	}
 
 	// Storage section
-	content.WriteString(StyleDialogTitle.PaddingLeft(4).Render("Storage"))
+	content.WriteString(StyleDialogTitle.PaddingLeft(4).Render(i18n.T("diskinfo.storage")))
 	content.WriteString("\n")
-	content.WriteString(row("Total", disk.FormatFileSize(total)))
-	content.WriteString(row("Used", disk.FormatFileSize(used)+fmt.Sprintf("  (%.1f%%)", usedPct)))
-	content.WriteString(row("Free", disk.FormatFileSize(total-used)))
-	content.WriteString(row("Trash", disk.FormatFileSize(trash)))
-	content.WriteString(row("Max file size", disk.FormatFileSize(m.info.MaxFileSize)))
+	content.WriteString(row(i18n.T("diskinfo.total"), disk.FormatFileSize(total)))
+	content.WriteString(row(i18n.T("diskinfo.used"), disk.FormatFileSize(used)+fmt.Sprintf("  (%.1f%%)", usedPct)))
+	content.WriteString(row(i18n.T("diskinfo.free"), disk.FormatFileSize(total-used)))
+	content.WriteString(row(i18n.T("diskinfo.trash"), disk.FormatFileSize(trash)))
+	content.WriteString(row(i18n.T("diskinfo.max_file_size"), disk.FormatFileSize(m.info.MaxFileSize)))
 	content.WriteString("\n")
 
 	// Usage bar
@@ -209,15 +210,15 @@ func (m DiskInfoModel) viewContent() string {
 	// System folders section
 	if m.info.SystemFolders != nil {
 		content.WriteString("\n")
-		content.WriteString(StyleDialogTitle.PaddingLeft(4).Render("System folders"))
+		content.WriteString(StyleDialogTitle.PaddingLeft(4).Render(i18n.T("diskinfo.system_folders")))
 		content.WriteString("\n")
 		sf := m.info.SystemFolders
 		for _, pair := range [][2]string{
-			{"Downloads", sf.Downloads},
-			{"Screenshots", sf.Screenshots},
-			{"Applications", sf.Applications},
-			{"Photostream", sf.Photostream},
-			{"Social", sf.Social},
+			{i18n.T("diskinfo.downloads"), sf.Downloads},
+			{i18n.T("diskinfo.screenshots"), sf.Screenshots},
+			{i18n.T("diskinfo.applications"), sf.Applications},
+			{i18n.T("diskinfo.photostream"), sf.Photostream},
+			{i18n.T("diskinfo.social"), sf.Social},
 		} {
 			if pair[1] != "" {
 				content.WriteString(row(pair[0], pair[1]))
@@ -230,7 +231,7 @@ func (m DiskInfoModel) viewContent() string {
 
 func boolStr(b bool) string {
 	if b {
-		return "yes"
+		return i18n.T("diskinfo.yes")
 	}
-	return "no"
+	return i18n.T("diskinfo.no")
 }

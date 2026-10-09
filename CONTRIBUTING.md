@@ -120,6 +120,37 @@ Yandex.Disk filenames are frequently Cyrillic, so never slice strings to fit a
 column. Use `truncateRight` and `truncateLeft` from
 [`tui/text.go`](tui/text.go).
 
+Every piece of text the user sees comes from a translation file, never from
+a string in the code. Call `i18n.T("trash.is_empty")`, `i18n.F` to format,
+or `i18n.N` for a count, and add the key to every file in
+[`internal/i18n/locales`](internal/i18n/locales). Keys must be written out as
+literals: the tests read them from the code.
+
+## Translating YaD
+
+Translations live in [`internal/i18n/locales`](internal/i18n/locales), one
+YAML file per language, named by its code: `en.yaml`, `ru.yaml`. They are
+built into the binary, so users never install anything extra. `en.yaml` is
+the source; whatever a translation lacks is shown in English.
+
+To add a language:
+
+1. Copy `en.yaml` to `<code>.yaml`, for example `uk.yaml` or `kk.yaml`.
+2. Translate the values. Keep the keys, the `%d`, `%s` and `%q` in the same
+   order, and the spaces at the start or end of a value: they separate a key
+   from its hint in the status bar.
+3. Counts have plural forms. English needs `one` and `other`. Russian,
+   Ukrainian and Belarusian need `one`, `few` and `many`. A language that
+   counts differently needs its rule in `pluralCategory` in
+   [`internal/i18n/i18n.go`](internal/i18n/i18n.go).
+4. Run `go test ./...`. It fails on a missing or extra key, a changed `%`
+   verb, or a missing plural form, and the layout tests check that every
+   screen still fits a narrow window.
+
+YaD picks the language from `YAD_LANG`, then `language:` in the config, then
+`LC_ALL`, `LC_MESSAGES` and `LANG`, then the Windows display language.
+Try yours with `YAD_LANG=<code> yad`.
+
 ## Documentation
 
 The project ships English and Russian READMEs. If you change one, please change
