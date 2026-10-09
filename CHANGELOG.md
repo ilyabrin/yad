@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [v1.9.0] - 2026-10-10
+
+### Added
+
+- **A Russian interface.** YaD speaks Russian or English, chosen from the system language. Set `language: ru` or `en` in the config, or `YAD_LANG` for a single run, to choose yourself
+- <kbd>L</kbd> switches the language; the title bar shows which one is on, and YaD remembers the choice
+- Hotkeys work in a Russian or Ukrainian keyboard layout: <kbd>в</kbd> does what <kbd>d</kbd> does. Text you type, such as a filter or a file name, stays as typed
+- Translations live in files, one per language; CONTRIBUTING explains how to add one
+
+### Fixed
+
+- Errors from Yandex are shown in the interface language, instead of Russian and English glued together
+- In a narrow window the trash list no longer wraps and pushes the title off screen, and dialogs no longer run off a 40-column screen
+
 ## [v1.8.0] - 2026-10-08
 
 ### Added
@@ -174,7 +188,8 @@ All notable changes to this project will be documented in this file.
 - `YANDEX_DISK_TOKEN` environment variable for CI / scripting
 - Support for user-supplied OAuth credentials via config (`oauth.client_id`, `oauth.client_secret`)
 
-[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/ilyabrin/yad/compare/v1.9.0...HEAD
+[v1.9.0]: https://github.com/ilyabrin/yad/compare/v1.8.0...v1.9.0
 [v1.8.0]: https://github.com/ilyabrin/yad/compare/v1.7.1...v1.8.0
 [v1.7.1]: https://github.com/ilyabrin/yad/compare/v1.7.0...v1.7.1
 [v1.7.0]: https://github.com/ilyabrin/yad/compare/v1.6.0...v1.7.0
