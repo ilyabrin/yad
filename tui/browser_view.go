@@ -265,21 +265,34 @@ func (m BrowserModel) viewStatusBar() string {
 		StyleStatusKey.Render("t") + " trash",
 		StyleStatusKey.Render("q") + " quit",
 	}
-	// A bar wider than the window wraps and pushes the title off screen, so
-	// drop hints from the end until it fits, always keeping "quit".
-	room := m.width - 2 - lipgloss.Width(left) - 1
+	return statusBar(m.width, left, hints)
+}
+
+// statusBar lays out a bottom bar: left-aligned status, right-aligned key
+// hints. A bar wider than the window wraps and pushes the title off screen,
+// so hints are dropped from the end until it fits, always keeping the last
+// one (quit, or back).
+func statusBar(width int, left string, hints []string) string {
+	room := width - 2 - lipgloss.Width(left) - 1
 	right := strings.Join(hints, "  ")
 	for len(hints) > 1 && lipgloss.Width(right) > room {
-		hints = append(hints[:len(hints)-2], hints[len(hints)-1])
+		hints = append(hints[:len(hints)-2:len(hints)-2], hints[len(hints)-1])
 		right = strings.Join(hints, "  ")
 	}
 	if lipgloss.Width(right) > room {
 		right = ""
 	}
 
-	gap := max(m.width-lipgloss.Width(left)-lipgloss.Width(right)-2, 1)
-	bar := truncateRight(left+spaces(gap)+right, max(m.width-2, 0))
-	return StyleStatusBar.Width(m.width).Render(bar)
+	gap := max(width-lipgloss.Width(left)-lipgloss.Width(right)-2, 1)
+	bar := truncateRight(left+spaces(gap)+right, max(width-2, 0))
+	return StyleStatusBar.Width(width).Render(bar)
+}
+
+// dialogWidth is the width of a dialog's content: roomy in a wide window,
+// never narrower than dialogMinWidth unless the window itself is, and never
+// so wide that the border runs off screen.
+func dialogWidth(width int) int {
+	return max(min(max(width-dialogMargin, dialogMinWidth), width-2), 0)
 }
 
 func (m BrowserModel) viewMetadata(e entry) string {

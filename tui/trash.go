@@ -420,7 +420,29 @@ func (m TrashModel) viewList(height int) string {
 
 	// the two-space gaps before the date and origin columns take 2 more cells
 	// than colDateWidth already counts; miss them and every row wraps
-	nameWidth := max(m.width-colSizeWidth-colDateWidth-trashOriginWidth-colRowPadding-2, colNameMinWidth)
+	// Columns: padding and icon, name, size, then the deletion date and where
+	// the item came from. In a narrow window the origin goes first, then the
+	// date, so the name always keeps enough room.
+	const (
+		fixedCols  = 1 + 2 + colSizeWidth // left padding, icon, size
+		dateCols   = 2 + colDateWidth - 1 // gap, date
+		originCols = 2 + trashOriginWidth // gap, origin
+	)
+	showDate, showOrigin := true, true
+	if m.width < fixedCols+colNameMinWidth+dateCols+originCols {
+		showOrigin = false
+	}
+	if m.width < fixedCols+colNameMinWidth+dateCols {
+		showDate = false
+	}
+	nameWidth := m.width - fixedCols
+	if showDate {
+		nameWidth -= dateCols
+	}
+	if showOrigin {
+		nameWidth -= originCols
+	}
+	nameWidth = max(nameWidth, colNameMinWidth)
 	originWidth := trashOriginWidth
 
 	var rows []string
@@ -447,14 +469,17 @@ func (m TrashModel) viewList(height int) string {
 			}
 		}
 
-		row := lipgloss.JoinHorizontal(lipgloss.Top,
-			lipgloss.NewStyle().Width(nameWidth+2).Render(nameStyled),
+		cells := []string{
+			lipgloss.NewStyle().Width(nameWidth + 2).Render(nameStyled),
 			StyleSize.Render(disk.FormatFileSize(item.Size)),
-			"  ",
-			StyleDate.Render(deleted),
-			"  ",
-			lipgloss.NewStyle().Foreground(colorMuted).Width(originWidth).Render(origin),
-		)
+		}
+		if showDate {
+			cells = append(cells, "  ", StyleDate.Render(deleted))
+		}
+		if showOrigin {
+			cells = append(cells, "  ", lipgloss.NewStyle().Foreground(colorMuted).Width(originWidth).Render(origin))
+		}
+		row := lipgloss.JoinHorizontal(lipgloss.Top, cells...)
 
 		if selected {
 			row = StyleItemSelected.Width(m.width).Render(row)
@@ -483,11 +508,5 @@ func (m TrashModel) viewStatusBar() string {
 		StyleStatusKey.Render("E") + " empty",
 		StyleStatusKey.Render("q/←") + " back",
 	}
-	right := strings.Join(hints, "  ")
-
-	gap := m.width - lipgloss.Width(left) - lipgloss.Width(right) - 2
-	if gap < 1 {
-		gap = 1
-	}
-	return StyleStatusBar.Width(m.width).Render(left + spaces(gap) + right)
+	return statusBar(m.width, left, hints)
 }

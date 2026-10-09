@@ -135,7 +135,7 @@ func (d ShareDialog) View(width int) string {
 
 	// As compact as the link dialog that follows it, but never wider than
 	// the window.
-	return StyleDialog.Width(min(shareDialogWidth, max(width-dialogMargin, dialogMinWidth))).Render(b.String())
+	return StyleDialog.Width(min(shareDialogWidth, dialogWidth(width))).Render(b.String())
 }
 
 const shareDialogWidth = 64

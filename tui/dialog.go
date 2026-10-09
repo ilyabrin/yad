@@ -71,7 +71,7 @@ func (d ConfirmDialog) View(width int) string {
 	b.WriteString("\n\n")
 	b.WriteString(StyleMuted("←/→ select   ↵ confirm   Esc cancel"))
 
-	return StyleDialog.Width(max(width-dialogMargin, dialogMinWidth)).Render(b.String())
+	return StyleDialog.Width(dialogWidth(width)).Render(b.String())
 }
 
 // InputDialog is a single-line text input overlay.
@@ -124,7 +124,7 @@ func (d InputDialog) View(width int) string {
 	b.WriteString("\n\n")
 	b.WriteString(StyleMuted("↵ confirm   Esc cancel"))
 
-	return StyleDialog.Width(max(width-dialogMargin, dialogMinWidth)).Render(b.String())
+	return StyleDialog.Width(dialogWidth(width)).Render(b.String())
 }
 
 // ProgressOverlay renders an upload/download progress bar.
@@ -176,5 +176,5 @@ func (p ProgressOverlay) View(width int) string {
 		b.WriteString(bar)
 	}
 
-	return StyleDialog.Width(max(width-dialogMargin, dialogMinWidth)).Render(b.String())
+	return StyleDialog.Width(dialogWidth(width)).Render(b.String())
 }
