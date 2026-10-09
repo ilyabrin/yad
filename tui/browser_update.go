@@ -2,7 +2,6 @@ package tui
 
 import (
 	"context"
-	"fmt"
 	"path"
 	"strings"
 	"time"
@@ -37,7 +36,7 @@ func (m BrowserModel) loadDir(p string, offset int) tea.Cmd {
 		}
 		resource, errResp := m.client.GetMetadataWithOptions(ctx, p, opts)
 		if errResp != nil {
-			return loadedMsg{path: p, err: fmt.Errorf("%s: %s", errResp.Error, errResp.Message)}
+			return loadedMsg{path: p, err: newAPIError(errResp)}
 		}
 
 		var entries []entry

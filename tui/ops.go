@@ -2,6 +2,7 @@ package tui
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"runtime"
@@ -326,14 +327,18 @@ func newAPIError(e *disk.ErrorResponse) error {
 	if e == nil {
 		return nil
 	}
-	msg := e.Message
-	if msg == "" {
-		msg = e.Error
+	// Yandex answers in both languages: Message in Russian, Description in
+	// English. Show the one matching the interface, the other as a fallback.
+	first, second := e.Description, e.Message
+	if i18n.Current() == i18n.Russian {
+		first, second = e.Message, e.Description
 	}
-	if e.Description != "" {
-		msg += ": " + e.Description
+	for _, msg := range []string{first, second, e.Error} {
+		if msg != "" {
+			return errors.New(msg)
+		}
 	}
-	return fmt.Errorf("%s", msg)
+	return errors.New(i18n.T("ops.unknown_error"))
 }
 
 // isAuthError reports whether err is an authentication failure (HTTP 401/403
