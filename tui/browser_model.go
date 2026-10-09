@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ilyabrin/disk"
+	"github.com/ilyabrin/yad/internal/i18n"
 )
 
 const pageSize = 100
@@ -146,17 +147,17 @@ var sortCycle = []string{"name", "-name", "modified", "-modified", "size", "-siz
 func sortLabel(s string) string {
 	switch s {
 	case "name":
-		return "name ↑"
+		return i18n.T("sort.name_asc")
 	case "-name":
-		return "name ↓"
+		return i18n.T("sort.name_desc")
 	case "modified":
-		return "date ↑"
+		return i18n.T("sort.date_asc")
 	case "-modified":
-		return "date ↓"
+		return i18n.T("sort.date_desc")
 	case "size":
-		return "size ↑"
+		return i18n.T("sort.size_asc")
 	case "-size":
-		return "size ↓"
+		return i18n.T("sort.size_desc")
 	default:
 		return s
 	}
@@ -180,7 +181,7 @@ func NewBrowserModel(client *disk.Client, defaultSort, lastPath string) BrowserM
 	sp.Style = lipgloss.NewStyle().Foreground(colorPrimary)
 
 	fi := textinput.New()
-	fi.Placeholder = "filter…"
+	fi.Placeholder = i18n.T("browser.filter_placeholder")
 	fi.CharLimit = 128
 
 	sort := defaultSort

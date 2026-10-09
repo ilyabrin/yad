@@ -434,6 +434,7 @@ token_expiry: "2026-06-01T12:00:00Z"
 # Optional: how you like things to look.
 default_sort: "-modified"
 last_path: "disk:/photos"
+language: "ru"
 
 # Optional: only if you registered your own Yandex application.
 oauth:
@@ -444,11 +445,13 @@ oauth:
 | -------------- | ----------------------------------------------------------------------------------------- |
 | `default_sort` | Starting sort order: `name`, `modified` or `size`. A leading `-` reverses it              |
 | `last_path`    | Folder to reopen on launch, updated when you quit. Set to `""` to always start at the top |
+| `language`     | Interface language: `ru`, `en`, or `auto` (the default) to follow the system              |
 | `oauth.*`      | Only needed if you use your own Yandex application instead of the built-in one            |
 
-| Environment variable | What it does                                                             |
-| -------------------- | ------------------------------------------------------------------------ |
-| `YANDEX_DISK_TOKEN`  | Uses this token instead of the saved one, and leaves the saved one alone |
+| Environment variable | What it does                                                                    |
+| -------------------- | ------------------------------------------------------------------------------- |
+| `YANDEX_DISK_TOKEN`  | Uses this token instead of the saved one, and leaves the saved one alone        |
+| `YAD_LANG`           | Interface language for this run: `ru` or `en`. Wins over the `language` setting |
 
 > [!IMPORTANT]
 > While `YANDEX_DISK_TOKEN` is set, YaD will not renew the token by itself.

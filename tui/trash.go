@@ -11,6 +11,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ilyabrin/disk"
+	"github.com/ilyabrin/yad/internal/i18n"
 )
 
 // --- Messages ---------------------------------------------------------------
@@ -191,7 +192,7 @@ func (m TrashModel) Update(msg tea.Msg) (TrashModel, tea.Cmd) {
 		}
 		m.items = nil
 		m.cursor = 0
-		return m.showMessage(iconOK+" Trash emptied", false), nil
+		return m.showMessage(iconOK+i18n.T("trash.trash_emptied"), false), nil
 
 	case tea.KeyMsg:
 		return m.handleKey(msg)
@@ -269,11 +270,11 @@ func (m TrashModel) handleKey(msg tea.KeyMsg) (TrashModel, tea.Cmd) {
 			return m, nil
 		}
 		name := m.items[m.cursor].Name
-		m.confirm = NewConfirmDialog("Delete permanently", "Permanently delete \""+name+"\"?")
+		m.confirm = NewConfirmDialog(i18n.T("trash.delete_permanently"), i18n.F("trash.permanently_delete", name))
 		m.mode = trashModeConfirmDelete
 
 	case key.Matches(msg, m.keys.Empty):
-		m.confirm = NewConfirmDialog("Empty trash", "Permanently delete ALL items in trash?")
+		m.confirm = NewConfirmDialog(i18n.T("trash.empty_trash"), i18n.T("trash.permanently_delete_all_items_in"))
 		m.mode = trashModeConfirmEmpty
 
 	case key.Matches(msg, m.keys.Refresh):
@@ -339,7 +340,7 @@ func (m TrashModel) View() string {
 		} else {
 			content = StyleSuccess.Render(m.message)
 		}
-		overlay := StyleDialog.Render(content + "\n\n" + StyleMuted("Press any key to continue"))
+		overlay := StyleDialog.Render(content + "\n\n" + StyleMuted(i18n.T("common.press_any_key")))
 		return renderOverlay(base, overlay, m.width, m.height)
 	}
 
@@ -350,8 +351,8 @@ func (m TrashModel) viewBase() string {
 	var b strings.Builder
 
 	// Title bar
-	title := StyleTitle.Render("  YaD  ·  Trash")
-	count := StylePath.Render(fmt.Sprintf(" %d items", len(m.items)))
+	title := StyleTitle.Render(i18n.T("trash.title"))
+	count := StylePath.Render(" " + i18n.N("trash.items", len(m.items)))
 	gap := m.width - lipgloss.Width(title) - lipgloss.Width(count)
 	if gap < 0 {
 		gap = 0
@@ -374,7 +375,7 @@ func (m TrashModel) viewBase() string {
 }
 
 func (m TrashModel) viewLoading(height int) string {
-	msg := m.spinner.View() + " Loading…"
+	msg := m.spinner.View() + i18n.T("common.loading")
 	lines := make([]string, height)
 	for i := range lines {
 		if i == height/2 {
@@ -392,7 +393,7 @@ func (m TrashModel) viewError(height int) string {
 		case mid:
 			lines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleError.Render(iconErr+" "+m.err.Error()))
 		case mid + 1:
-			lines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted("Press any key to continue"))
+			lines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted(i18n.T("common.press_any_key")))
 		}
 	}
 	return strings.Join(lines, "\n")
@@ -401,7 +402,7 @@ func (m TrashModel) viewError(height int) string {
 func (m TrashModel) viewList(height int) string {
 	if len(m.items) == 0 {
 		lines := make([]string, height)
-		lines[height/2] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted("Trash is empty"))
+		lines[height/2] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted(i18n.T("trash.is_empty")))
 		return strings.Join(lines, "\n")
 	}
 
@@ -502,11 +503,11 @@ func (m TrashModel) viewStatusBar() string {
 	}
 
 	hints := []string{
-		StyleStatusKey.Render("↑↓") + " move",
-		StyleStatusKey.Render("r") + " restore",
-		StyleStatusKey.Render("D") + " delete",
-		StyleStatusKey.Render("E") + " empty",
-		StyleStatusKey.Render("q/←") + " back",
+		StyleStatusKey.Render("↑↓") + i18n.T("hint.move"),
+		StyleStatusKey.Render("r") + i18n.T("hint.restore"),
+		StyleStatusKey.Render("D") + i18n.T("hint.delete"),
+		StyleStatusKey.Render("E") + i18n.T("hint.empty_trash"),
+		StyleStatusKey.Render("q/←") + i18n.T("hint.back"),
 	}
 	return statusBar(m.width, left, hints)
 }

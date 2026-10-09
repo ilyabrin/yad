@@ -11,6 +11,7 @@ import (
 	"github.com/ilyabrin/disk"
 	"github.com/ilyabrin/yad/internal/auth"
 	"github.com/ilyabrin/yad/internal/dns"
+	"github.com/ilyabrin/yad/internal/i18n"
 	"github.com/ilyabrin/yad/tui"
 )
 
@@ -19,38 +20,14 @@ import (
 //	go build -ldflags "-X main.version=v0.1.0"
 var version = "dev"
 
-const helpText = `yad: Yandex.Disk terminal UI
-
-Usage:
-  yad [flag]
-
-Flags:
-  -v, --version   print version and exit
-  -h, --help      print this help and exit
-
-Config:
-  ~/.yad/config.yaml   tokens and UI preferences
-
-Environment:
-  YANDEX_DISK_TOKEN   override stored token (useful for CI/scripting)
-
-Keybindings (inside the app):
-  ↑/k  ↓/j           navigate        u  upload file
-  ↵/→/l              open dir        U  upload from URL
-  ←/h/Backspace      go up           d  download
-  Space              select          D  delete
-  Ctrl+A             select all      n  new directory
-  /                  filter by name  r  rename
-  Esc                clear filter    s  cycle sort
-  m                  file info       R  refresh
-  p                  publish         i  disk info
-  c                  copy URL        t  trash
-  o                  open link       q  quit
-
-Source: https://github.com/ilyabrin/yad`
+func helpText() string {
+	return i18n.T("cli.help")
+}
 
 func main() {
 	dns.Setup(runtime.GOOS)
+	// From the system for now; the config may choose otherwise in run.
+	i18n.Set(i18n.Detect("", os.Getenv))
 
 	if len(os.Args) == 2 {
 		switch os.Args[1] {
@@ -58,7 +35,7 @@ func main() {
 			fmt.Println("yad", version)
 			return
 		case "--help", "-h":
-			fmt.Println(helpText)
+			fmt.Println(helpText())
 			return
 		}
 	}
@@ -73,6 +50,7 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("loading config: %w", err)
 	}
+	i18n.Set(i18n.Detect(cfg.Language, os.Getenv))
 
 	// Build auth.Config from any user-supplied OAuth credentials in config.
 	oauthCfg := toAuthConfig(cfg)

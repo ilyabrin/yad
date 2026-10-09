@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ilyabrin/disk"
+	"github.com/ilyabrin/yad/internal/i18n"
 )
 
 func (m BrowserModel) View() string {
@@ -31,9 +32,9 @@ func (m BrowserModel) View() string {
 	case modeMessage:
 		var msgView string
 		if m.messageIsError {
-			msgView = StyleDialog.Render(StyleError.Render(m.message) + "\n\n" + StyleMuted("Press any key to continue"))
+			msgView = StyleDialog.Render(StyleError.Render(m.message) + "\n\n" + StyleMuted(i18n.T("common.press_any_key")))
 		} else {
-			msgView = StyleDialog.Render(StyleSuccess.Render(m.message) + "\n\n" + StyleMuted("Press any key to continue"))
+			msgView = StyleDialog.Render(StyleSuccess.Render(m.message) + "\n\n" + StyleMuted(i18n.T("common.press_any_key")))
 		}
 		return renderOverlay(base, msgView, m.width, m.height)
 	case modeShare:
@@ -44,12 +45,12 @@ func (m BrowserModel) View() string {
 		if m.linkProtection != "" {
 			protection = StyleMuted(m.linkProtection) + "\n\n"
 		}
-		content := StyleSuccess.Render("⇡ Public link") + "\n\n" +
+		content := StyleSuccess.Render(i18n.T("browser.public_link")) + "\n\n" +
 			urlStyle.Render(m.publicURL) + "\n\n" + protection +
-			StyleStatusKey.Render("c") + " copy   " +
-			StyleStatusKey.Render("o") + " open   " +
-			StyleStatusKey.Render("u") + " unpublish   " +
-			StyleMuted("any other key to close")
+			StyleStatusKey.Render("c") + i18n.T("hint.copy") +
+			StyleStatusKey.Render("o") + i18n.T("hint.open_link") +
+			StyleStatusKey.Render("u") + i18n.T("hint.unpublish") +
+			StyleMuted(i18n.T("browser.any_other_key_to_close"))
 		return renderOverlay(base, StyleDialog.Render(content), m.width, m.height)
 	case modeMetadata:
 		if e, ok := m.currentEntry(); ok {
@@ -105,7 +106,7 @@ func (m BrowserModel) viewTitleBar() string {
 }
 
 func (m BrowserModel) viewLoading(height int) string {
-	msg := m.spinner.View() + " Loading…"
+	msg := m.spinner.View() + i18n.T("common.loading")
 	lines := make([]string, height)
 	for i := range lines {
 		if i == height/2 {
@@ -123,7 +124,7 @@ func (m BrowserModel) viewError(height int) string {
 		case mid:
 			lines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleError.Render(iconErr+" "+m.err.Error()))
 		case mid + 1:
-			lines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted("Press any key to continue"))
+			lines[i] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted(i18n.T("common.press_any_key")))
 		}
 	}
 	return strings.Join(lines, "\n")
@@ -134,9 +135,9 @@ func (m BrowserModel) viewList(height int) string {
 
 	if len(entries) == 0 {
 		lines := make([]string, height)
-		msg := "(empty directory)"
+		msg := i18n.T("browser.empty_directory")
 		if m.filter != "" {
-			msg = `no matches for "` + m.filter + `"`
+			msg = i18n.F("browser.no_matches_for", m.filter)
 		}
 		lines[height/2] = lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted(msg))
 		return strings.Join(lines, "\n")
@@ -212,11 +213,11 @@ func (m BrowserModel) viewList(height int) string {
 	// Wrap list rows with pagination indicators.
 	remaining := m.total - m.offset - len(m.entries)
 	if hasPrev {
-		indicator := lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted("▲ previous page"))
+		indicator := lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted(i18n.T("browser.previous_page")))
 		rows = append([]string{indicator}, rows...)
 	}
 	if hasNext {
-		label := fmt.Sprintf("▼  %d more  (↓ to load)", remaining)
+		label := i18n.F("browser.more_to_load", remaining)
 		indicator := lipgloss.PlaceHorizontal(m.width, lipgloss.Center, StyleMuted(label))
 		rows = append(rows, indicator)
 	}
@@ -238,32 +239,32 @@ func (m BrowserModel) viewStatusBar() string {
 	entries := m.visibleEntries()
 	if len(entries) > 0 {
 		if m.filter != "" {
-			left = fmt.Sprintf("%d matches", len(entries))
+			left = i18n.N("browser.matches", len(entries))
 		} else {
 			left = fmt.Sprintf("%d/%d", m.cursor+1+m.offset, m.total)
 		}
 	}
 	if n := len(m.selected); n > 0 {
-		left += "  " + StyleSuccess.Render(fmt.Sprintf("%d selected", n))
+		left += "  " + StyleSuccess.Render(i18n.N("browser.selected", n))
 	}
 	if m.filter != "" {
-		left += "  " + StyleMuted(`filter: "`+m.filter+`"`)
+		left += "  " + StyleMuted(i18n.F("browser.filter_status", m.filter))
 	}
 
 	hints := []string{
-		StyleStatusKey.Render("↑↓") + " move",
-		StyleStatusKey.Render("↵") + " open",
-		StyleStatusKey.Render("spc") + " select",
-		StyleStatusKey.Render("/") + " filter",
-		StyleStatusKey.Render("u") + " upload",
-		StyleStatusKey.Render("d") + " download",
-		StyleStatusKey.Render("n") + " mkdir",
-		StyleStatusKey.Render("r") + " rename",
-		StyleStatusKey.Render("D") + " delete",
-		StyleStatusKey.Render("s") + " sort",
-		StyleStatusKey.Render("p") + " publish",
-		StyleStatusKey.Render("t") + " trash",
-		StyleStatusKey.Render("q") + " quit",
+		StyleStatusKey.Render("↑↓") + i18n.T("hint.move"),
+		StyleStatusKey.Render("↵") + i18n.T("hint.open"),
+		StyleStatusKey.Render("spc") + i18n.T("hint.select"),
+		StyleStatusKey.Render("/") + i18n.T("hint.filter"),
+		StyleStatusKey.Render("u") + i18n.T("hint.upload"),
+		StyleStatusKey.Render("d") + i18n.T("hint.download"),
+		StyleStatusKey.Render("n") + i18n.T("hint.mkdir"),
+		StyleStatusKey.Render("r") + i18n.T("hint.rename"),
+		StyleStatusKey.Render("D") + i18n.T("hint.delete"),
+		StyleStatusKey.Render("s") + i18n.T("hint.sort"),
+		StyleStatusKey.Render("p") + i18n.T("hint.publish"),
+		StyleStatusKey.Render("t") + i18n.T("hint.trash"),
+		StyleStatusKey.Render("q") + i18n.T("hint.quit"),
 	}
 	return statusBar(m.width, left, hints)
 }
@@ -319,24 +320,24 @@ func (m BrowserModel) viewMetadata(e entry) string {
 		return t.Format("2006-01-02  15:04:05")
 	}
 
-	kind := "file"
+	kind := i18n.T("info.kind_file")
 	if e.isDir() {
-		kind = "directory"
+		kind = i18n.T("info.kind_dir")
 	}
 
 	var sb strings.Builder
-	sb.WriteString(StyleTitle.Render(" Info") + "\n\n")
-	sb.WriteString(row("Name", r.Name))
-	sb.WriteString(row("Type", kind))
+	sb.WriteString(StyleTitle.Render(i18n.T("info.title")) + "\n\n")
+	sb.WriteString(row(i18n.T("info.name"), r.Name))
+	sb.WriteString(row(i18n.T("info.type"), kind))
 	if !e.isDir() {
-		sb.WriteString(row("Size", disk.FormatFileSize(r.Size)))
+		sb.WriteString(row(i18n.T("info.size"), disk.FormatFileSize(r.Size)))
 		sb.WriteString(row("MIME", r.MimeType))
 		if r.MediaType != "" {
-			sb.WriteString(row("Media", r.MediaType))
+			sb.WriteString(row(i18n.T("info.media"), r.MediaType))
 		}
 	}
-	sb.WriteString(row("Created", parseTime(r.Created)))
-	sb.WriteString(row("Modified", parseTime(r.Modified)))
+	sb.WriteString(row(i18n.T("info.created"), parseTime(r.Created)))
+	sb.WriteString(row(i18n.T("info.modified"), parseTime(r.Modified)))
 	if r.Md5 != "" {
 		sb.WriteString(row("MD5", r.Md5))
 	}
@@ -344,9 +345,9 @@ func (m BrowserModel) viewMetadata(e entry) string {
 		sb.WriteString(row("SHA256", r.Sha256[:16]+"…"))
 	}
 	if r.PublicURL != "" {
-		sb.WriteString(row("Public", r.PublicURL))
+		sb.WriteString(row(i18n.T("info.public"), r.PublicURL))
 	}
-	sb.WriteString("\n" + StyleMuted("any key to close"))
+	sb.WriteString("\n" + StyleMuted(i18n.T("info.any_key_to_close")))
 
 	return StyleDialog.Render(sb.String())
 }

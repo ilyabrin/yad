@@ -39,6 +39,7 @@ type Config struct {
 	// UI preferences
 	DefaultSort string `yaml:"default_sort,omitempty"` // name, -name, modified, -modified, size, -size
 	LastPath    string `yaml:"last_path,omitempty"`    // last visited directory; restored on next launch
+	Language    string `yaml:"language,omitempty"`     // ru, en or auto (the default: from the system)
 }
 
 // validSorts is the set of values accepted by the Yandex Disk API sort parameter.

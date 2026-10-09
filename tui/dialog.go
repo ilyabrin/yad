@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ilyabrin/disk"
+	"github.com/ilyabrin/yad/internal/i18n"
 )
 
 // ConfirmDialog is a simple yes/no overlay.
@@ -60,16 +61,16 @@ func (d ConfirmDialog) View(width int) string {
 
 	var no, yes string
 	if d.focused {
-		yes = yesStyle.Render("Yes")
-		no = noStyle.Render("No")
+		yes = yesStyle.Render(i18n.T("dialog.yes"))
+		no = noStyle.Render(i18n.T("dialog.no"))
 	} else {
-		yes = noStyle.Render("Yes")
-		no = yesStyle.Render("No")
+		yes = noStyle.Render(i18n.T("dialog.yes"))
+		no = yesStyle.Render(i18n.T("dialog.no"))
 	}
 
 	b.WriteString(lipgloss.JoinHorizontal(lipgloss.Center, no, "  ", yes))
 	b.WriteString("\n\n")
-	b.WriteString(StyleMuted("←/→ select   ↵ confirm   Esc cancel"))
+	b.WriteString(StyleMuted(i18n.T("dialog.select_confirm_esc_cancel")))
 
 	return StyleDialog.Width(dialogWidth(width)).Render(b.String())
 }
@@ -122,7 +123,7 @@ func (d InputDialog) View(width int) string {
 	}
 	b.WriteString(d.input.View())
 	b.WriteString("\n\n")
-	b.WriteString(StyleMuted("↵ confirm   Esc cancel"))
+	b.WriteString(StyleMuted(i18n.T("dialog.confirm_esc_cancel")))
 
 	return StyleDialog.Width(dialogWidth(width)).Render(b.String())
 }
@@ -151,7 +152,7 @@ func (p ProgressOverlay) View(width int) string {
 		if p.Err != nil {
 			b.WriteString(StyleError.Render(iconErr + " " + p.Err.Error()))
 		} else {
-			b.WriteString(StyleSuccess.Render(iconOK + " Done  " + disk.FormatFileSize(p.Current)))
+			b.WriteString(StyleSuccess.Render(iconOK + i18n.T("dialog.done") + disk.FormatFileSize(p.Current)))
 		}
 	} else {
 		filled := int(float64(barWidth) * p.Percentage / 100)

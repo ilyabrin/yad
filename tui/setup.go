@@ -10,6 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/ilyabrin/yad/internal/auth"
+	"github.com/ilyabrin/yad/internal/i18n"
 	"github.com/ilyabrin/yad/internal/qr"
 )
 
@@ -105,10 +106,10 @@ func NewSetupModel(oauthCfg *auth.Config) SetupModel {
 			qrLines = code.HalfBlocks(qrQuietZone)
 		}
 		firstStep = stepShowURL
-		placeholder = "Paste the verification code from Yandex…"
+		placeholder = i18n.T("setup.paste_the_verification_code_from")
 	} else {
 		firstStep = stepEnterCode
-		placeholder = "Paste your Yandex OAuth token…"
+		placeholder = i18n.T("setup.paste_token_placeholder")
 		ti.EchoMode = textinput.EchoPassword
 		ti.EchoCharacter = '•'
 	}
@@ -236,7 +237,7 @@ func (m SetupModel) handleKey(msg tea.KeyMsg) (SetupModel, tea.Cmd) {
 func (m SetupModel) View() string {
 	var b strings.Builder
 
-	titleText := "  YaD  ·  Setup"
+	titleText := i18n.T("setup.title")
 	b.WriteString(StyleTitle.Render(titleText))
 	if m.width > lipgloss.Width(titleText) {
 		b.WriteString(strings.Repeat(" ", m.width-lipgloss.Width(titleText)))
@@ -252,11 +253,11 @@ func (m SetupModel) View() string {
 	case stepExchange:
 		b.WriteString(m.viewExchange())
 	case stepDone:
-		b.WriteString(StyleSuccess.Render("✓ Authorised! Starting YaD…"))
+		b.WriteString(StyleSuccess.Render(i18n.T("setup.authorised_starting_yad")))
 	case stepError:
 		b.WriteString(StyleError.Render("✗ " + m.errMsg))
 		b.WriteString("\n\n")
-		b.WriteString(StyleMuted("Press any key to exit."))
+		b.WriteString(StyleMuted(i18n.T("setup.press_any_key_to_exit")))
 	}
 
 	return b.String()
@@ -265,15 +266,15 @@ func (m SetupModel) View() string {
 func (m SetupModel) viewShowURL() string {
 	var b strings.Builder
 
-	b.WriteString(StyleDialogTitle.Render("Step 1 - Authorise YaD"))
+	b.WriteString(StyleDialogTitle.Render(i18n.T("setup.step_1_authorise_yad")))
 	b.WriteString("\n\n")
 
 	if m.browserOpen {
-		b.WriteString(StyleSuccess.Render("✓ Browser opened automatically"))
+		b.WriteString(StyleSuccess.Render(i18n.T("setup.browser_opened_automatically")))
 	} else {
-		b.WriteString(StyleMuted("Could not open browser automatically."))
+		b.WriteString(StyleMuted(i18n.T("setup.could_not_open_browser_automatically")))
 		b.WriteString("\n")
-		b.WriteString("Open this URL manually:\n")
+		b.WriteString(i18n.T("setup.open_this_url_manually") + "\n")
 	}
 
 	b.WriteString("\n")
@@ -283,10 +284,10 @@ func (m SetupModel) viewShowURL() string {
 	b.WriteString(urlStyle.Render(m.authURL))
 	b.WriteString("\n\n")
 
-	b.WriteString(StyleMuted("Log in and grant access. Yandex will show a verification code."))
+	b.WriteString(StyleMuted(i18n.T("setup.log_in_and_grant_access")))
 	b.WriteString("\n\n")
-	b.WriteString(StyleStatusKey.Render("any key") + " - I've authorised, show code input   " +
-		StyleStatusKey.Render("Esc") + " quit")
+	b.WriteString(StyleStatusKey.Render(i18n.T("setup.any_key")) + i18n.T("setup.i_ve_authorised_show_code") +
+		StyleStatusKey.Render("Esc") + i18n.T("hint.quit"))
 
 	// No Width() here - let the terminal handle line length naturally
 	return StyleDialog.Render(b.String())
@@ -296,26 +297,26 @@ func (m SetupModel) viewEnterCode() string {
 	var b strings.Builder
 
 	if m.fullOAuth {
-		b.WriteString(StyleDialogTitle.Render("Step 2 - Enter verification code"))
+		b.WriteString(StyleDialogTitle.Render(i18n.T("setup.step_2_enter_verification_code")))
 		b.WriteString("\n")
-		b.WriteString(StyleMuted("Paste the code shown on the Yandex page:"))
+		b.WriteString(StyleMuted(i18n.T("setup.paste_the_code_shown_on")))
 	} else {
-		b.WriteString(StyleDialogTitle.Render("Paste your Yandex OAuth token"))
+		b.WriteString(StyleDialogTitle.Render(i18n.T("setup.paste_token_title")))
 		b.WriteString("\n")
-		b.WriteString(StyleMuted("Get a token at https://oauth.yandex.ru"))
+		b.WriteString(StyleMuted(i18n.T("setup.get_a_token_at_https")))
 	}
 	b.WriteString("\n\n")
 	b.WriteString(m.input.View())
 	b.WriteString("\n\n")
-	b.WriteString(StyleStatusKey.Render("↵") + " confirm   " +
-		StyleStatusKey.Render("Esc") + " quit")
+	b.WriteString(StyleStatusKey.Render("↵") + i18n.T("hint.confirm") +
+		StyleStatusKey.Render("Esc") + i18n.T("hint.quit"))
 
 	return StyleDialog.Width(wrapWidth(m.width)).Render(b.String())
 }
 
 func (m SetupModel) viewExchange() string {
 	return StyleDialog.Width(wrapWidth(m.width)).Render(
-		m.spinner.View() + "  Exchanging code for token…",
+		m.spinner.View() + i18n.T("setup.exchanging_code_for_token"),
 	)
 }
 
@@ -336,12 +337,12 @@ func (m SetupModel) viewQR(above string) string {
 	// will really use, then a blank line and the caption.
 	need := rowsOnScreen(above, m.width) + 2 + len(m.qrLines)
 	if lipgloss.Width(m.qrLines[0]) > m.width || need > m.height {
-		return "\n\n" + StyleMuted("Make the window taller or zoom out to see a QR code for your phone.")
+		return "\n\n" + StyleMuted(i18n.T("setup.make_the_window_taller_or"))
 	}
 
 	var b strings.Builder
 	b.WriteString("\n\n")
-	b.WriteString(StyleMuted("Or scan this with your phone:"))
+	b.WriteString(StyleMuted(i18n.T("setup.or_scan_this_with_your")))
 	for _, line := range m.qrLines {
 		b.WriteString("\n")
 		b.WriteString(StyleQR.Render(line))
